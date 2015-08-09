@@ -88,11 +88,19 @@ function UpgradeStorage($) {
         $("#Forge").click();
     }
 }
+function ClickAllNonEquipmentUpgrades() {
+    for (var name in game.upgrades) {
+        if (typeof game.upgrades[name].prestiges === 'undefined' && game.upgrades[name].locked === 0) {
+            document.getElementById(name).click();  //Upgrade!
+        }
+    }
+}
 /**
  * @return {boolean} return.collectingForNonEquipment Is it collecting for upgrade?
  */
 function UpgradeNonEquipment($) {
     "use strict";
+    ClickAllNonEquipmentUpgrades();
     for (var name in game.upgrades) {
         if (typeof game.upgrades[name].prestiges === 'undefined' && game.upgrades[name].locked === 0) {
             for (var aResource in game.upgrades[name].cost.resources) {
