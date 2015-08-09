@@ -94,6 +94,7 @@ function ClickAllNonEquipmentUpgrades() {
             document.getElementById(name).click();  //Upgrade!
         }
     }
+    tooltip('hide');
 }
 /**
  * @return {boolean} return.collectingForNonEquipment Is it collecting for upgrade?
@@ -271,19 +272,33 @@ function TurnOnAutoFight($) {
 }
 function BuyEquipment($) {
     "use strict";
+    var constants = (function () {
+        var maxLevel = 15;
+        return {
+            getMaxLevel: function () {
+                return maxLevel;
+            }
+        };
+    })();
+
+    //Find lowest level
     var lowestLevel = 1000;
-    for (var anEquipment in game.equipment){
-        if (game.equipment[anEquipment].locked === 1){
+    for (var anEquipment in game.equipment) {
+        if (game.equipment[anEquipment].locked === 1) {
             continue;
         }
-        if (anEquipment === "Shield"){
-            if (CanBuyNonUpgrade(game.equipment[anEquipment], 1) === true){ //Buy immediately(1 ratio)
+        if (anEquipment === "Shield") {
+            if (CanBuyNonUpgrade(game.equipment[anEquipment], 1) === true) { //Buy immediately(1 ratio)
                 document.getElementById(anEquipment).click();
             }
-        } else if (game.equipment[anEquipment].level < lowestLevel){
+        } else if (game.equipment[anEquipment].level < lowestLevel) {
             lowestLevel = game.equipment[anEquipment].level;
         }
     }
+    if (lowestLevel >= constants.getMaxLevel()) {   //Done upgrading levels?
+        return;
+    }
+    //Buy lowest level equipment
     for (var anEquipment in game.equipment){
         if (game.equipment[anEquipment].locked === 1 ||
             anEquipment === "Shield"
