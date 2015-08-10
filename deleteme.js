@@ -318,40 +318,26 @@ function BuyEquipment() {
 }
 (function () {
     "use strict";
-    function callback() {
-        (function ($) {
-            var jQuery = $;
-            const runInterval = 1500;
-            setInterval(function () {
-                //Main code
-                ShowRunningIndicator.call(this);
-                BuyBuildings();
-                BuyEquipment();
-                TurnOnAutoFight();
-                AssignFreeWorkers();
-                Fight();
-                UpgradeStorage();
-                var shouldReturn = BeginPriorityAction();
-                if (shouldReturn === true) {
-                    tooltip('hide');
-                    return;
-                }
-                BeginDefaultManualActionAndUpgrade();
-                //End Main code
-            }, runInterval);
-        })(jQuery.noConflict(true));
-    }
+    const runInterval = 1500;
 
-    var s = document.createElement("script");
-    s.src = "https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js";
-    if (s.addEventListener) {
-        s.addEventListener("load", callback, false);
-    }
-    else if (s.readyState) {
-        s.onreadystatechange = callback;
-    }
-    document.body.appendChild(s);
     CreateButtonForTrapping();
+    setInterval(function () {
+        //Main loop code
+        ShowRunningIndicator.call(this);
+        BuyBuildings();
+        BuyEquipment();
+        TurnOnAutoFight();
+        AssignFreeWorkers();
+        Fight();
+        UpgradeStorage();
+        var shouldReturn = BeginPriorityAction();
+        if (shouldReturn === true) {
+            tooltip('hide');
+            return;
+        }
+        BeginDefaultManualActionAndUpgrade();
+        //End Main loop code
+    }, runInterval);
 })();
 
 function CreateButtonForTrapping() {
