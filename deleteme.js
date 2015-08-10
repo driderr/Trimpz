@@ -90,6 +90,7 @@ function UpgradeStorage() {
     }
 }
 function ClickAllNonEquipmentUpgrades() {
+    "use strict";
     for (var name in game.upgrades) {
         if (typeof game.upgrades[name].prestiges === 'undefined' && game.upgrades[name].locked === 0) {
             document.getElementById(name).click();  //Upgrade!
@@ -200,11 +201,11 @@ function BeginPriorityAction() {
 /**
  * @return {boolean} return.canAfford affordable respecting the ratio?
  */
-function CanBuyNonUpgrade(buildingOrWorker, ratio) {
-    for (var aResource in buildingOrWorker.cost) {
-        var needed = buildingOrWorker.cost[aResource];
+function CanBuyNonUpgrade(nonUpgradeItem, ratio) {
+    for (var aResource in nonUpgradeItem.cost) {
+        var needed = nonUpgradeItem.cost[aResource];
         if (typeof needed[1] !== 'undefined') {
-            needed = resolvePow(needed, buildingOrWorker);
+            needed = resolvePow(needed, nonUpgradeItem);
         }
         if (game.resources[aResource].owned * ratio < needed) {
             return false;
@@ -275,11 +276,11 @@ function TurnOnAutoFight() {
 function BuyEquipment() {
     "use strict";
     var constants = (function () {
-        var maxLevel = 15;
+        var maxLevel = 15,
+            equipmentCostRatio = 0.5;
         return {
-            getMaxLevel: function () {
-                return maxLevel;
-            }
+            getMaxLevel: function () {return maxLevel;},
+            getEquipmentCostRatio: function () {return equipmentCostRatio;}
         };
     })();
 
@@ -307,7 +308,7 @@ function BuyEquipment() {
             || game.equipment[anEquipment].level > lowestLevel){
             continue;
         }
-        if (CanBuyNonUpgrade(game.equipment[anEquipment], 0.5) === true) {
+        if (CanBuyNonUpgrade(game.equipment[anEquipment], constants.getEquipmentCostRatio()) === true) {
             document.getElementById(anEquipment).click()
         }
     }
