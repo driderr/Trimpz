@@ -258,7 +258,7 @@ function BuyBuildings() {
     }
     if (game.buildings.Resort.locked === 0 &&
         CanBuyNonUpgrade(game.buildings.Resort, constants.getHousingCostRatio()) === true) {
-        document.getElementById("Tribute").click();
+        document.getElementById("Resort").click();
     }
     if (game.buildings.Gateway.locked === 0 &&
         CanBuyNonUpgrade(game.buildings.Gateway, 1) === true) { //Buy immediately(1 ratio)
