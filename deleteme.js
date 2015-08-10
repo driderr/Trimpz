@@ -345,4 +345,20 @@ function BuyEquipment($) {
         s.onreadystatechange = callback;
     }
     document.body.appendChild(s);
+    CreateButtonForTrapping();
 })();
+
+function CreateButtonForTrapping() {
+    var addElementsHere = document.getElementById("battleBtnsColumn");
+    var newDiv = document.createElement("DIV");
+    newDiv.className = "battleSideBtnContainer";
+    addElementsHere.appendChild(newDiv);
+
+    var newSpan = document.createElement("SPAN");
+    newSpan.className = "btn btn-primary fightBtn";
+    newSpan.innerHTML = "Button Test";
+    newSpan.onclick = function () { // Note this is a function
+        alert("blabla");
+    };
+    newDiv.appendChild(newSpan);
+}
