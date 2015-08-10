@@ -1,4 +1,5 @@
 /*global game,tooltip,resolvePow*/
+var openTrapsForDefault;
 function AssignFreeWorkers($) {
     "use strict";
     var constants = (function () {
@@ -136,8 +137,9 @@ function BeginDefaultManualActionAndUpgrade($) {
     var collectingForNonEquipment = UpgradeNonEquipment($);
     if (collectingForNonEquipment === false) {
         //Collect trimps if breeding speed is low
-        if (game.resources.trimps.owned < game.resources.trimps.realMax() &&
-            document.getElementById("trimpsPs").innerHTML.match(/\d+/)[0] < 1) {
+        if ((game.resources.trimps.owned < game.resources.trimps.realMax() &&
+            document.getElementById("trimpsPs").innerHTML.match(/\d+/)[0] < 1) ||
+            openTrapsForDefault === true) {
             $("#trimpsCollectBtn").click();
         } else if (game.global.buildingsQueue.length > 0) {
             $("#buildingsCollectBtn").click();
@@ -299,7 +301,7 @@ function BuyEquipment($) {
         return;
     }
     //Buy lowest level equipment
-    for (var anEquipment in game.equipment){
+    for (anEquipment in game.equipment){
         if (game.equipment[anEquipment].locked === 1 ||
             anEquipment === "Shield"
             || game.equipment[anEquipment].level > lowestLevel){
@@ -356,9 +358,15 @@ function CreateButtonForTrapping() {
 
     var newSpan = document.createElement("SPAN");
     newSpan.className = "btn btn-primary fightBtn";
-    newSpan.innerHTML = "Button Test";
-    newSpan.onclick = function () { // Note this is a function
-        alert("blabla");
+    openTrapsForDefault = false;
+    newSpan.innerHTML = "Building";
+    newSpan.onclick = function () {
+        openTrapsForDefault = ! openTrapsForDefault;
+        if (openTrapsForDefault === true){
+            newSpan.innerHTML = "Trapping";
+        } else{
+            newSpan.innerHTML = "Building";
+        }
     };
     newDiv.appendChild(newSpan);
 }
