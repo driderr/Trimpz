@@ -17,7 +17,7 @@ function AssignFreeWorkers() {
         return;
     }
     var free = (Math.ceil(trimps.realMax() / 2) - trimps.employed);
-    while (free > 0) {
+    while (free > 0 && Math.floor(game.resources.trimps.owned) > game.resources.trimps.employed) {
         trimps = game.resources.trimps;
         free = (Math.ceil(trimps.realMax() / 2) - trimps.employed);
         if (free === 0) {
@@ -35,23 +35,30 @@ function AssignFreeWorkers() {
             tooltip('hide');
             continue;
         }
-        if (game.jobs.Scientist.locked === 0 && game.jobs.Scientist.owned < game.global.world + 1) {
+        if (game.jobs.Scientist.locked === 0 && game.jobs.Scientist.owned < game.global.world + 1 &&
+            CanBuyNonUpgrade(game.jobs.Scientist, 1) === true) {
             document.getElementById("Scientist").click();
             tooltip('hide');
             continue;
         }
-        if (game.jobs.Miner.locked === 0 && game.jobs.Miner.owned < game.jobs.Farmer.owned * constants.getMinerMultiplier()) {
+        if (game.jobs.Miner.locked === 0 && game.jobs.Miner.owned < game.jobs.Farmer.owned * constants.getMinerMultiplier() &&
+            CanBuyNonUpgrade(game.jobs.Miner, 1) === true) {
             document.getElementById("Miner").click();
             tooltip('hide');
             continue;
         }
-        if (game.jobs.Lumberjack.locked === 0 && game.jobs.Lumberjack.owned < game.jobs.Farmer.owned) {
+        if (game.jobs.Lumberjack.locked === 0 && game.jobs.Lumberjack.owned < game.jobs.Farmer.owned &&
+            CanBuyNonUpgrade(game.jobs.Lumberjack, 1) === true){
             document.getElementById("Lumberjack").click();
             tooltip('hide');
             continue;
         }
-        document.getElementById("Farmer").click();
-        tooltip('hide');
+        if (CanBuyNonUpgrade(game.jobs.Farmer, 1) === true){
+            document.getElementById("Farmer").click();
+            tooltip('hide')
+            continue;
+        }
+        return; //Can't afford anything!
     }
 }
 function Fight() {
@@ -80,18 +87,27 @@ function ShowRunningIndicator() {
 function UpgradeStorage() {
     "use strict";
     if (game.resources.food.owned > game.buildings.Barn.cost.food()) {
-        document.getElementById("Barn").click();
+        if (game.buildings.Barn.locked == 0) {
+            document.getElementById("Barn").click();
+        }
     }
     if (game.resources.wood.owned > game.buildings.Shed.cost.wood()) {
-        document.getElementById("Shed").click();
+        if (game.buildings.Shed.locked == 0) {
+            document.getElementById("Shed").click();
+        }
     }
     if (game.resources.metal.owned > game.buildings.Forge.cost.metal()) {
-        document.getElementById("Forge").click();
+        if (game.buildings.Forge.locked == 0) {
+            document.getElementById("Forge").click();
+        }
     }
 }
 function ClickAllNonEquipmentUpgrades() {
     "use strict";
     for (var name in game.upgrades) {
+        if (name === "Coordination" && game.resources.trimps.realMax() < game.resources.trimps.maxSoldiers * 3) {
+            continue;
+        }
         if (typeof game.upgrades[name].prestiges === 'undefined' && game.upgrades[name].locked === 0) {
             document.getElementById(name).click();  //Upgrade!
         }
@@ -283,6 +299,7 @@ function TurnOnAutoFight() {
         document.getElementById("autoTrapBtn").click();
     }
 }
+
 function BuyEquipment() {
     "use strict";
     var constants = (function () {
@@ -323,6 +340,37 @@ function BuyEquipment() {
         }
     }
 }
+
+function BuyEquipmentUpgrades() {
+    for (var name in game.upgrades) {
+        if (typeof game.upgrades[name].prestiges !== 'undefined' && game.upgrades[name].locked === 0) {
+            for (var aResource in game.upgrades[name].cost.resources) {
+                var needed = game.upgrades[name].cost.resources[aResource];
+                if (typeof needed[1] !== 'undefined') {
+                    needed = resolvePow(needed, game.upgrades[name]);
+                }
+                if (aResource === "food" && needed > game.resources.food.owned) {
+                    document.getElementById("foodCollectBtn").click();
+                    return true;
+                }
+                if (aResource === "metal" && needed > game.resources.metal.owned) {
+                    document.getElementById("metalCollectBtn").click();
+                    return true;
+                }
+                if (aResource === "science" && needed > game.resources.science.owned) {
+                    document.getElementById("scienceCollectBtn").click();
+                    return true;
+                }
+                if (aResource === "wood" && needed > game.resources.wood.owned) {
+                    document.getElementById("woodCollectBtn").click();
+                    return true;
+                }
+            }
+            document.getElementById(name).click();  //Upgrade!
+        }
+    }
+}
+
 //Main
 (function () {
     "use strict";
@@ -333,6 +381,7 @@ function BuyEquipment() {
         //Main loop code
         ShowRunningIndicator.call(this);
         BuyBuildings();
+        //BuyEquipmentUpgrades();
         BuyEquipment();
         TurnOnAutoFight();
         AssignFreeWorkers();
