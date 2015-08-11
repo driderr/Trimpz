@@ -106,6 +106,9 @@ function UpgradeNonEquipment() {
     ClickAllNonEquipmentUpgrades();
     for (var name in game.upgrades) {
         if (typeof game.upgrades[name].prestiges === 'undefined' && game.upgrades[name].locked === 0) {
+            if (name === "Coordination" && game.resources.trimps.realMax() < game.resources.trimps.maxSoldiers * 3){
+                continue;
+            }
             for (var aResource in game.upgrades[name].cost.resources) {
                 var needed = game.upgrades[name].cost.resources[aResource];
                 if (typeof needed[1] !== 'undefined') {
