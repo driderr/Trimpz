@@ -133,9 +133,13 @@ function UpgradeNonEquipment() {
     }
     return false;
 }
-function BeginDefaultManualActionAndUpgrade() {
+function BeginDefaultManualActionAndUpgrade(trappingSpan) {
     "use strict";
     var collectingForNonEquipment = UpgradeNonEquipment();
+    if (openTrapsForDefault === true && game.buildings.Trap.owned < 10){ //traps exhausted, turn off "Trapping"
+        trappingSpan.innerHTML = "Building";
+        openTrapsForDefault = false;
+    }
     if (collectingForNonEquipment === false) {
         //Collect trimps if breeding speed is low
         if ((game.resources.trimps.owned < game.resources.trimps.realMax() &&
@@ -144,7 +148,7 @@ function BeginDefaultManualActionAndUpgrade() {
             document.getElementById("trimpsCollectBtn").click();
         } else if (game.global.buildingsQueue.length > 0) {
             document.getElementById("buildingsCollectBtn").click();
-        } else {
+        } else { //nothing to build
             document.getElementById("metalCollectBtn").click();
         }
         tooltip('hide');
@@ -312,15 +316,16 @@ function BuyEquipment() {
             continue;
         }
         if (CanBuyNonUpgrade(game.equipment[anEquipment], constants.getEquipmentCostRatio()) === true) {
-            document.getElementById(anEquipment).click()
+            document.getElementById(anEquipment).click();
         }
     }
 }
+//Main
 (function () {
     "use strict";
     const runInterval = 1500;
 
-    CreateButtonForTrapping();
+    var trappingSpan = CreateButtonForTrapping();
     setInterval(function () {
         //Main loop code
         ShowRunningIndicator.call(this);
@@ -335,7 +340,7 @@ function BuyEquipment() {
             tooltip('hide');
             return;
         }
-        BeginDefaultManualActionAndUpgrade();
+        BeginDefaultManualActionAndUpgrade(trappingSpan);
         //End Main loop code
     }, runInterval);
 })();
@@ -359,4 +364,5 @@ function CreateButtonForTrapping() {
         }
     };
     newDiv.appendChild(newSpan);
+    return newSpan;
 }
