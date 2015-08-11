@@ -318,7 +318,8 @@ function BuyEquipment() {
             continue;
         }
         if (anEquipment === "Shield") {
-            if (CanBuyNonUpgrade(game.equipment[anEquipment], 1) === true) { //Buy immediately(1 ratio)
+            if (CanBuyNonUpgrade(game.equipment[anEquipment], 1) === true &&
+                game.equipment[anEquipment].level < constants.getMaxLevel()) { //Buy immediately(1 ratio)
                 document.getElementById(anEquipment).click();
             }
         } else if (game.equipment[anEquipment].level < lowestLevel) {
