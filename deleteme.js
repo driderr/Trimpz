@@ -85,9 +85,17 @@ function AssignFreeWorkers() {
 }
 function Fight() {
     "use strict";
+    if (typeof this.autoFighting === "undefined") {
+        var safePauseFightButton = document.getElementById("pauseFight");
+        this.autoFighting = !!(safePauseFightButton.offsetHeight > 0 && safePauseFightButton.innerHTML === "AutoFight On");
+    }
+    if (this.autoFighting === true) {
+        return;
+    }
     var pauseFightButton = document.getElementById("pauseFight");
     if (pauseFightButton.offsetHeight > 0 && pauseFightButton.innerHTML !== "AutoFight On") {
         pauseFightButton.click();
+        this.autoFighting = true;
     }
     if (pauseFightButton.offsetHeight === 0 &&
         document.getElementById("battleContainer").style.visibility !== "hidden") {
@@ -374,7 +382,7 @@ function BuyEquipmentUpgrades() {
         BuyEquipment();
         TurnOnAutoFight();
         AssignFreeWorkers();
-        Fight();
+        Fight.call(this);
         UpgradeStorage();
         var shouldReturn = BeginPriorityAction();
         if (shouldReturn === true) {
