@@ -1,17 +1,39 @@
 /*global game,tooltip,resolvePow*/
 var openTrapsForDefault;
+var constants = (function () {
+    "use strict";
+    var minerMultiplier = 2,
+        trainerCostRatio = 0.2,
+        explorerCostRatio = 0.2,
+        minFoodOwned = 15,
+        minWoodOwned = 15,
+        minTrimpsOwned = 10,
+        minScienceOwned = 10,
+        housingCostRatio = 0.3,
+        gymCostRatio = 0.2,
+        tributeCostRatio = 0.5,
+        nurseryCostRatio = 0.5,
+        maxLevel = 15,
+        equipmentCostRatio = 0.5;
+    return {
+        getTrainerCostRatio: function () { return trainerCostRatio; },
+        getMinerMultiplier: function () { return minerMultiplier; },
+        getExplorerCostRatio: function () { return explorerCostRatio; },
+        getMinFoodOwned: function () { return minFoodOwned; },
+        getMinWoodOwned: function () { return minWoodOwned; },
+        getMinTrimpsOwned: function () { return minTrimpsOwned; },
+        getMinScienceOwned: function () { return minScienceOwned; },
+        getGymCostRatio: function () { return gymCostRatio; },
+        getHousingCostRatio: function () { return housingCostRatio; },
+        getTributeCostRatio: function () { return tributeCostRatio; },
+        getNurseryCostRatio: function () { return nurseryCostRatio; },
+        getMaxLevel: function () {return maxLevel;},
+        getEquipmentCostRatio: function () {return equipmentCostRatio;}
+    };
+})();
+
 function AssignFreeWorkers() {
     "use strict";
-    var constants = (function () {
-        var minerMultiplier = 2,
-            trainerCostRatio = 0.2,
-            explorerCostRatio = 0.2;
-        return {
-            getTrainerCostRatio: function () { return trainerCostRatio; },
-            getMinerMultiplier: function () { return minerMultiplier; },
-            getExplorerCostRatio: function () { return explorerCostRatio; }
-        };
-    })();
     var trimps = game.resources.trimps;
     if (trimps.owned === 0) {
         return;
@@ -55,7 +77,7 @@ function AssignFreeWorkers() {
         }
         if (CanBuyNonUpgrade(game.jobs.Farmer, 1) === true){
             document.getElementById("Farmer").click();
-            tooltip('hide')
+            tooltip('hide');
             continue;
         }
         return; //Can't afford anything!
@@ -178,18 +200,6 @@ function BeginDefaultManualActionAndUpgrade(trappingSpan) {
  */
 function BeginPriorityAction() {
     "use strict";
-    var constants = (function () {
-        var minFoodOwned = 15,
-            minWoodOwned = 15,
-            minTrimpsOwned = 10,
-            minScienceOwned = 10;
-        return {
-            getMinFoodOwned: function () { return minFoodOwned; },
-            getMinWoodOwned: function () { return minWoodOwned; },
-            getMinTrimpsOwned: function () { return minTrimpsOwned; },
-            getMinScienceOwned: function () { return minScienceOwned; }
-        };
-    })();
     if (game.global.buildingsQueue.length > 0) {//Build queue
         if (document.getElementById("autoTrapBtn").innerHTML !== "Traps On" ||
             game.global.buildingsQueue[0] !== "Trap.1") {
@@ -241,19 +251,6 @@ function CanBuyNonUpgrade(nonUpgradeItem, ratio) {
 }
 function BuyBuildings() {
     "use strict";
-    var constants = (function () {
-        var housingCostRatio = 0.3,
-            gymCostRatio = 0.2,
-            tributeCostRatio = 0.5,
-            nurseryCostRatio = 0.5;
-        return {
-            getGymCostRatio: function () { return gymCostRatio; },
-            getHousingCostRatio: function () { return housingCostRatio; },
-            getTributeCostRatio: function () { return tributeCostRatio; },
-            getNurseryCostRatio: function () { return nurseryCostRatio; }
-        };
-    })();
-
     if (game.buildings.Gym.locked === 0 &&
         CanBuyNonUpgrade(game.buildings.Gym, constants.getGymCostRatio()) === true) {
         document.getElementById("Gym").click();
@@ -302,15 +299,6 @@ function TurnOnAutoFight() {
 
 function BuyEquipment() {
     "use strict";
-    var constants = (function () {
-        var maxLevel = 15,
-            equipmentCostRatio = 0.5;
-        return {
-            getMaxLevel: function () {return maxLevel;},
-            getEquipmentCostRatio: function () {return equipmentCostRatio;}
-        };
-    })();
-
     //Find lowest level
     var lowestLevel = 1000;
     for (var anEquipment in game.equipment) {
