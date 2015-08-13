@@ -40,6 +40,9 @@ function AssignFreeWorkers() {
     if (trimps.owned === 0) {
         return;
     }
+    if (game.global.firing){
+        return;
+    }
     var free = (Math.ceil(trimps.realMax() / 2) - trimps.employed);
     while (free > 0 && Math.floor(game.resources.trimps.owned) > game.resources.trimps.employed) {
         trimps = game.resources.trimps;
