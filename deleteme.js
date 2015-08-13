@@ -12,6 +12,7 @@ var constants = (function () {
         minScienceOwned = 10,
         housingCostRatio = 0.3,
         gymCostRatio = 0.2,
+        maxGyms = 50,
         tributeCostRatio = 0.5,
         nurseryCostRatio = 0.5,
         maxLevel = 15,
@@ -26,6 +27,7 @@ var constants = (function () {
         getMinTrimpsOwned: function () { return minTrimpsOwned; },
         getMinScienceOwned: function () { return minScienceOwned; },
         getGymCostRatio: function () { return gymCostRatio; },
+        getMaxGyms : function () { return maxGyms; },
         getHousingCostRatio: function () { return housingCostRatio; },
         getTributeCostRatio: function () { return tributeCostRatio; },
         getNurseryCostRatio: function () { return nurseryCostRatio; },
@@ -264,7 +266,7 @@ function CanBuyNonUpgrade(nonUpgradeItem, ratio) {
 }
 function BuyBuildings() {
     "use strict";
-    if (game.buildings.Gym.locked === 0 &&
+    if (game.buildings.Gym.locked === 0 && game.buildings.Gym.owned < constants.getMaxGyms() &&
         CanBuyNonUpgrade(game.buildings.Gym, constants.getGymCostRatio()) === true) {
         document.getElementById("Gym").click();
     }
