@@ -2,7 +2,8 @@
 var openTrapsForDefault;
 var constants = (function () {
     "use strict";
-    var minerMultiplier = 2,
+    var runInterval = 1500,
+        minerMultiplier = 2,
         trainerCostRatio = 0.2,
         explorerCostRatio = 0.2,
         minFoodOwned = 15,
@@ -16,6 +17,7 @@ var constants = (function () {
         maxLevel = 15,
         equipmentCostRatio = 0.5;
     return {
+        getRunInterval: function () { return runInterval; },
         getTrainerCostRatio: function () { return trainerCostRatio; },
         getMinerMultiplier: function () { return minerMultiplier; },
         getExplorerCostRatio: function () { return explorerCostRatio; },
@@ -355,7 +357,7 @@ function BuyEquipmentUpgrades() {
             }
             if (canBuyUpgrade === false)
                 continue;
-            costOfNextLevel = Math.ceil(getNextPrestigeCost(upgrade) * (Math.pow(1 - game.portal.Artisanistry.modifier, game.portal.Artisanistry.level)))
+            costOfNextLevel = Math.ceil(getNextPrestigeCost(upgrade) * (Math.pow(1 - game.portal.Artisanistry.modifier, game.portal.Artisanistry.level)));
             if (upgrade === "Supershield"){
                 var costOfTwoLevels = costOfNextLevel * (1 + game.equipment.Shield.cost.wood[1]);
                 if (game.resources.wood.owned < costOfTwoLevels){
@@ -378,8 +380,6 @@ function BuyEquipmentUpgrades() {
 //Main
 (function () {
     "use strict";
-    const runInterval = 1500;
-
     var trappingSpan = CreateButtonForTrapping();
     setInterval(function () {
         //Main loop code
@@ -398,7 +398,7 @@ function BuyEquipmentUpgrades() {
         }
         BeginDefaultManualActionAndUpgrade(trappingSpan);
         //End Main loop code
-    }, runInterval);
+    }, constants.getRunInterval());
 })();
 
 function CreateButtonForTrapping() {
