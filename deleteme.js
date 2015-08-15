@@ -96,9 +96,10 @@ function AssignFreeWorkers() {
 }
 function Fight() {
     "use strict";
-    if (autoFighting === true) {
+    if (autoFighting === true && game.resources.trimps.owned > 25) { //>25 should reset autofighting on portal
         return;
     }
+    autoFighting = false;
     var pauseFightButton = document.getElementById("pauseFight");
     if (pauseFightButton.offsetHeight > 0) {
         if (pauseFightButton.innerHTML !== "AutoFight On") {
