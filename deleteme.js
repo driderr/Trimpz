@@ -1,5 +1,7 @@
 /*global game,tooltip,resolvePow*/
-var openTrapsForDefault;
+var openTrapsForDefault;    //Open traps as default action?
+var trimpz = 0;             //"Trimpz" running indicator
+var autoFighting = false;   //Autofight on?
 var constants = (function () {
     "use strict";
     var runInterval = 1500,
@@ -92,32 +94,25 @@ function AssignFreeWorkers() {
 }
 function Fight() {
     "use strict";
-    if (typeof this.autoFighting === "undefined") {
-        var safePauseFightButton = document.getElementById("pauseFight");
-        this.autoFighting = !!(safePauseFightButton.offsetHeight > 0 && safePauseFightButton.innerHTML === "AutoFight On");
-    }
-    if (this.autoFighting === true) {
+    if (autoFighting === true) {
         return;
     }
     var pauseFightButton = document.getElementById("pauseFight");
-    if (pauseFightButton.offsetHeight > 0 && pauseFightButton.innerHTML !== "AutoFight On") {
-        pauseFightButton.click();
-        this.autoFighting = true;
-    }
-    if (pauseFightButton.offsetHeight === 0 &&
-        document.getElementById("battleContainer").style.visibility !== "hidden") {
+    if (pauseFightButton.offsetHeight > 0) {
+        if (pauseFightButton.innerHTML !== "AutoFight On") {
+            pauseFightButton.click();
+        }
+        autoFighting = true;
+    } else if (document.getElementById("battleContainer").style.visibility !== "hidden") {
         document.getElementById("fightBtn").click();
     }
 }
 function ShowRunningIndicator() {
     "use strict";
-    if (typeof this.trimpz === "undefined") {
-        this.trimpz = 0;
-    }
-    var rotater = ["|", "/", "-", "\\"][this.trimpz];
-    this.trimpz += 1;
-    if (this.trimpz > 3) {
-        this.trimpz = 0;
+    var rotater = ["|", "/", "-", "\\"][trimpz];
+    trimpz += 1;
+    if (trimpz > 3) {
+        trimpz = 0;
     }
     document.getElementById("trimpTitle").innerHTML = "Trimpz " + rotater;
 }
@@ -388,13 +383,13 @@ function BuyEquipmentUpgrades() {
     var trappingSpan = CreateButtonForTrapping();
     setInterval(function () {
         //Main loop code
-        ShowRunningIndicator.call(this);
+        ShowRunningIndicator();
         BuyBuildings();
         BuyEquipmentUpgrades();
         BuyEquipment();
         TurnOnAutoFight();
         AssignFreeWorkers();
-        Fight.call(this);
+        Fight();
         UpgradeStorage();
         var shouldReturn = BeginPriorityAction();
         if (shouldReturn === true) {
