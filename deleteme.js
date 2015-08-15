@@ -311,7 +311,7 @@ function BuyBuildings() {
     tooltip('hide');
 }
 
-function TurnOnAutoFight() {
+function TurnOnAutoBuildTraps() {
     if (document.getElementById("autoTrapBtn").getAttribute("style") !== "display: none" &&
         document.getElementById("autoTrapBtn").innerHTML === "Traps Off") {
         document.getElementById("autoTrapBtn").click();
@@ -395,7 +395,7 @@ function BuyEquipmentUpgrades() {
     setInterval(function () {
         //Main loop code
         ShowRunningIndicator();
-        TurnOnAutoFight();
+        TurnOnAutoBuildTraps();
         AssignFreeWorkers();
         Fight();
         UpgradeStorage();
