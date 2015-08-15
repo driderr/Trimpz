@@ -187,6 +187,9 @@ function UpgradeNonEquipment() {
     }
     return false;
 }
+/**
+ * @return {boolean} return.collectingForNonEquipment Is it collecting for upgrade?
+ */
 function BeginDefaultManualActionAndUpgrade(trappingSpan) {
     "use strict";
     var collectingForNonEquipment = UpgradeNonEquipment();
@@ -211,6 +214,7 @@ function BeginDefaultManualActionAndUpgrade(trappingSpan) {
         }
         tooltip('hide');
     }
+    return collectingForNonEquipment;
 }
 /**
  * @return {boolean} return.shouldReturn Was priority found (stop further processing)?
@@ -400,10 +404,12 @@ function BuyEquipmentUpgrades() {
             tooltip('hide');
             return;
         }
-        BuyBuildings();
-        BuyEquipmentUpgrades();
-        BuyEquipment();
-        BeginDefaultManualActionAndUpgrade(trappingSpan);
+        var collectingForUpgrade = BeginDefaultManualActionAndUpgrade(trappingSpan);
+        if (collectingForUpgrade === false) { //allow resources to accumulate for upgrades if true
+            BuyBuildings();
+            BuyEquipmentUpgrades();
+            BuyEquipment();
+        }
         //End Main loop code
     }, constants.getRunInterval());
 })();
