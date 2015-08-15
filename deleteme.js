@@ -18,7 +18,8 @@ var constants = (function () {
         tributeCostRatio = 0.5,
         nurseryCostRatio = 0.5,
         maxLevel = 15,
-        equipmentCostRatio = 0.5;
+        equipmentCostRatio = 0.5,
+        numTrapsForAutoTrapping = 10000;
     return {
         getRunInterval: function () { return runInterval; },
         getTrainerCostRatio: function () { return trainerCostRatio; },
@@ -34,7 +35,8 @@ var constants = (function () {
         getTributeCostRatio: function () { return tributeCostRatio; },
         getNurseryCostRatio: function () { return nurseryCostRatio; },
         getMaxLevel: function () {return maxLevel;},
-        getEquipmentCostRatio: function () {return equipmentCostRatio;}
+        getEquipmentCostRatio: function () {return equipmentCostRatio;},
+        getNumTrapsForAutoTrapping: function () {return numTrapsForAutoTrapping;}
     };
 })();
 
@@ -190,6 +192,10 @@ function BeginDefaultManualActionAndUpgrade(trappingSpan) {
     if (openTrapsForDefault === true && game.buildings.Trap.owned < 10){ //traps exhausted, turn off "Trapping"
         trappingSpan.innerHTML = "Building";
         openTrapsForDefault = false;
+    }
+    if (openTrapsForDefault === false && game.buildings.Trap.owned > constants.getNumTrapsForAutoTrapping()){ //traps overflowing, use them
+        trappingSpan.innerHTML = "Trapping";
+        openTrapsForDefault = true;
     }
     if (collectingForNonEquipment === false) {
         //Collect trimps if breeding speed is low
