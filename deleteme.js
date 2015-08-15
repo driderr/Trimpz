@@ -215,7 +215,7 @@ function BeginDefaultManualActionAndUpgrade(trappingSpan) {
 /**
  * @return {boolean} return.shouldReturn Was priority found (stop further processing)?
  */
-function BeginPriorityAction() {
+function BeginPriorityAction() { //this is really just for the beginning (after a portal)
     "use strict";
     if (game.global.buildingsQueue.length > 0) {//Build queue
         if (document.getElementById("autoTrapBtn").innerHTML !== "Traps On" ||
@@ -391,9 +391,6 @@ function BuyEquipmentUpgrades() {
     setInterval(function () {
         //Main loop code
         ShowRunningIndicator();
-        BuyBuildings();
-        BuyEquipmentUpgrades();
-        BuyEquipment();
         TurnOnAutoFight();
         AssignFreeWorkers();
         Fight();
@@ -403,6 +400,9 @@ function BuyEquipmentUpgrades() {
             tooltip('hide');
             return;
         }
+        BuyBuildings();
+        BuyEquipmentUpgrades();
+        BuyEquipment();
         BeginDefaultManualActionAndUpgrade(trappingSpan);
         //End Main loop code
     }, constants.getRunInterval());
