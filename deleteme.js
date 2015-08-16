@@ -208,7 +208,7 @@ function RestoreWorkerFocus() {
         game.global.buyAmt = 1;
         workersMoved[jobMoved][1] = 0;
     }
-    if (workersToMove === 0) {
+    if (workersLeft === 0) {
         workersFocusedOnScience = false;
     }
 }
