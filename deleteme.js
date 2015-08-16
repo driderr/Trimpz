@@ -2,6 +2,7 @@
 var openTrapsForDefault;    //Open traps as default action?
 var trimpz = 0;             //"Trimpz" running indicator
 var autoFighting = false;   //Autofight on?
+var workersFocusedOnScience = false;
 var constants = (function () {
     "use strict";
     var runInterval = 1500,
@@ -13,12 +14,13 @@ var constants = (function () {
         minTrimpsOwned = 10,
         minScienceOwned = 10,
         housingCostRatio = 0.3,
-        gymCostRatio = 0.2,
+        gymCostRatio = 0.6,
         maxGyms = 10000,
         tributeCostRatio = 0.5,
         nurseryCostRatio = 0.5,
         maxLevel = 15,
         equipmentCostRatio = 0.5,
+        otherWorkersFocusRatio = 0.5,
         numTrapsForAutoTrapping = 10000;
     return {
         getRunInterval: function () { return runInterval; },
@@ -36,6 +38,7 @@ var constants = (function () {
         getNurseryCostRatio: function () { return nurseryCostRatio; },
         getMaxLevel: function () {return maxLevel;},
         getEquipmentCostRatio: function () {return equipmentCostRatio;},
+        getOtherWorkersFocusRatio: function () {return otherWorkersFocusRatio;},
         getNumTrapsForAutoTrapping: function () {return numTrapsForAutoTrapping;}
     };
 })();
@@ -146,8 +149,21 @@ function ClickAllNonEquipmentUpgrades() {
         if (typeof game.upgrades[upgrade].prestiges === 'undefined' && game.upgrades[upgrade].locked === 0) {
             document.getElementById(upgrade).click();  //Upgrade!
         }
+        //constants.getOtherWorkersFocusRatio()
     }
     tooltip('hide');
+}
+function FocusWorkersOnScience() {
+    if (game.jobs.Scientist.locked || workersFocusedOnScience === true){
+        return;
+    }
+    workersFocusedOnScience = true;
+}
+function RestoreWorkerFocus() {
+    if (workersFocusedOnScience === false){
+        return;
+    }
+    workersFocusedOnScience = false;
 }
 /**
  * @return {boolean} return.collectingForNonEquipment Is it collecting for upgrade?
@@ -175,6 +191,7 @@ function UpgradeNonEquipment() {
                 }
                 if (aResource === "science" && needed > game.resources.science.owned) {
                     document.getElementById("scienceCollectBtn").click();
+                    //FocusWorkersOnScience();
                     return true;
                 }
                 if (aResource === "wood" && needed > game.resources.wood.owned) {
@@ -185,6 +202,7 @@ function UpgradeNonEquipment() {
             document.getElementById(upgrade).click();  //Upgrade!
         }
     }
+    //RestoreWorkerFocus();
     return false;
 }
 /**
@@ -410,7 +428,7 @@ function RunNewMap() {
 
     document.getElementById("difficultyAdvMapsRange").value = 9;
     adjustMap('difficulty', 9);
-    document.getElementById("sizeAdvMapsRange").value = 9;
+    document.getElementById("sizeAdvMapsRange").value = size;
     adjustMap('size', size);
     var cost = updateMapCost(true);
     while (cost > game.resources.fragments.owned){
@@ -418,6 +436,7 @@ function RunNewMap() {
         if (size === 0){
             return;         //need more fragments!
         }
+        document.getElementById("sizeAdvMapsRange").value = size;
         adjustMap('size', size);
         cost = updateMapCost(true);
     }
