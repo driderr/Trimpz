@@ -156,13 +156,14 @@ function ClickAllNonEquipmentUpgrades() {
 function FocusWorkersOnScience() {
     var jobObj;
     var workersToMove;
+    var jobsToMoveFrom = ["Farmer","Lumberjack","Miner"];
 
     if (game.jobs.Scientist.locked || workersFocusedOnScience === true){
         return;
     }
     workersMoved = [];
-    for (var job in ["Farmer","Lumberjack","Miner"]){
-        jobObj = game.jobs[job];
+    for (var job in jobsToMoveFrom){
+        jobObj = game.jobs[jobsToMoveFrom[job]];
         if(jobObj.locked === true || jobObj.owned < 2){
             continue;
         }
@@ -172,11 +173,11 @@ function FocusWorkersOnScience() {
         }
         game.global.buyAmt = workersToMove;
         game.global.firing = true;
-        document.getElementById(job).click();
+        document.getElementById(jobsToMoveFrom[job]).click();
         game.global.firing = false;
         document.getElementById("Scientist").click();
         game.global.buyAmt = 1;
-        workersMoved.push([job,workersToMove]);
+        workersMoved.push([jobsToMoveFrom[job],workersToMove]);
     }
     if (workersMoved.length !== 0)
         workersFocusedOnScience = true;
