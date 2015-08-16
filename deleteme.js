@@ -2,7 +2,6 @@
 var openTrapsForDefault;    //Open traps as default action?
 var trimpz = 0;             //"Trimpz" running indicator
 var autoFighting = false;   //Autofight on?
-var inMaps = false;
 var constants = (function () {
     "use strict";
     var runInterval = 1500,
@@ -392,14 +391,48 @@ function BuyEquipmentUpgrades() {
     }
 }
 
+function GotoMapsScreen() {
+    if (game.global.preMapsActive === true) {
+        return;
+    }
+    document.getElementById("mapsBtn").click();  //mapsClicked();
+    if (document.getElementById("mapsBtn").innerHTML === "Abandon Soldiers"){
+        document.getElementById("mapsBtn").click();
+    }
+}
+
+function RunNewMap(map) {
+    var newMap = {};
+    GotoMapsScreen();
+    var size = 9;
+
+    adjustMap('difficulty', 9);
+    adjustMap('size', size);
+    var cost = updateMapCost(true);
+    while (cost > game.resources.fragments.owned){
+        size--;
+        if (size === 0){
+            return;         //need more fragments!
+        }
+        adjustMap('size', size);
+        cost = updateMapCost(true);
+    }
+    document.getElementById("mapCreateBtn").click();
+    RunMap(newMap);
+}
+
 function RunMap(map) {
-    inMaps = true;
+    GotoMapsScreen();
+    document.getElementById(map.id).click();
+    document.getElementById("selectMapBtn").click();
 }
+
 function RunWorld() {
-    inMaps = false;
+    document.getElementById("mapsBtn").click();  //mapsClicked();
 }
-function SwitchToMaps() {
-    if (game.global.world < 6){
+
+function RunMaps() {
+    if (game.global.world < 7 || game.global.mapsActive === true){ //no map ability(wait one) or already running a map(repeat should be off)
         return;
     }
     var itemsAvailableInNewMap = addSpecials(true,true,{ id: "map999", name: "My Map", location: "Sea", clears: 0, level: game.global.world, difficulty: 1.11, size: 40, loot: 1.2, noRecycle: false })
@@ -410,58 +443,12 @@ function SwitchToMaps() {
             return;
         }
     }
-    if (itemsAvailableInNewMap == 0 && inMaps == true){
+    if (itemsAvailableInNewMap > 0){
+        RunNewMap();
+    }
+    if (game.global.preMapsActive === true){
         RunWorld();
     }
-    if (itemsAvailableInNewMap > 0){
-        RunMap();
-    }
-    /*
-     problem: need equipment upgrades that only happen on the last cell of a map
-     maps only have items every so often
-     creating them can be expensive if max difficulty and size
-     know current zone
-     click maps (starts from zone 6), pick map, run, optional repeat(probably not for automation)
-     when no items, go back to world
-     maps can create unique maps, but those unique maps will have an item if they're useful
-     once 20 is finished, upgrade, then do anger map
-     can check the map creation tools, see how many items would be on it before switching to maps...
-     check unique maps for items
-     there's a game.global.mapsActive boolean
-     .mapsOwned = # of maps
-     .mapsOwnedArray = maps
-     # items being displayed on main maps part for each map... how's it getting the #?
-     "mapStatsItems", "mapStatsResource", create=>"buyMap()
-     if (game.global.lookingAtMap && !game.global.currentMapId) selectMap(game.global.lookingAtMap, true);
-     map = game.global.mapsOwnedArray[map];
-     document.getElementById("mapStatsItems").innerHTML = addSpecials(true, true, map);
-     document.getElementById("recycleMapBtn").style.visibility = (map.noRecycle) ? "hidden" : "visible";
-     noRecycle says if it's a special map
-     <input value="0" id="difficultyAdvMapsRange" class="mapSelector mapInput" min="0" max="9" oninput="adjustMap('difficulty',
-     this.value)" onchange="adjustMap('difficulty', this.value)" type="range">
-     <input value="0" id="sizeAdvMapsRange" class="mapSelector mapInput" min="0" max="9" oninput="adjustMap('size', this.value)"
-     onchange="adjustMap('size', this.value)" type="range">
-     adjustMap('difficulty', 9)
-     adjustMap('size', 9)
-     var cost = updateMapCost(true);
-     if (game.resources.fragments.owned >= cost)
-     see if worth going to maps:
-     check all current maps for any items
-     check if a new map would have any items
-     addspecial gets a map and uses
-     map.level,map.size
-     game.mapConfig.locations[map.location].upgrade ?!?!?   game.mapConfig.locations.Sea
-     game.mapConfig.locations[map.location].resourceType
-     Object { id: "map1", name: "Tricky Paradise", location: "All", clears: 0, level: 6, difficulty: 1.11, size: 40, loot: 1.2,
-     noRecycle: false }
-     -----
-     don't click buttons if they're not there for manual upgrade gathering
-     <div style="background: rgb(0, 0, 0) none repeat scroll 0% 0%; display: none;" id="scienceCollectBtn" class="workBtn pointer
-     noselect" onclick="setGather('science')">Research</div>
-     ----
-     dont do special map if map of same level has the same number of items
-     can call addSpecials with anonymous {blah blah}
-     */
 }
 
 //Main
@@ -486,7 +473,7 @@ function SwitchToMaps() {
             BuyEquipmentUpgrades();
             BuyEquipment();
         }
-        //SwitchToMaps();
+        RunMaps();
         //End Main loop code
     }, constants.getRunInterval());
 })();
