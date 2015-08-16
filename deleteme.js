@@ -401,8 +401,8 @@ function GotoMapsScreen() {
     }
 }
 
-function RunNewMap(map) {
-    var newMap = {};
+function RunNewMap() {
+    var newMap;
     GotoMapsScreen();
     var size = 9;
 
@@ -418,6 +418,7 @@ function RunNewMap(map) {
         cost = updateMapCost(true);
     }
     document.getElementById("mapCreateBtn").click();
+    newMap = game.global.mapsOwnedArray[game.global.mapsOwnedArray.length - 1];
     RunMap(newMap);
 }
 
@@ -438,8 +439,8 @@ function RunMaps() {
     var itemsAvailableInNewMap = addSpecials(true,true,{ id: "map999", name: "My Map", location: "Sea", clears: 0, level: game.global.world, difficulty: 1.11, size: 40, loot: 1.2, noRecycle: false })
     for (var map in game.global.mapsOwnedArray){
         var itemsAvailable = addSpecials(true,true,game.global.mapsOwnedArray[map]);
-        if (itemsAvailable > itemsAvailableInNewMap) {
-            RunMap(map);
+        if (itemsAvailable >= itemsAvailableInNewMap) {
+            RunMap(game.global.mapsOwnedArray[map]);
             return;
         }
     }
