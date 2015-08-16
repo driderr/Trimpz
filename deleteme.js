@@ -157,6 +157,7 @@ function FocusWorkersOnScience() {
     var jobObj;
     var workersToMove;
     var jobsToMoveFrom = ["Farmer","Lumberjack","Miner"];
+    var fromJobButton;
 
     if (game.jobs.Scientist.locked || workersFocusedOnScience === true){
         return;
@@ -167,13 +168,14 @@ function FocusWorkersOnScience() {
         if(jobObj.locked === true || jobObj.owned < 2){
             continue;
         }
-        workersToMove = jobObj.owned * constants.getOtherWorkersFocusRatio();
+        workersToMove = Math.floor(jobObj.owned * constants.getOtherWorkersFocusRatio());
         if (game.resources.food.owned <  workersToMove * game.jobs.Scientist.cost.food[0]){
             continue;
         }
         game.global.buyAmt = workersToMove;
         game.global.firing = true;
-        document.getElementById(jobsToMoveFrom[job]).click();
+        fromJobButton = document.getElementById(jobsToMoveFrom[job]);
+        fromJobButton.click();
         game.global.firing = false;
         document.getElementById("Scientist").click();
         game.global.buyAmt = 1;
@@ -206,8 +208,9 @@ function RestoreWorkerFocus() {
         game.global.buyAmt = 1;
         workersMoved[jobMoved][1] = 0;
     }
-    if (workersToMove === 0)
+    if (workersToMove === 0) {
         workersFocusedOnScience = false;
+    }
 }
 /**
  * @return {boolean} return.collectingForNonEquipment Is it collecting for upgrade?
