@@ -408,7 +408,9 @@ function RunNewMap() {
     GotoMapsScreen();
     var size = 9;
 
+    document.getElementById("difficultyAdvMapsRange").value = 9;
     adjustMap('difficulty', 9);
+    document.getElementById("sizeAdvMapsRange").value = 9;
     adjustMap('size', size);
     var cost = updateMapCost(true);
     while (cost > game.resources.fragments.owned){
