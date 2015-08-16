@@ -439,13 +439,14 @@ function RunMaps() {
     var itemsAvailableInNewMap = addSpecials(true,true,{ id: "map999", name: "My Map", location: "Sea", clears: 0, level: game.global.world, difficulty: 1.11, size: 40, loot: 1.2, noRecycle: false })
     for (var map in game.global.mapsOwnedArray){
         var itemsAvailable = addSpecials(true,true,game.global.mapsOwnedArray[map]);
-        if (itemsAvailable >= itemsAvailableInNewMap) {
+        if (itemsAvailable >= itemsAvailableInNewMap && itemsAvailable > 0) {
             RunMap(game.global.mapsOwnedArray[map]);
             return;
         }
     }
     if (itemsAvailableInNewMap > 0){
         RunNewMap();
+        return;
     }
     if (game.global.preMapsActive === true){
         RunWorld();
