@@ -3,6 +3,7 @@ var openTrapsForDefault;    //Open traps as default action?
 var trimpz = 0;             //"Trimpz" running indicator
 var autoFighting = false;   //Autofight on?
 var workersFocusedOnScience = false;
+var workersMoved = [];
 var constants = (function () {
     "use strict";
     var runInterval = 1500,
@@ -149,21 +150,63 @@ function ClickAllNonEquipmentUpgrades() {
         if (typeof game.upgrades[upgrade].prestiges === 'undefined' && game.upgrades[upgrade].locked === 0) {
             document.getElementById(upgrade).click();  //Upgrade!
         }
-        //constants.getOtherWorkersFocusRatio()
     }
     tooltip('hide');
 }
 function FocusWorkersOnScience() {
+    var jobObj;
+    var workersToMove;
+
     if (game.jobs.Scientist.locked || workersFocusedOnScience === true){
         return;
     }
-    workersFocusedOnScience = true;
+    workersMoved = [];
+    for (var job in ["Farmer","Lumberjack","Miner"]){
+        jobObj = game.jobs[job];
+        if(jobObj.locked === true || jobObj.owned < 2){
+            continue;
+        }
+        workersToMove = jobObj.owned * constants.getOtherWorkersFocusRatio();
+        if (game.resources.food.owned <  workersToMove * game.jobs.Scientist.cost.food[0]){
+            continue;
+        }
+        game.global.buyAmt = workersToMove;
+        game.global.firing = true;
+        document.getElementById(job).click();
+        game.global.firing = false;
+        document.getElementById("Scientist").click();
+        game.global.buyAmt = 1;
+        workersMoved.push([job,workersToMove]);
+    }
+    if (workersMoved.length !== 0)
+        workersFocusedOnScience = true;
 }
 function RestoreWorkerFocus() {
+    var workersToMove;
+    var job;
+    var workersLeft = 0;
+
     if (workersFocusedOnScience === false){
         return;
     }
-    workersFocusedOnScience = false;
+    for (var jobMoved in workersMoved)
+    {
+        workersToMove = workersMoved[jobMoved][1];
+        job = workersMoved[jobMoved][0];
+        if (game.resources.food.owned <  workersToMove * game.jobs[job].cost.food[0] || workersToMove === 0){
+            workersLeft += workersToMove;
+            continue;
+        }
+        game.global.buyAmt = workersToMove;
+        game.global.firing = true;
+        document.getElementById("Scientist").click();
+        game.global.firing = false;
+        document.getElementById(job).click();
+        game.global.buyAmt = 1;
+        workersMoved[jobMoved][1] = 0;
+    }
+    if (workersToMove === 0)
+        workersFocusedOnScience = false;
 }
 /**
  * @return {boolean} return.collectingForNonEquipment Is it collecting for upgrade?
@@ -191,7 +234,7 @@ function UpgradeNonEquipment() {
                 }
                 if (aResource === "science" && needed > game.resources.science.owned) {
                     document.getElementById("scienceCollectBtn").click();
-                    //FocusWorkersOnScience();
+                    FocusWorkersOnScience();
                     return true;
                 }
                 if (aResource === "wood" && needed > game.resources.wood.owned) {
@@ -202,7 +245,7 @@ function UpgradeNonEquipment() {
             document.getElementById(upgrade).click();  //Upgrade!
         }
     }
-    //RestoreWorkerFocus();
+    RestoreWorkerFocus();
     return false;
 }
 /**
@@ -466,7 +509,7 @@ function RunMaps() {
     if (game.global.world < 7 || game.global.mapsActive === true){ //no map ability(wait one) or already running a map(repeat should be off)
         return;
     }
-    var itemsAvailableInNewMap = addSpecials(true,true,{ id: "map999", name: "My Map", location: "Sea", clears: 0, level: game.global.world, difficulty: 1.11, size: 40, loot: 1.2, noRecycle: false })
+    var itemsAvailableInNewMap = addSpecials(true,true,{ id: "map999", name: "My Map", location: "Sea", clears: 0, level: game.global.world, difficulty: 1.11, size: 40, loot: 1.2, noRecycle: false });
     for (var map in game.global.mapsOwnedArray){
         var itemsAvailable = addSpecials(true,true,game.global.mapsOwnedArray[map]);
         if (itemsAvailable >= itemsAvailableInNewMap && itemsAvailable > 0) {
