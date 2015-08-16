@@ -347,6 +347,7 @@ function BuyEquipment() {
         }
         if (CanBuyNonUpgrade(game.equipment[anEquipment], constants.getEquipmentCostRatio()) === true) {
             document.getElementById(anEquipment).click();
+            tooltip('hide');
         }
     }
 }
@@ -387,6 +388,7 @@ function BuyEquipmentUpgrades() {
             if (upgrade === "Supershield") {
                 document.getElementById(game.upgrades[upgrade].prestiges).click();  //Buy another!
             }
+            tooltip('hide');
         }
     }
 }
