@@ -425,19 +425,26 @@ function RunNewMap() {
     var newMap;
     GotoMapsScreen();
     var size = 9;
+    var difficulty = 9;
 
-    document.getElementById("difficultyAdvMapsRange").value = 9;
-    adjustMap('difficulty', 9);
+    document.getElementById("difficultyAdvMapsRange").value = difficulty;
+    adjustMap('difficulty', difficulty);
     document.getElementById("sizeAdvMapsRange").value = size;
     adjustMap('size', size);
     var cost = updateMapCost(true);
     while (cost > game.resources.fragments.owned){
-        size--;
-        if (size === 0){
-            return;         //need more fragments!
+        if (size === 1){
+            difficulty--;
+            if (difficulty === 1) {
+                return;         //need more fragments!
+            }
+        } else {
+            size--;
         }
         document.getElementById("sizeAdvMapsRange").value = size;
         adjustMap('size', size);
+        document.getElementById("difficultyAdvMapsRange").value = difficulty;
+        adjustMap('difficulty', difficulty);
         cost = updateMapCost(true);
     }
     document.getElementById("mapCreateBtn").click();
