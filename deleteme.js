@@ -359,6 +359,9 @@ function BuyEquipmentUpgrades() {
         if (typeof game.upgrades[upgrade].prestiges !== 'undefined' && game.upgrades[upgrade].locked === 0) {
             canBuyUpgrade = true;
             for (var aResource in game.upgrades[upgrade].cost.resources) {
+                if (aResource === "metal" || aResource === "wood"){
+                    continue;
+                }
                 var needed = game.upgrades[upgrade].cost.resources[aResource];
                 if (typeof needed[1] !== 'undefined') {
                     needed = resolvePow(needed, game.upgrades[upgrade]);
