@@ -2,7 +2,7 @@
 var openTrapsForDefault;    //Open traps as default action?
 var trimpz = 0;             //"Trimpz" running indicator
 var autoFighting = false;   //Autofight on?
-var workersFocusedOnScience = false;
+var workersFocused = false;
 var workersMoved = [];
 var constants = (function () {
     "use strict";
@@ -153,13 +153,13 @@ function ClickAllNonEquipmentUpgrades() {
     }
     tooltip('hide');
 }
-function FocusWorkersOnScience() {
+function FocusWorkersOn(jobToFocusOn) {
     var jobObj;
     var workersToMove;
     var jobsToMoveFrom = ["Farmer","Lumberjack","Miner"];
     var fromJobButton;
 
-    if (game.jobs.Scientist.locked || workersFocusedOnScience === true){
+    if (game.jobs[jobToFocusOn].locked || workersFocused === true){
         return;
     }
     workersMoved = [];
@@ -169,7 +169,7 @@ function FocusWorkersOnScience() {
             continue;
         }
         workersToMove = Math.floor(jobObj.owned * constants.getOtherWorkersFocusRatio());
-        if (game.resources.food.owned <  workersToMove * game.jobs.Scientist.cost.food[0]){
+        if (game.resources.food.owned <  workersToMove * game.jobs[jobToFocusOn].cost.food[0]){
             continue;
         }
         game.global.buyAmt = workersToMove;
@@ -177,19 +177,19 @@ function FocusWorkersOnScience() {
         fromJobButton = document.getElementById(jobsToMoveFrom[job]);
         fromJobButton.click();
         game.global.firing = false;
-        document.getElementById("Scientist").click();
+        document.getElementById(jobToFocusOn).click();
         game.global.buyAmt = 1;
-        workersMoved.push([jobsToMoveFrom[job],workersToMove]);
+        workersMoved.push([jobsToMoveFrom[job],workersToMove,jobToFocusOn]);
     }
     if (workersMoved.length !== 0)
-        workersFocusedOnScience = true;
+        workersFocused = true;
 }
 function RestoreWorkerFocus() {
     var workersToMove;
     var job;
     var workersLeft = 0;
 
-    if (workersFocusedOnScience === false){
+    if (workersFocused === false){
         return;
     }
     for (var jobMoved in workersMoved)
@@ -202,14 +202,14 @@ function RestoreWorkerFocus() {
         }
         game.global.buyAmt = workersToMove;
         game.global.firing = true;
-        document.getElementById("Scientist").click();
+        document.getElementById(workersMoved[jobMoved][2]).click();
         game.global.firing = false;
         document.getElementById(job).click();
         game.global.buyAmt = 1;
         workersMoved[jobMoved][1] = 0;
     }
     if (workersLeft === 0) {
-        workersFocusedOnScience = false;
+        workersFocused = false;
     }
 }
 /**
@@ -238,7 +238,7 @@ function UpgradeNonEquipment() {
                 }
                 if (aResource === "science" && needed > game.resources.science.owned) {
                     document.getElementById("scienceCollectBtn").click();
-                    FocusWorkersOnScience();
+                    FocusWorkersOn("Scientist");
                     return true;
                 }
                 if (aResource === "wood" && needed > game.resources.wood.owned) {
