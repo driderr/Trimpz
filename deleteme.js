@@ -1,4 +1,5 @@
-/*global game,tooltip,resolvePow*/
+/*global game,tooltip,resolvePow,getNextPrestigeCost,adjustMap,updateMapCost,addSpecials*/
+/*jslint plusplus: true */
 var openTrapsForDefault;    //Open traps as default action?
 var trimpz = 0;             //"Trimpz" running indicator
 var autoFighting = false;   //Autofight on?
@@ -44,6 +45,28 @@ var constants = (function () {
     };
 })();
 
+/**
+ * @return {boolean} return.canAfford affordable respecting the ratio?
+ */
+function CanBuyNonUpgrade(nonUpgradeItem, ratio) {
+    "use strict";
+    var aResource; //JSLint insisted I move declaration to top...
+    var needed;
+    for (aResource in nonUpgradeItem.cost) {
+        needed = nonUpgradeItem.cost[aResource];
+        if (typeof needed[1] !== 'undefined') {
+            needed = resolvePow(needed, nonUpgradeItem);
+        }
+        if (typeof nonUpgradeItem.prestige !== 'undefined') {//Discount equipment
+            needed = Math.ceil(needed * (Math.pow(1 - game.portal.Artisanistry.modifier, game.portal.Artisanistry.level)));
+        }
+        if (game.resources[aResource].owned * ratio < needed) {
+            return false;
+        }
+    }
+    return true;
+}
+
 function AssignFreeWorkers() {
     "use strict";
     var trimps = game.resources.trimps;
@@ -63,44 +86,29 @@ function AssignFreeWorkers() {
         if (game.jobs.Trainer.locked === 0 &&
             CanBuyNonUpgrade(game.jobs.Trainer, constants.getTrainerCostRatio()) === true){
             document.getElementById("Trainer").click();
-            tooltip('hide');
-            continue;
-        }
-        if (game.jobs.Explorer.locked === 0 &&
+        } else if (game.jobs.Explorer.locked === 0 &&
             CanBuyNonUpgrade(game.jobs.Explorer, constants.getExplorerCostRatio()) === true){
             document.getElementById("Explorer").click();
-            tooltip('hide');
-            continue;
-        }
-        if (game.jobs.Scientist.locked === 0 && game.jobs.Scientist.owned < game.global.world + 1 &&
+        } else if (game.jobs.Scientist.locked === 0 && game.jobs.Scientist.owned < game.global.world + 1 &&
             CanBuyNonUpgrade(game.jobs.Scientist, 1) === true) {
             document.getElementById("Scientist").click();
-            tooltip('hide');
-            continue;
-        }
-        if (game.jobs.Miner.locked === 0 && game.jobs.Miner.owned < game.jobs.Farmer.owned * constants.getMinerMultiplier() &&
+        } else if (game.jobs.Miner.locked === 0 && game.jobs.Miner.owned < game.jobs.Farmer.owned * constants.getMinerMultiplier() &&
             CanBuyNonUpgrade(game.jobs.Miner, 1) === true) {
             document.getElementById("Miner").click();
-            tooltip('hide');
-            continue;
-        }
-        if (game.jobs.Lumberjack.locked === 0 && game.jobs.Lumberjack.owned < game.jobs.Farmer.owned &&
+        } else if (game.jobs.Lumberjack.locked === 0 && game.jobs.Lumberjack.owned < game.jobs.Farmer.owned &&
             CanBuyNonUpgrade(game.jobs.Lumberjack, 1) === true){
             document.getElementById("Lumberjack").click();
-            tooltip('hide');
-            continue;
-        }
-        if (CanBuyNonUpgrade(game.jobs.Farmer, 1) === true){
+        } else if (CanBuyNonUpgrade(game.jobs.Farmer, 1) === true){
             document.getElementById("Farmer").click();
-            tooltip('hide');
-            continue;
+        } else {
+            return; //Can't afford anything!
         }
-        return; //Can't afford anything!
     }
+    tooltip('hide');
 }
 function Fight() {
     "use strict";
-    if (autoFighting === true && game.resources.trimps.owned > 25) { //>25 should reset autofighting on portal
+    if (autoFighting === true && game.resources.trimps.owned > 25) { //>25 should reset autoFighting on portal
         return;
     }
     autoFighting = false;
@@ -126,24 +134,25 @@ function ShowRunningIndicator() {
 function UpgradeStorage() {
     "use strict";
     if (game.resources.food.owned > game.buildings.Barn.cost.food()) {
-        if (game.buildings.Barn.locked == 0) {
+        if (game.buildings.Barn.locked === 0) {
             document.getElementById("Barn").click();
         }
     }
     if (game.resources.wood.owned > game.buildings.Shed.cost.wood()) {
-        if (game.buildings.Shed.locked == 0) {
+        if (game.buildings.Shed.locked === 0) {
             document.getElementById("Shed").click();
         }
     }
     if (game.resources.metal.owned > game.buildings.Forge.cost.metal()) {
-        if (game.buildings.Forge.locked == 0) {
+        if (game.buildings.Forge.locked === 0) {
             document.getElementById("Forge").click();
         }
     }
 }
 function ClickAllNonEquipmentUpgrades() {
     "use strict";
-    for (var upgrade in game.upgrades) {
+    var upgrade;
+    for (upgrade in game.upgrades) {
         if (upgrade === "Coordination" && game.resources.trimps.realMax() < game.resources.trimps.maxSoldiers * 3) {
             continue;
         }
@@ -154,16 +163,18 @@ function ClickAllNonEquipmentUpgrades() {
     tooltip('hide');
 }
 function FocusWorkersOn(jobToFocusOn) {
+    "use strict";
     var jobObj;
     var workersToMove;
     var jobsToMoveFrom = ["Farmer","Lumberjack","Miner"];
     var fromJobButton;
+    var job;
 
     if (game.jobs[jobToFocusOn].locked || workersFocused === true){
         return;
     }
     workersMoved = [];
-    for (var job in jobsToMoveFrom){
+    for (job in jobsToMoveFrom){
         jobObj = game.jobs[jobsToMoveFrom[job]];
         if(jobObj.locked === true || jobObj.owned < 2){
             continue;
@@ -181,18 +192,21 @@ function FocusWorkersOn(jobToFocusOn) {
         game.global.buyAmt = 1;
         workersMoved.push([jobsToMoveFrom[job],workersToMove,jobToFocusOn]);
     }
-    if (workersMoved.length !== 0)
+    if (workersMoved.length !== 0) {
         workersFocused = true;
+    }
 }
 function RestoreWorkerFocus() {
+    "use strict";
     var workersToMove;
     var job;
     var workersLeft = 0;
+    var jobMoved;
 
     if (workersFocused === false){
         return;
     }
-    for (var jobMoved in workersMoved)
+    for (jobMoved in workersMoved)
     {
         workersToMove = workersMoved[jobMoved][1];
         job = workersMoved[jobMoved][0];
@@ -217,14 +231,17 @@ function RestoreWorkerFocus() {
  */
 function UpgradeNonEquipment() {
     "use strict";
+    var upgrade;
+    var aResource;
+    var needed;
     ClickAllNonEquipmentUpgrades();
-    for (var upgrade in game.upgrades) {
+    for (upgrade in game.upgrades) {
         if (typeof game.upgrades[upgrade].prestiges === 'undefined' && game.upgrades[upgrade].locked === 0) {
             if (upgrade === "Coordination" && game.resources.trimps.realMax() < game.resources.trimps.maxSoldiers * 3){
                 continue;
             }
-            for (var aResource in game.upgrades[upgrade].cost.resources) {
-                var needed = game.upgrades[upgrade].cost.resources[aResource];
+            for (aResource in game.upgrades[upgrade].cost.resources) {
+                needed = game.upgrades[upgrade].cost.resources[aResource];
                 if (typeof needed[1] !== 'undefined') {
                     needed = resolvePow(needed, game.upgrades[upgrade]);
                 }
@@ -243,6 +260,7 @@ function UpgradeNonEquipment() {
                 }
                 if (aResource === "wood" && needed > game.resources.wood.owned) {
                     document.getElementById("woodCollectBtn").click();
+                    FocusWorkersOn("Lumberjack");
                     return true;
                 }
             }
@@ -255,7 +273,7 @@ function UpgradeNonEquipment() {
 /**
  * @return {boolean} return.collectingForNonEquipment Is it collecting for upgrade?
  */
-function BeginDefaultManualActionAndUpgrade(trappingSpan) {
+function UpgradeAndGather(trappingSpan) {
     "use strict";
     var collectingForNonEquipment = UpgradeNonEquipment();
     if (openTrapsForDefault === true && game.buildings.Trap.owned < 10){ //traps exhausted, turn off "Trapping"
@@ -317,24 +335,7 @@ function BeginPriorityAction() { //this is really just for the beginning (after 
     }
     return false;
 }
-/**
- * @return {boolean} return.canAfford affordable respecting the ratio?
- */
-function CanBuyNonUpgrade(nonUpgradeItem, ratio) {
-    for (var aResource in nonUpgradeItem.cost) {
-        var needed = nonUpgradeItem.cost[aResource];
-        if (typeof needed[1] !== 'undefined') {
-            needed = resolvePow(needed, nonUpgradeItem);
-        }
-        if (typeof nonUpgradeItem.prestige !== 'undefined') {//Discount equipment
-            needed = Math.ceil(needed * (Math.pow(1 - game.portal.Artisanistry.modifier, game.portal.Artisanistry.level)));
-        }
-        if (game.resources[aResource].owned * ratio < needed) {
-            return false;
-        }
-    }
-    return true;
-}
+
 function BuyBuildings() {
     "use strict";
     if (game.buildings.Gym.locked === 0 && game.buildings.Gym.owned < constants.getMaxGyms() &&
@@ -377,6 +378,7 @@ function BuyBuildings() {
 }
 
 function TurnOnAutoBuildTraps() {
+    "use strict";
     if (document.getElementById("autoTrapBtn").getAttribute("style") !== "display: none" &&
         document.getElementById("autoTrapBtn").innerHTML === "Traps Off") {
         document.getElementById("autoTrapBtn").click();
@@ -385,9 +387,10 @@ function TurnOnAutoBuildTraps() {
 
 function BuyEquipment() {
     "use strict";
+    var anEquipment;
     //Find lowest level
     var lowestLevel = 1000;
-    for (var anEquipment in game.equipment) {
+    for (anEquipment in game.equipment) {
         if (game.equipment[anEquipment].locked === 1) {
             continue;
         }
@@ -406,8 +409,8 @@ function BuyEquipment() {
     //Buy lowest level equipment
     for (anEquipment in game.equipment){
         if (game.equipment[anEquipment].locked === 1 ||
-            anEquipment === "Shield"
-            || game.equipment[anEquipment].level > lowestLevel){
+            anEquipment === "Shield" ||
+            game.equipment[anEquipment].level > lowestLevel){
             continue;
         }
         if (CanBuyNonUpgrade(game.equipment[anEquipment], constants.getEquipmentCostRatio()) === true) {
@@ -417,29 +420,42 @@ function BuyEquipment() {
     }
 }
 
+/**
+ * @return {boolean} return.canAfford affordable upgrade?
+ */
+function CanAffordEquipmentUpgrade(upgrade) {
+    "use strict";
+    var canBuyUpgrade = true;
+    var aResource;
+    var needed;
+    for (aResource in game.upgrades[upgrade].cost.resources) {
+        if (aResource === "metal" || aResource === "wood") {
+            continue;
+        }
+        needed = game.upgrades[upgrade].cost.resources[aResource];
+        if (typeof needed[1] !== 'undefined') {
+            needed = resolvePow(needed, game.upgrades[upgrade]);
+        }
+        if (needed > game.resources[aResource].owned) {
+            canBuyUpgrade = false;
+            break;
+        }
+    }
+    return canBuyUpgrade;
+}
 function BuyEquipmentUpgrades() {
-    var canBuyUpgrade;
+    "use strict";
     var costOfNextLevel;
-    for (var upgrade in game.upgrades) {
+    var upgrade;
+    var costOfTwoLevels;
+    for (upgrade in game.upgrades) {
         if (typeof game.upgrades[upgrade].prestiges !== 'undefined' && game.upgrades[upgrade].locked === 0) {
-            canBuyUpgrade = true;
-            for (var aResource in game.upgrades[upgrade].cost.resources) {
-                if (aResource === "metal" || aResource === "wood"){
-                    continue;
-                }
-                var needed = game.upgrades[upgrade].cost.resources[aResource];
-                if (typeof needed[1] !== 'undefined') {
-                    needed = resolvePow(needed, game.upgrades[upgrade]);
-                }
-                if (needed > game.resources[aResource].owned) {
-                    canBuyUpgrade = false;
-                }
-            }
-            if (canBuyUpgrade === false)
+            if (CanAffordEquipmentUpgrade(upgrade) === false) {
                 continue;
+            }
             costOfNextLevel = Math.ceil(getNextPrestigeCost(upgrade) * (Math.pow(1 - game.portal.Artisanistry.modifier, game.portal.Artisanistry.level)));
             if (upgrade === "Supershield"){
-                var costOfTwoLevels = costOfNextLevel * (1 + game.equipment.Shield.cost.wood[1]);
+                costOfTwoLevels = costOfNextLevel * (1 + game.equipment.Shield.cost.wood[1]);
                 if (game.resources.wood.owned < costOfTwoLevels){
                     continue;
                 }
@@ -459,6 +475,7 @@ function BuyEquipmentUpgrades() {
 }
 
 function GotoMapsScreen() {
+    "use strict";
     if (game.global.preMapsActive === true) {
         return;
     }
@@ -469,6 +486,7 @@ function GotoMapsScreen() {
 }
 
 function RunNewMap() {
+    "use strict";
     var newMap;
     GotoMapsScreen();
     var size = 9;
@@ -500,22 +518,27 @@ function RunNewMap() {
 }
 
 function RunMap(map) {
+    "use strict";
     GotoMapsScreen();
     document.getElementById(map.id).click();
     document.getElementById("selectMapBtn").click();
 }
 
 function RunWorld() {
+    "use strict";
     document.getElementById("mapsBtn").click();  //mapsClicked();
 }
 
 function RunMaps() {
+    "use strict";
+    var map;
+    var itemsAvailable;
     if (game.global.world < 7 || game.global.mapsActive === true){ //no map ability(wait one) or already running a map(repeat should be off)
         return;
     }
     var itemsAvailableInNewMap = addSpecials(true,true,{ id: "map999", name: "My Map", location: "Sea", clears: 0, level: game.global.world, difficulty: 1.11, size: 40, loot: 1.2, noRecycle: false });
-    for (var map in game.global.mapsOwnedArray){
-        var itemsAvailable = addSpecials(true,true,game.global.mapsOwnedArray[map]);
+    for (map in game.global.mapsOwnedArray){
+        itemsAvailable = addSpecials(true,true,game.global.mapsOwnedArray[map]);
         if (itemsAvailable >= itemsAvailableInNewMap && itemsAvailable > 0) {
             RunMap(game.global.mapsOwnedArray[map]);
             return;
@@ -546,7 +569,7 @@ function RunMaps() {
             tooltip('hide');
             return;
         }
-        var collectingForUpgrade = BeginDefaultManualActionAndUpgrade(trappingSpan);
+        var collectingForUpgrade = UpgradeAndGather(trappingSpan);
         if (collectingForUpgrade === false) { //allow resources to accumulate for upgrades if true
             BuyBuildings();
             BuyEquipmentUpgrades();
@@ -558,6 +581,7 @@ function RunMaps() {
 })();
 
 function CreateButtonForTrapping() {
+    "use strict";
     var addElementsHere = document.getElementById("battleBtnsColumn");
     var newDiv = document.createElement("DIV");
     newDiv.className = "battleSideBtnContainer";
