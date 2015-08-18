@@ -77,6 +77,9 @@ function AssignFreeWorkers() {
         return;
     }
     var free = (Math.ceil(trimps.realMax() / 2) - trimps.employed);
+    if (free > 0){
+        document.getElementById("tab1").click();    //hire 1 at a time
+    }
     while (free > 0 && Math.floor(game.resources.trimps.owned) > game.resources.trimps.employed) {
         trimps = game.resources.trimps;
         free = (Math.ceil(trimps.realMax() / 2) - trimps.employed);
@@ -176,7 +179,7 @@ function FocusWorkersOn(jobToFocusOn) {
     workersMoved = [];
     for (job in jobsToMoveFrom){
         jobObj = game.jobs[jobsToMoveFrom[job]];
-        if(jobObj.locked === true || jobObj.owned < 2){
+        if(jobObj.locked === true || jobObj.owned < 2 || jobsToMoveFrom[job] === jobToFocusOn){
             continue;
         }
         workersToMove = Math.floor(jobObj.owned * constants.getOtherWorkersFocusRatio());
