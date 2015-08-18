@@ -4,6 +4,7 @@ var openTrapsForDefault;    //Open traps as default action?
 var trimpz = 0;             //"Trimpz" running indicator
 var autoFighting = false;   //Autofight on?
 var workersFocused = false;
+var workersFocusedOn;
 var workersMoved = [];
 var constants = (function () {
     "use strict";
@@ -169,21 +170,27 @@ function FocusWorkersOn(jobToFocusOn) {
     "use strict";
     var jobObj;
     var workersToMove;
-    var jobsToMoveFrom = ["Farmer","Lumberjack","Miner"];
+    var jobsToMoveFrom = ["Farmer", "Lumberjack", "Miner"];
     var fromJobButton;
     var job;
 
-    if (game.jobs[jobToFocusOn].locked || workersFocused === true){
+    if (game.jobs[jobToFocusOn].locked) {
         return;
     }
+    if (workersFocused === true && jobToFocusOn === workersFocusedOn) {
+        return;
+    }
+    if (workersFocused === true){ //focused on the wrong thing!
+        RestoreWorkerFocus();
+    }
     workersMoved = [];
-    for (job in jobsToMoveFrom){
+    for (job in jobsToMoveFrom) {
         jobObj = game.jobs[jobsToMoveFrom[job]];
-        if(jobObj.locked === true || jobObj.owned < 2 || jobsToMoveFrom[job] === jobToFocusOn){
+        if (jobObj.locked === true || jobObj.owned < 2 || jobsToMoveFrom[job] === jobToFocusOn) {
             continue;
         }
         workersToMove = Math.floor(jobObj.owned * constants.getOtherWorkersFocusRatio());
-        if (game.resources.food.owned <  workersToMove * game.jobs[jobToFocusOn].cost.food[0]){
+        if (game.resources.food.owned < workersToMove * game.jobs[jobToFocusOn].cost.food[0]) {
             continue;
         }
         game.global.buyAmt = workersToMove;
@@ -193,10 +200,11 @@ function FocusWorkersOn(jobToFocusOn) {
         game.global.firing = false;
         document.getElementById(jobToFocusOn).click();
         game.global.buyAmt = 1;
-        workersMoved.push([jobsToMoveFrom[job],workersToMove,jobToFocusOn]);
+        workersMoved.push([jobsToMoveFrom[job], workersToMove, jobToFocusOn]);
     }
     if (workersMoved.length !== 0) {
         workersFocused = true;
+        workersFocusedOn = jobToFocusOn;
     }
 }
 function RestoreWorkerFocus() {
@@ -227,6 +235,7 @@ function RestoreWorkerFocus() {
     }
     if (workersLeft === 0) {
         workersFocused = false;
+        workersFocusedOn = "";
     }
 }
 /**
