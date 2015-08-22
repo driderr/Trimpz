@@ -6,7 +6,7 @@ var autoFighting = false;   //Autofight on?
 var workersFocused = false;
 var workersFocusedOn;
 var workersMoved = [];
-var lateGame = false;
+var lateGame;
 var constants = (function () {
     "use strict";
     var runInterval = 1500,
@@ -658,6 +658,9 @@ function CheckLateGame() {
 (function () {
     "use strict";
     var trappingSpan = CreateButtonForTrapping();
+    if (game.global.world >= constants.getLateGameZone()) {
+        lateGame = true;
+    }
     setInterval(function () {
         //Main loop code
         ShowRunningIndicator();
