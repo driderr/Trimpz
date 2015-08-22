@@ -660,6 +660,7 @@ function CheckLateGame() {
     var trappingSpan = CreateButtonForTrapping();
     if (game.global.world >= constants.getLateGameZone()) {
         lateGame = true;
+        constants = constantsLateGame;
     }
     setInterval(function () {
         //Main loop code
