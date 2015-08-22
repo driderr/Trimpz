@@ -6,6 +6,7 @@ var autoFighting = false;   //Autofight on?
 var workersFocused = false;
 var workersFocusedOn;
 var workersMoved = [];
+var lateGame = false;
 var constants = (function () {
     "use strict";
     var runInterval = 1500,
@@ -24,7 +25,10 @@ var constants = (function () {
         maxLevel = 15,
         equipmentCostRatio = 0.5,
         otherWorkersFocusRatio = 0.5,
-        numTrapsForAutoTrapping = 10000;
+        numTrapsForAutoTrapping = 10000,
+        shieldCostRatio = 1,
+        lumberjackMultiplier = 1,
+        lateGameZone = 45;
     return {
         getRunInterval: function () { return runInterval; },
         getTrainerCostRatio: function () { return trainerCostRatio; },
@@ -42,7 +46,55 @@ var constants = (function () {
         getMaxLevel: function () {return maxLevel;},
         getEquipmentCostRatio: function () {return equipmentCostRatio;},
         getOtherWorkersFocusRatio: function () {return otherWorkersFocusRatio;},
-        getNumTrapsForAutoTrapping: function () {return numTrapsForAutoTrapping;}
+        getNumTrapsForAutoTrapping: function () {return numTrapsForAutoTrapping;},
+        getShieldCostRatio: function () {return shieldCostRatio;},
+        getLumberjackMultiplier: function () {return lumberjackMultiplier;},
+        getLateGameZone: function () {return lateGameZone;}
+    };
+})();
+var constantsLateGame = (function () {
+    "use strict";
+    var runInterval = 1500,
+        minerMultiplier = 1,
+        trainerCostRatio = 0.2,
+        explorerCostRatio = 0.2,
+        minFoodOwned = 15,
+        minWoodOwned = 15,
+        minTrimpsOwned = 10,
+        minScienceOwned = 10,
+        housingCostRatio = 0.1,
+        gymCostRatio = 0.95,
+        maxGyms = 10000,
+        tributeCostRatio = 0.5,
+        nurseryCostRatio = 0.5,
+        maxLevel = 15,
+        equipmentCostRatio = 0.2,
+        otherWorkersFocusRatio = 0.5,
+        numTrapsForAutoTrapping = 10000,
+        shieldCostRatio = 0.05,
+        lumberjackMultiplier = 6,
+        lateGameZone = 45;
+    return {
+        getRunInterval: function () { return runInterval; },
+        getTrainerCostRatio: function () { return trainerCostRatio; },
+        getMinerMultiplier: function () { return minerMultiplier; },
+        getExplorerCostRatio: function () { return explorerCostRatio; },
+        getMinFoodOwned: function () { return minFoodOwned; },
+        getMinWoodOwned: function () { return minWoodOwned; },
+        getMinTrimpsOwned: function () { return minTrimpsOwned; },
+        getMinScienceOwned: function () { return minScienceOwned; },
+        getGymCostRatio: function () { return gymCostRatio; },
+        getMaxGyms : function () { return maxGyms; },
+        getHousingCostRatio: function () { return housingCostRatio; },
+        getTributeCostRatio: function () { return tributeCostRatio; },
+        getNurseryCostRatio: function () { return nurseryCostRatio; },
+        getMaxLevel: function () {return maxLevel;},
+        getEquipmentCostRatio: function () {return equipmentCostRatio;},
+        getOtherWorkersFocusRatio: function () {return otherWorkersFocusRatio;},
+        getNumTrapsForAutoTrapping: function () {return numTrapsForAutoTrapping;},
+        getShieldCostRatio: function () {return shieldCostRatio;},
+        getLumberjackMultiplier: function () {return lumberjackMultiplier;},
+        getLateGameZone: function () {return lateGameZone;}
     };
 })();
 
@@ -99,7 +151,7 @@ function AssignFreeWorkers() {
         } else if (game.jobs.Miner.locked === 0 && game.jobs.Miner.owned < game.jobs.Farmer.owned * constants.getMinerMultiplier() &&
             CanBuyNonUpgrade(game.jobs.Miner, 1) === true) {
             document.getElementById("Miner").click();
-        } else if (game.jobs.Lumberjack.locked === 0 && game.jobs.Lumberjack.owned < game.jobs.Farmer.owned &&
+        } else if (game.jobs.Lumberjack.locked === 0 && game.jobs.Lumberjack.owned < game.jobs.Farmer.owned * constants.getLumberjackMultiplier() &&
             CanBuyNonUpgrade(game.jobs.Lumberjack, 1) === true){
             document.getElementById("Lumberjack").click();
         } else if (CanBuyNonUpgrade(game.jobs.Farmer, 1) === true){
@@ -407,7 +459,7 @@ function BuyEquipment() {
             continue;
         }
         if (anEquipment === "Shield") {
-            if (CanBuyNonUpgrade(game.equipment[anEquipment], 1) === true &&
+            if (CanBuyNonUpgrade(game.equipment[anEquipment], constants.getShieldCostRatio()) === true &&
                 game.equipment[anEquipment].level < constants.getMaxLevel()) { //Buy immediately(1 ratio)
                 document.getElementById(anEquipment).click();
             }
@@ -468,7 +520,7 @@ function BuyEquipmentUpgrades() {
             costOfNextLevel = Math.ceil(getNextPrestigeCost(upgrade) * (Math.pow(1 - game.portal.Artisanistry.modifier, game.portal.Artisanistry.level)));
             if (upgrade === "Supershield"){
                 costOfTwoLevels = costOfNextLevel * (1 + game.equipment.Shield.cost.wood[1]);
-                if (game.resources.wood.owned < costOfTwoLevels){
+                if (game.resources.wood.owned * constants.getShieldCostRatio() < costOfTwoLevels){
                     continue;
                 }
             } else{
@@ -565,6 +617,43 @@ function RunMaps() {
     }
 }
 
+
+function ReallocateWorkers() {
+    "use strict";
+    var jobObj;
+    var workersToFire;
+    var jobsToFire = ["Farmer", "Lumberjack", "Miner"];
+    var jobButton;
+    var job;
+
+    game.global.firing = true;
+    for (job in jobsToFire) {
+        jobObj = game.jobs[jobsToFire[job]];
+        if (jobObj.locked === true) {
+            continue;
+        }
+        workersToFire = Math.floor(jobObj.owned);
+        game.global.buyAmt = workersToFire;
+        jobButton = document.getElementById(jobsToFire[job]);
+        jobButton.click();
+    }
+    game.global.buyAmt = 1;
+    game.global.firing = false;
+    AssignFreeWorkers();
+}
+
+function CheckLateGame() {
+    "use strict";
+    if (lateGame === true) {
+        return;
+    }
+    if (game.global.world >= constants.getLateGameZone()){
+        lateGame = true;
+        constants = constantsLateGame;
+        ReallocateWorkers();
+    }
+}
+
 //Main
 (function () {
     "use strict";
@@ -572,6 +661,7 @@ function RunMaps() {
     setInterval(function () {
         //Main loop code
         ShowRunningIndicator();
+        CheckLateGame();
         TurnOnAutoBuildTraps();
         AssignFreeWorkers();
         Fight();
