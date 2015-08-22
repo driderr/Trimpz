@@ -7,7 +7,8 @@ var workersFocused = false;
 var workersFocusedOn;
 var workersMoved = [];
 var lateGame;
-var constants = (function () {
+var constants;
+var constantsEarlyGame = (function () {
     "use strict";
     var runInterval = 1500,
         minerMultiplier = 2,
@@ -645,6 +646,10 @@ function ReallocateWorkers() {
 function CheckLateGame() {
     "use strict";
     if (lateGame === true) {
+        if (game.resources.trimps.owned < 1000) {
+            lateGame = false;
+            constants = constantsEarlyGame;
+        }
         return;
     }
     if (game.global.world >= constants.getLateGameZone()){
@@ -661,6 +666,8 @@ function CheckLateGame() {
     if (game.global.world >= constants.getLateGameZone()) {
         lateGame = true;
         constants = constantsLateGame;
+    } else{
+        constants = constantsEarlyGame;
     }
     setInterval(function () {
         //Main loop code
