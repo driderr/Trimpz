@@ -7,7 +7,6 @@ var workersFocused = false;
 var workersFocusedOn;
 var workersMoved = [];
 var lateGame;
-var constants;
 var constantsEarlyGame = (function () {
     "use strict";
     var runInterval = 1500,
@@ -29,7 +28,8 @@ var constantsEarlyGame = (function () {
         numTrapsForAutoTrapping = 10000,
         shieldCostRatio = 1,
         lumberjackMultiplier = 1,
-        lateGameZone = 45;
+        lateGameZone = 45,
+        maxWormholes = 7;
     return {
         getRunInterval: function () { return runInterval; },
         getTrainerCostRatio: function () { return trainerCostRatio; },
@@ -50,7 +50,8 @@ var constantsEarlyGame = (function () {
         getNumTrapsForAutoTrapping: function () {return numTrapsForAutoTrapping;},
         getShieldCostRatio: function () {return shieldCostRatio;},
         getLumberjackMultiplier: function () {return lumberjackMultiplier;},
-        getLateGameZone: function () {return lateGameZone;}
+        getLateGameZone: function () {return lateGameZone;},
+        getMaxWormholes: function () {return maxWormholes;}
     };
 })();
 var constantsLateGame = (function () {
@@ -74,7 +75,8 @@ var constantsLateGame = (function () {
         numTrapsForAutoTrapping = 10000,
         shieldCostRatio = 0.05,
         lumberjackMultiplier = 6,
-        lateGameZone = 45;
+        lateGameZone = 45,
+        maxWormholes = 7;
     return {
         getRunInterval: function () { return runInterval; },
         getTrainerCostRatio: function () { return trainerCostRatio; },
@@ -95,9 +97,11 @@ var constantsLateGame = (function () {
         getNumTrapsForAutoTrapping: function () {return numTrapsForAutoTrapping;},
         getShieldCostRatio: function () {return shieldCostRatio;},
         getLumberjackMultiplier: function () {return lumberjackMultiplier;},
-        getLateGameZone: function () {return lateGameZone;}
+        getLateGameZone: function () {return lateGameZone;},
+        getMaxWormholes: function () {return maxWormholes;}
     };
 })();
+var constants = constantsEarlyGame;
 
 /**
  * @return {boolean} return.canAfford affordable respecting the ratio?
@@ -438,6 +442,10 @@ function BuyBuildings() {
     if (game.buildings.Gateway.locked === 0 &&
         CanBuyNonUpgrade(game.buildings.Gateway, 1) === true) { //Buy immediately(1 ratio)
         document.getElementById("Gateway").click();
+    }
+    if (game.buildings.Wormhole.locked === 0 && game.buildings.Wormhole.owned < constants.getMaxWormholes() &&
+        CanBuyNonUpgrade(game.buildings.Wormhole, 1) === true) { //Buy immediately(1 ratio)
+        document.getElementById("Wormhole").click();
     }
     tooltip('hide');
 }
