@@ -239,6 +239,9 @@ function FocusWorkersOn(jobToFocusOn) {
     }
     if (workersFocused === true){ //focused on the wrong thing!
         RestoreWorkerFocus();
+        if (workersFocused === true){
+            return;
+        }
     }
     workersMoved = [];
     for (job in jobsToMoveFrom) {
