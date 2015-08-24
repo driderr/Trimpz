@@ -281,7 +281,7 @@ function RestoreWorkerFocus() {
     {
         workersToMove = workersMoved[jobMoved][1];
         job = workersMoved[jobMoved][0];
-        if (game.resources.food.owned <  workersToMove * game.jobs[job].cost.food[0] || workersToMove === 0){
+        if (game.resources.food.owned <  workersToMove * game.jobs[job].cost.food || workersToMove === 0){
             workersLeft += workersToMove;
             continue;
         }
