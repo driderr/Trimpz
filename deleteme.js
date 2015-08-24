@@ -250,7 +250,7 @@ function FocusWorkersOn(jobToFocusOn) {
             continue;
         }
         workersToMove = Math.floor(jobObj.owned * constants.getOtherWorkersFocusRatio());
-        if (game.resources.food.owned < workersToMove * game.jobs[jobToFocusOn].cost.food[0]) {
+        if (game.resources.food.owned < workersToMove * game.jobs[jobToFocusOn].cost.food) {
             continue;
         }
         game.global.buyAmt = workersToMove;
@@ -319,10 +319,12 @@ function UpgradeNonEquipment() {
                 }
                 if (aResource === "food" && needed > game.resources.food.owned) {
                     document.getElementById("foodCollectBtn").click();
+                    FocusWorkersOn("Farmer");
                     return true;
                 }
                 if (aResource === "metal" && needed > game.resources.metal.owned) {
                     document.getElementById("metalCollectBtn").click();
+                    FocusWorkersOn("Miner");
                     return true;
                 }
                 if (aResource === "science" && needed > game.resources.science.owned) {
