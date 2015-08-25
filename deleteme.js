@@ -69,7 +69,7 @@ var constantsLateGame = (function () {
         gymCostRatio = 0.95,
         maxGyms = 160,
         tributeCostRatio = 0.8,
-        nurseryCostRatio = 0.2,
+        nurseryCostRatio = 0.15,
         maxLevel = 15,
         equipmentCostRatio = 0.2,
         otherWorkersFocusRatio = 0.5,
@@ -527,6 +527,9 @@ function BuyEquipment() {
                 document.getElementById(anEquipment).click();
             }
         } else if (game.equipment[anEquipment].level < lowestLevel) {
+            if (lateLateGame === true && typeof game.equipment[anEquipment].health !== 'undefined'){ //don't buy hp equips in late late game
+                continue;
+            }
             lowestLevel = game.equipment[anEquipment].level;
         }
     }
