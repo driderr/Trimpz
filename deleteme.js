@@ -8,8 +8,10 @@ var workersFocusedOn;
 var workersMoved = [];
 var lateGame;
 var lateLateGame;
+var endGame;
 var lateGameZone = 45;
 var lateLateGameZone = 55;
+var endGameZone = 60;
 var constantsEarlyGame = (function () {
     "use strict";
     var runInterval = 1500,
@@ -121,6 +123,51 @@ var constantsLateLateGame = (function () {
         numTrapsForAutoTrapping = 10000,
         shieldCostRatio = 0.01,
         lumberjackMultiplier = 0.5, //half of farmers
+        maxWormholes = 7;
+    return {
+        getRunInterval: function () { return runInterval; },
+        getTrainerCostRatio: function () { return trainerCostRatio; },
+        getMinerMultiplier: function () { return minerMultiplier; },
+        getExplorerCostRatio: function () { return explorerCostRatio; },
+        getMinFoodOwned: function () { return minFoodOwned; },
+        getMinWoodOwned: function () { return minWoodOwned; },
+        getMinTrimpsOwned: function () { return minTrimpsOwned; },
+        getMinScienceOwned: function () { return minScienceOwned; },
+        getGymCostRatio: function () { return gymCostRatio; },
+        getMaxGyms : function () { return maxGyms; },
+        getHousingCostRatio: function () { return housingCostRatio; },
+        getTributeCostRatio: function () { return tributeCostRatio; },
+        getNurseryCostRatio: function () { return nurseryCostRatio; },
+        getMaxLevel: function () {return maxLevel;},
+        getEquipmentCostRatio: function () {return equipmentCostRatio;},
+        getOtherWorkersFocusRatio: function () {return otherWorkersFocusRatio;},
+        getNumTrapsForAutoTrapping: function () {return numTrapsForAutoTrapping;},
+        getShieldCostRatio: function () {return shieldCostRatio;},
+        getLumberjackMultiplier: function () {return lumberjackMultiplier;},
+        getMaxWormholes: function () {return maxWormholes;}
+    };
+})();
+var constantsEndGame = (function () {
+    "use strict";
+    var runInterval = 1500,
+        minerMultiplier = 2,
+        trainerCostRatio = 0.1,
+        explorerCostRatio = 0.1,
+        minFoodOwned = 15,
+        minWoodOwned = 15,
+        minTrimpsOwned = 10,
+        minScienceOwned = 10,
+        housingCostRatio = 0.3,
+        gymCostRatio = 0.6,
+        maxGyms = 10000,
+        tributeCostRatio = 0.5,
+        nurseryCostRatio = 0.5,
+        maxLevel = 15,
+        equipmentCostRatio = 0.5,
+        otherWorkersFocusRatio = 0.5,
+        numTrapsForAutoTrapping = 10000,
+        shieldCostRatio = 0.05,
+        lumberjackMultiplier = 1,
         maxWormholes = 7;
     return {
         getRunInterval: function () { return runInterval; },
@@ -719,12 +766,20 @@ function CheckLateGame() {
     if (game.resources.trimps.owned < 1000) {
         lateGame = false;
         lateLateGame = false;
+        endGame = false;
         constants = constantsEarlyGame;
-    } else if (game.global.world >= lateLateGameZone && lateLateGame === false){
+    } else if (game.global.world >= endGameZone && endGameZone === false){
+        endGameZone = true;
+        lateLateGame = false;
+        lateGame = false;
+        constants = constantsEndGame;
+        ReallocateWorkers();
+    } else if (game.global.world >= lateLateGameZone && lateLateGame === false && endGame === false){
         lateLateGame = true;
+        lateGame = false;
         constants = constantsLateLateGame;
         ReallocateWorkers();
-    } else if (game.global.world >= lateGameZone && lateGame === false && lateLateGame === false){
+    } else if (game.global.world >= lateGameZone && lateGame === false && lateLateGame === false && endGame === false){
         lateGame = true;
         constants = constantsLateGame;
         ReallocateWorkers();
@@ -735,7 +790,10 @@ function CheckLateGame() {
 (function () {
     "use strict";
     var trappingSpan = CreateButtonForTrapping();
-    if (game.global.world >= lateLateGameZone) {
+    if (game.global.world >= endGameZone) {
+        endGame = true;
+        constants = constantsEndGame;
+    } else if (game.global.world >= lateLateGameZone) {
         lateLateGame = true;
         constants = constantsLateLateGame;
     } else if (game.global.world >= lateGameZone) {
