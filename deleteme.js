@@ -6,15 +6,10 @@ var autoFighting = false;   //Autofight on?
 var workersFocused = false;
 var workersFocusedOn;
 var workersMoved = [];
-var lateGame;
-var lateLateGame;
-var endGame;
-var lateGameZone = 45;
-var lateLateGameZone = 55;
-var endGameZone = 60;
 var constantsEarlyGame = (function () {
     "use strict";
-    var runInterval = 1500,
+    var zoneToStartAt = 0,
+        runInterval = 1500,
         minerMultiplier = 2,
         trainerCostRatio = 0.2,
         explorerCostRatio = 0.2,
@@ -33,8 +28,10 @@ var constantsEarlyGame = (function () {
         numTrapsForAutoTrapping = 10000,
         shieldCostRatio = 1,
         lumberjackMultiplier = 1,
-        maxWormholes = 7;
+        maxWormholes = 7,
+        shouldSkipHpEquipment = false;
     return {
+        getZoneToStartAt: function () { return zoneToStartAt; },
         getRunInterval: function () { return runInterval; },
         getTrainerCostRatio: function () { return trainerCostRatio; },
         getMinerMultiplier: function () { return minerMultiplier; },
@@ -54,12 +51,14 @@ var constantsEarlyGame = (function () {
         getNumTrapsForAutoTrapping: function () {return numTrapsForAutoTrapping;},
         getShieldCostRatio: function () {return shieldCostRatio;},
         getLumberjackMultiplier: function () {return lumberjackMultiplier;},
-        getMaxWormholes: function () {return maxWormholes;}
+        getMaxWormholes: function () {return maxWormholes;},
+        getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;}
     };
 })();
 var constantsLateGame = (function () {
     "use strict";
-    var runInterval = 1500,
+    var zoneToStartAt = 45,
+        runInterval = 1500,
         minerMultiplier = 2,
         trainerCostRatio = 0.2,
         explorerCostRatio = 0.2,
@@ -78,8 +77,10 @@ var constantsLateGame = (function () {
         numTrapsForAutoTrapping = 10000,
         shieldCostRatio = 0.05,
         lumberjackMultiplier = 6,
-        maxWormholes = 7;
+        maxWormholes = 7,
+        shouldSkipHpEquipment = false;
     return {
+        getZoneToStartAt: function () { return zoneToStartAt; },
         getRunInterval: function () { return runInterval; },
         getTrainerCostRatio: function () { return trainerCostRatio; },
         getMinerMultiplier: function () { return minerMultiplier; },
@@ -99,12 +100,14 @@ var constantsLateGame = (function () {
         getNumTrapsForAutoTrapping: function () {return numTrapsForAutoTrapping;},
         getShieldCostRatio: function () {return shieldCostRatio;},
         getLumberjackMultiplier: function () {return lumberjackMultiplier;},
-        getMaxWormholes: function () {return maxWormholes;}
+        getMaxWormholes: function () {return maxWormholes;},
+        getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;}
     };
 })();
 var constantsLateLateGame = (function () {
     "use strict";
-    var runInterval = 1500,
+    var zoneToStartAt = 55,
+        runInterval = 1500,
         minerMultiplier = 6,
         trainerCostRatio = 0.01,
         explorerCostRatio = 0.01,
@@ -123,8 +126,10 @@ var constantsLateLateGame = (function () {
         numTrapsForAutoTrapping = 10000,
         shieldCostRatio = 0.01,
         lumberjackMultiplier = 0.5, //half of farmers
-        maxWormholes = 7;
+        maxWormholes = 7,
+        shouldSkipHpEquipment = true;
     return {
+        getZoneToStartAt: function () { return zoneToStartAt; },
         getRunInterval: function () { return runInterval; },
         getTrainerCostRatio: function () { return trainerCostRatio; },
         getMinerMultiplier: function () { return minerMultiplier; },
@@ -144,12 +149,14 @@ var constantsLateLateGame = (function () {
         getNumTrapsForAutoTrapping: function () {return numTrapsForAutoTrapping;},
         getShieldCostRatio: function () {return shieldCostRatio;},
         getLumberjackMultiplier: function () {return lumberjackMultiplier;},
-        getMaxWormholes: function () {return maxWormholes;}
+        getMaxWormholes: function () {return maxWormholes;},
+        getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;}
     };
 })();
 var constantsEndGame = (function () {
     "use strict";
-    var runInterval = 1500,
+    var zoneToStartAt = 60,
+        runInterval = 1500,
         minerMultiplier = 2,
         trainerCostRatio = 0.1,
         explorerCostRatio = 0.1,
@@ -168,8 +175,10 @@ var constantsEndGame = (function () {
         numTrapsForAutoTrapping = 10000,
         shieldCostRatio = 0.05,
         lumberjackMultiplier = 1,
-        maxWormholes = 7;
+        maxWormholes = 7,
+        shouldSkipHpEquipment = false;
     return {
+        getZoneToStartAt: function () { return zoneToStartAt; },
         getRunInterval: function () { return runInterval; },
         getTrainerCostRatio: function () { return trainerCostRatio; },
         getMinerMultiplier: function () { return minerMultiplier; },
@@ -189,11 +198,13 @@ var constantsEndGame = (function () {
         getNumTrapsForAutoTrapping: function () {return numTrapsForAutoTrapping;},
         getShieldCostRatio: function () {return shieldCostRatio;},
         getLumberjackMultiplier: function () {return lumberjackMultiplier;},
-        getMaxWormholes: function () {return maxWormholes;}
+        getMaxWormholes: function () {return maxWormholes;},
+        getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;}
     };
 })();
-
-var constants = constantsEarlyGame;
+var constantsSets = [constantsEarlyGame, constantsLateGame, constantsLateLateGame, constantsEndGame];
+var constantsIndex;
+var constants;
 
 /**
  * @return {boolean} return.canAfford affordable respecting the ratio?
@@ -574,7 +585,7 @@ function BuyEquipment() {
                 document.getElementById(anEquipment).click();
             }
         } else if (game.equipment[anEquipment].level < lowestLevel) {
-            if (lateLateGame === true && typeof game.equipment[anEquipment].health !== 'undefined'){ //don't buy hp equips in late late game
+            if (constants.getShouldSkipHpEquipment() === true && typeof game.equipment[anEquipment].health !== 'undefined'){ //don't buy hp equips in late late game
                 continue;
             }
             lowestLevel = game.equipment[anEquipment].level;
@@ -591,7 +602,7 @@ function BuyEquipment() {
             continue;
         }
         if (CanBuyNonUpgrade(game.equipment[anEquipment], constants.getEquipmentCostRatio()) === true) {
-            if (lateLateGame === true && typeof game.equipment[anEquipment].health !== 'undefined'){ //don't buy hp equips in late late game
+            if (constants.getShouldSkipHpEquipment() === true && typeof game.equipment[anEquipment].health !== 'undefined'){ //don't buy hp equips in late late game
                 continue;
             }
             document.getElementById(anEquipment).click();
@@ -630,7 +641,7 @@ function BuyEquipmentUpgrades() {
     var costOfTwoLevels;
     for (upgrade in game.upgrades) {
         if (typeof game.upgrades[upgrade].prestiges !== 'undefined' && game.upgrades[upgrade].locked === 0) {
-            if (lateLateGame === true && typeof game.equipment[game.upgrades[upgrade].prestiges].health !== 'undefined'){ //don't buy hp equips in late late game
+            if (constants.getShouldSkipHpEquipment() === true && typeof game.equipment[game.upgrades[upgrade].prestiges].health !== 'undefined'){ //don't buy hp equips in late late game
                 continue;
             }
             if (CanAffordEquipmentUpgrade(upgrade) === false) {
@@ -764,24 +775,18 @@ function ReallocateWorkers() {
 function CheckLateGame() {
     "use strict";
     if (game.resources.trimps.owned < 1000) {
-        lateGame = false;
-        lateLateGame = false;
-        endGame = false;
-        constants = constantsEarlyGame;
-    } else if (game.global.world >= endGameZone && endGameZone === false){
-        endGameZone = true;
-        lateLateGame = false;
-        lateGame = false;
-        constants = constantsEndGame;
-        ReallocateWorkers();
-    } else if (game.global.world >= lateLateGameZone && lateLateGame === false && endGame === false){
-        lateLateGame = true;
-        lateGame = false;
-        constants = constantsLateLateGame;
-        ReallocateWorkers();
-    } else if (game.global.world >= lateGameZone && lateGame === false && lateLateGame === false && endGame === false){
-        lateGame = true;
-        constants = constantsLateGame;
+        constants = constantsSets[0];
+        constantsIndex = 0;
+        return;
+    }
+    if (constantsIndex === constantsSets.length - 1){ //check for last element
+        return;
+    }
+    var nextSet = constantsIndex + 1;
+    if (game.global.world >= constantsSets[nextSet].getZoneToStartAt())
+    {
+        constants = constantsSets[nextSet];
+        constantsIndex = nextSet;
         ReallocateWorkers();
     }
 }
@@ -790,17 +795,12 @@ function CheckLateGame() {
 (function () {
     "use strict";
     var trappingSpan = CreateButtonForTrapping();
-    if (game.global.world >= endGameZone) {
-        endGame = true;
-        constants = constantsEndGame;
-    } else if (game.global.world >= lateLateGameZone) {
-        lateLateGame = true;
-        constants = constantsLateLateGame;
-    } else if (game.global.world >= lateGameZone) {
-        lateGame = true;
-        constants = constantsLateGame;
-    } else{
-        constants = constantsEarlyGame;
+    var i;
+    for(i = 0; i < constantsSets.length; ++i){
+        if (game.global.world >= constantsSets[i].getZoneToStartAt()) {
+            constants = constantsSets[i];
+            constantsIndex = i;
+        }
     }
     setInterval(function () {
         //Main loop code
