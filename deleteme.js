@@ -164,7 +164,7 @@ var constantsEndGame = (function () {
         minWoodOwned = 15,
         minTrimpsOwned = 10,
         minScienceOwned = 10,
-        housingCostRatio = 0.3,
+        housingCostRatio = 0.1,
         gymCostRatio = 0.6,
         maxGyms = 10000,
         tributeCostRatio = 0.5,
@@ -756,6 +756,8 @@ function ReallocateWorkers() {
     var jobButton;
     var job;
 
+    workersFocused = false;
+    workersFocusedOn = "";
     game.global.firing = true;
     for (job in jobsToFire) {
         jobObj = game.jobs[jobsToFire[job]];
