@@ -30,7 +30,8 @@ var constantsEarlyGame = (function () {
         lumberjackMultiplier = 1,
         maxWormholes = 7,
         shouldSkipHpEquipment = false,
-        minimumWarpStations = 10;
+        minimumWarpStations = 10,
+        minimumEquipmentLevel = 5;
     return {
         getZoneToStartAt: function () { return zoneToStartAt; },
         getRunInterval: function () { return runInterval; },
@@ -54,7 +55,8 @@ var constantsEarlyGame = (function () {
         getLumberjackMultiplier: function () {return lumberjackMultiplier;},
         getMaxWormholes: function () {return maxWormholes;},
         getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
-        getMinimumWarpStations: function () {return minimumWarpStations;}
+        getMinimumWarpStations: function () {return minimumWarpStations;},
+        getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;}
     };
 })();
 var constantsLateGame = (function () {
@@ -81,7 +83,8 @@ var constantsLateGame = (function () {
         lumberjackMultiplier = 6,
         maxWormholes = 7,
         shouldSkipHpEquipment = false,
-        minimumWarpStations = 10;
+        minimumWarpStations = 10,
+        minimumEquipmentLevel = 5;
     return {
         getZoneToStartAt: function () { return zoneToStartAt; },
         getRunInterval: function () { return runInterval; },
@@ -105,7 +108,8 @@ var constantsLateGame = (function () {
         getLumberjackMultiplier: function () {return lumberjackMultiplier;},
         getMaxWormholes: function () {return maxWormholes;},
         getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
-        getMinimumWarpStations: function () {return minimumWarpStations;}
+        getMinimumWarpStations: function () {return minimumWarpStations;},
+        getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;}
     };
 })();
 var constantsLateLateGame = (function () {
@@ -132,7 +136,8 @@ var constantsLateLateGame = (function () {
         lumberjackMultiplier = 0.5, //half of farmers
         maxWormholes = 7,
         shouldSkipHpEquipment = true,
-        minimumWarpStations = 10;
+        minimumWarpStations = 10,
+        minimumEquipmentLevel = 5;
     return {
         getZoneToStartAt: function () { return zoneToStartAt; },
         getRunInterval: function () { return runInterval; },
@@ -156,7 +161,8 @@ var constantsLateLateGame = (function () {
         getLumberjackMultiplier: function () {return lumberjackMultiplier;},
         getMaxWormholes: function () {return maxWormholes;},
         getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
-        getMinimumWarpStations: function () {return minimumWarpStations;}
+        getMinimumWarpStations: function () {return minimumWarpStations;},
+        getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;}
     };
 })();
 var constantsEndGame = (function () {
@@ -183,7 +189,8 @@ var constantsEndGame = (function () {
         lumberjackMultiplier = 1,
         maxWormholes = 7,
         shouldSkipHpEquipment = false,
-        minimumWarpStations = 10;
+        minimumWarpStations = 10,
+        minimumEquipmentLevel = 5;
     return {
         getZoneToStartAt: function () { return zoneToStartAt; },
         getRunInterval: function () { return runInterval; },
@@ -207,7 +214,8 @@ var constantsEndGame = (function () {
         getLumberjackMultiplier: function () {return lumberjackMultiplier;},
         getMaxWormholes: function () {return maxWormholes;},
         getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
-        getMinimumWarpStations: function () {return minimumWarpStations;}
+        getMinimumWarpStations: function () {return minimumWarpStations;},
+        getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;}
     };
 })();
 var constantsSets = [constantsEarlyGame, constantsLateGame, constantsLateLateGame, constantsEndGame];
@@ -675,6 +683,9 @@ function BuyEquipmentUpgrades() {
                 }
             } else{
                 if (game.resources.metal.owned < costOfNextLevel){
+                    continue;
+                }
+                if (game.equipment[game.upgrades[upgrade].prestiges].level < constants.getMinimumEquipmentLevel()){
                     continue;
                 }
             }
