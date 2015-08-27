@@ -170,11 +170,11 @@ var constantsEndGame = (function () {
         minWoodOwned = 15,
         minTrimpsOwned = 10,
         minScienceOwned = 10,
-        housingCostRatio = 0.03,
+        housingCostRatio = 0.01,
         gymCostRatio = 0.6,
         maxGyms = 10000,
         tributeCostRatio = 0.7,
-        nurseryCostRatio = 0.25,
+        nurseryCostRatio = 0.20,
         maxLevel = 15,
         equipmentCostRatio = 0.5,
         otherWorkersFocusRatio = 0.5,
@@ -328,6 +328,9 @@ function ClickAllNonEquipmentUpgrades() {
     var upgrade;
     for (upgrade in game.upgrades) {
         if (upgrade === "Coordination" && game.resources.trimps.realMax() < game.resources.trimps.maxSoldiers * 3) {
+            continue;
+        }
+        if (upgrade === "Gigastation" && game.buildings.Warpstation.owned < constants.getMinimumWarpStations()){
             continue;
         }
         if (typeof game.upgrades[upgrade].prestiges === 'undefined' && game.upgrades[upgrade].locked === 0) {
