@@ -335,9 +335,6 @@ function ClickAllNonEquipmentUpgrades() {
     "use strict";
     var upgrade;
     for (upgrade in game.upgrades) {
-        if (upgrade === "Coordination" && game.resources.trimps.realMax() < game.resources.trimps.maxSoldiers * 3) {
-            continue;
-        }
         if (upgrade === "Gigastation" && game.buildings.Warpstation.owned < constants.getMinimumWarpStations()){
             continue;
         }
@@ -433,9 +430,6 @@ function UpgradeNonEquipment() {
     ClickAllNonEquipmentUpgrades();
     for (upgrade in game.upgrades) {
         if (typeof game.upgrades[upgrade].prestiges === 'undefined' && game.upgrades[upgrade].locked === 0) {
-            if (upgrade === "Coordination" && game.resources.trimps.realMax() < game.resources.trimps.maxSoldiers * 3){
-                continue;
-            }
             if (upgrade === "Gigastation" && game.buildings.Warpstation.owned < constants.getMinimumWarpStations()){
                 continue;
             }
