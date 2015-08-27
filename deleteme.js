@@ -189,7 +189,7 @@ var constantsEndGame = (function () {
         lumberjackMultiplier = 1,
         maxWormholes = 7,
         shouldSkipHpEquipment = false,
-        minimumWarpStations = 10,
+        minimumWarpStations = 5,
         minimumEquipmentLevel = 5;
     return {
         getZoneToStartAt: function () { return zoneToStartAt; },
