@@ -29,7 +29,8 @@ var constantsEarlyGame = (function () {
         shieldCostRatio = 1,
         lumberjackMultiplier = 1,
         maxWormholes = 7,
-        shouldSkipHpEquipment = false;
+        shouldSkipHpEquipment = false,
+        minimumWarpStations = 10;
     return {
         getZoneToStartAt: function () { return zoneToStartAt; },
         getRunInterval: function () { return runInterval; },
@@ -52,7 +53,8 @@ var constantsEarlyGame = (function () {
         getShieldCostRatio: function () {return shieldCostRatio;},
         getLumberjackMultiplier: function () {return lumberjackMultiplier;},
         getMaxWormholes: function () {return maxWormholes;},
-        getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;}
+        getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
+        getMinimumWarpStations: function () {return minimumWarpStations;}
     };
 })();
 var constantsLateGame = (function () {
@@ -78,7 +80,8 @@ var constantsLateGame = (function () {
         shieldCostRatio = 0.05,
         lumberjackMultiplier = 6,
         maxWormholes = 7,
-        shouldSkipHpEquipment = false;
+        shouldSkipHpEquipment = false,
+        minimumWarpStations = 10;
     return {
         getZoneToStartAt: function () { return zoneToStartAt; },
         getRunInterval: function () { return runInterval; },
@@ -101,7 +104,8 @@ var constantsLateGame = (function () {
         getShieldCostRatio: function () {return shieldCostRatio;},
         getLumberjackMultiplier: function () {return lumberjackMultiplier;},
         getMaxWormholes: function () {return maxWormholes;},
-        getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;}
+        getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
+        getMinimumWarpStations: function () {return minimumWarpStations;}
     };
 })();
 var constantsLateLateGame = (function () {
@@ -127,7 +131,8 @@ var constantsLateLateGame = (function () {
         shieldCostRatio = 0.01,
         lumberjackMultiplier = 0.5, //half of farmers
         maxWormholes = 7,
-        shouldSkipHpEquipment = true;
+        shouldSkipHpEquipment = true,
+        minimumWarpStations = 10;
     return {
         getZoneToStartAt: function () { return zoneToStartAt; },
         getRunInterval: function () { return runInterval; },
@@ -150,7 +155,8 @@ var constantsLateLateGame = (function () {
         getShieldCostRatio: function () {return shieldCostRatio;},
         getLumberjackMultiplier: function () {return lumberjackMultiplier;},
         getMaxWormholes: function () {return maxWormholes;},
-        getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;}
+        getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
+        getMinimumWarpStations: function () {return minimumWarpStations;}
     };
 })();
 var constantsEndGame = (function () {
@@ -173,10 +179,11 @@ var constantsEndGame = (function () {
         equipmentCostRatio = 0.5,
         otherWorkersFocusRatio = 0.5,
         numTrapsForAutoTrapping = 10000,
-        shieldCostRatio = 0.05,
+        shieldCostRatio = 0.01,
         lumberjackMultiplier = 1,
         maxWormholes = 7,
-        shouldSkipHpEquipment = false;
+        shouldSkipHpEquipment = false,
+        minimumWarpStations = 10;
     return {
         getZoneToStartAt: function () { return zoneToStartAt; },
         getRunInterval: function () { return runInterval; },
@@ -199,7 +206,8 @@ var constantsEndGame = (function () {
         getShieldCostRatio: function () {return shieldCostRatio;},
         getLumberjackMultiplier: function () {return lumberjackMultiplier;},
         getMaxWormholes: function () {return maxWormholes;},
-        getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;}
+        getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
+        getMinimumWarpStations: function () {return minimumWarpStations;}
     };
 })();
 var constantsSets = [constantsEarlyGame, constantsLateGame, constantsLateLateGame, constantsEndGame];
@@ -230,6 +238,7 @@ function CanBuyNonUpgrade(nonUpgradeItem, ratio) {
 
 function AssignFreeWorkers() {
     "use strict";
+    var trimpsAssigned = 0;
     var trimps = game.resources.trimps;
     if (trimps.owned === 0) {
         return;
@@ -241,7 +250,7 @@ function AssignFreeWorkers() {
     if (free > 0){
         document.getElementById("tab1").click();    //hire 1 at a time
     }
-    while (free > 0 && Math.floor(game.resources.trimps.owned) > game.resources.trimps.employed) {
+    while (free > 0 && Math.floor(game.resources.trimps.owned) > game.resources.trimps.employed && trimpsAssigned < 1000) {
         trimps = game.resources.trimps;
         free = (Math.ceil(trimps.realMax() / 2) - trimps.employed);
         if (free === 0) {
@@ -267,6 +276,7 @@ function AssignFreeWorkers() {
         } else {
             return; //Can't afford anything!
         }
+        trimpsAssigned++;
     }
     tooltip('hide');
 }
@@ -415,6 +425,9 @@ function UpgradeNonEquipment() {
             if (upgrade === "Coordination" && game.resources.trimps.realMax() < game.resources.trimps.maxSoldiers * 3){
                 continue;
             }
+            if (upgrade === "Gigastation" && game.buildings.Warpstation.owned < constants.getMinimumWarpStations()){
+                continue;
+            }
             for (aResource in game.upgrades[upgrade].cost.resources) {
                 needed = game.upgrades[upgrade].cost.resources[aResource];
                 if (typeof needed[1] !== 'undefined') {
@@ -558,6 +571,10 @@ function BuyBuildings() {
     if (game.buildings.Collector.locked === 0 &&
         CanBuyNonUpgrade(game.buildings.Collector, 1) === true) { //Buy immediately(1 ratio)
         document.getElementById("Collector").click();
+    }
+    if (game.buildings.Warpstation.locked === 0 &&
+        CanBuyNonUpgrade(game.buildings.Warpstation, 1) === true) { //Buy immediately(1 ratio)
+        document.getElementById("Warpstation").click();
     }
     tooltip('hide');
 }
