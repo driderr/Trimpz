@@ -31,7 +31,8 @@ var constantsEarlyGame = (function () {
         maxWormholes = 7,
         shouldSkipHpEquipment = false,
         minimumWarpStations = 10,
-        minimumEquipmentLevel = 5;
+        minimumEquipmentLevel = 5,
+        shouldRunMaps = true;
     return {
         getZoneToStartAt: function () { return zoneToStartAt; },
         getRunInterval: function () { return runInterval; },
@@ -56,7 +57,8 @@ var constantsEarlyGame = (function () {
         getMaxWormholes: function () {return maxWormholes;},
         getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
         getMinimumWarpStations: function () {return minimumWarpStations;},
-        getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;}
+        getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;},
+        getShouldRunMaps: function () {return shouldRunMaps;}
     };
 })();
 var constantsLateGame = (function () {
@@ -84,7 +86,8 @@ var constantsLateGame = (function () {
         maxWormholes = 7,
         shouldSkipHpEquipment = false,
         minimumWarpStations = 10,
-        minimumEquipmentLevel = 5;
+        minimumEquipmentLevel = 5,
+        shouldRunMaps = true;
     return {
         getZoneToStartAt: function () { return zoneToStartAt; },
         getRunInterval: function () { return runInterval; },
@@ -109,7 +112,8 @@ var constantsLateGame = (function () {
         getMaxWormholes: function () {return maxWormholes;},
         getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
         getMinimumWarpStations: function () {return minimumWarpStations;},
-        getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;}
+        getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;},
+        getShouldRunMaps: function () {return shouldRunMaps;}
     };
 })();
 var constantsLateLateGame = (function () {
@@ -137,7 +141,8 @@ var constantsLateLateGame = (function () {
         maxWormholes = 7,
         shouldSkipHpEquipment = true,
         minimumWarpStations = 10,
-        minimumEquipmentLevel = 5;
+        minimumEquipmentLevel = 5,
+        shouldRunMaps = false;
     return {
         getZoneToStartAt: function () { //don't start until enough block since last constants should be getting gyms
             if (game.global.soldierCurrentBlock > 750 * 1000000000000000) { //need about 750Qa to beat 59 boss
@@ -168,7 +173,8 @@ var constantsLateLateGame = (function () {
         getMaxWormholes: function () {return maxWormholes;},
         getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
         getMinimumWarpStations: function () {return minimumWarpStations;},
-        getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;}
+        getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;},
+        getShouldRunMaps: function () {return shouldRunMaps;}
     };
 })();
 var constantsEndGame = (function () {
@@ -196,7 +202,8 @@ var constantsEndGame = (function () {
         maxWormholes = 7,
         shouldSkipHpEquipment = false,
         minimumWarpStations = 5,
-        minimumEquipmentLevel = 5;
+        minimumEquipmentLevel = 5,
+        shouldRunMaps = true;
     return {
         getZoneToStartAt: function () { return zoneToStartAt; },
         getRunInterval: function () { return runInterval; },
@@ -221,7 +228,8 @@ var constantsEndGame = (function () {
         getMaxWormholes: function () {return maxWormholes;},
         getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
         getMinimumWarpStations: function () {return minimumWarpStations;},
-        getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;}
+        getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;},
+        getShouldRunMaps: function () {return shouldRunMaps;}
     };
 })();
 var constantsSets = [constantsEarlyGame, constantsLateGame, constantsLateLateGame, constantsEndGame];
@@ -769,7 +777,7 @@ function RunMaps() {
             return;
         }
     }
-    if (itemsAvailableInNewMap > 0){
+    if (itemsAvailableInNewMap > 0 && constants.getShouldRunMaps() === true){
         RunNewMap();
         return;
     }
