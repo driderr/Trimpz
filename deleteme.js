@@ -700,17 +700,20 @@ function BuyMetalEquipment() {  //ignoring max level, ignoring min level, buying
     if (bestEquipGainPerMetal === 0 && bestUpgradeGainPerMetal === 0)   //nothing to buy
         return;
     var boughtSomething = false;
+    var time;
     if (bestEquipGainPerMetal > bestUpgradeGainPerMetal){
         if (CanBuyNonUpgrade(game.equipment[bestEquipment], constants.getEquipmentCostRatio()) === true) {
             document.getElementById(bestEquipment).click();
-            console.debug("Best buy " + bestEquipment);
+            time = new Date();
+            console.debug("Best buy " + bestEquipment + time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds());
             boughtSomething = true;
         }
     } else {
         cost = Math.ceil(getNextPrestigeCost(upgrade) * (Math.pow(1 - game.portal.Artisanistry.modifier, game.portal.Artisanistry.level)));
         if (CanAffordEquipmentUpgrade(upgrade) === true && cost < game.resources.metal.owned * constants.getEquipmentCostRatio()) {
             document.getElementById(bestUpgrade).click();
-            console.debug("Best buy " + bestUpgrade);
+            time = new Date();
+            console.debug("Best buy " + bestUpgrade + time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds());
             boughtSomething = true;
         }
     }
@@ -721,7 +724,8 @@ function BuyMetalEquipment() {  //ignoring max level, ignoring min level, buying
         }
         if (CanBuyNonUpgrade(game.equipment[anEquipment], 0.1) === true) {
             document.getElementById(anEquipment).click();
-            console.debug("Low cost buy for " + anEquipment);
+            time = new Date();
+            console.debug("Low cost buy for " + anEquipment + time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds());
         }
     }
     for (upgrade in game.upgrades) {
@@ -733,7 +737,8 @@ function BuyMetalEquipment() {  //ignoring max level, ignoring min level, buying
             cost = Math.ceil(getNextPrestigeCost(upgrade) * (Math.pow(1 - game.portal.Artisanistry.modifier, game.portal.Artisanistry.level)));
             if (CanAffordEquipmentUpgrade(upgrade) === true && cost < game.resources.metal.owned * 0.1) {
                 document.getElementById(upgrade).click();
-                console.debug("Low cost buy for " + upgrade);
+                time = new Date();
+                console.debug("Low cost buy for " + upgrade + time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds());
             }
         }
     }
