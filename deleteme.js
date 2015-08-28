@@ -709,8 +709,7 @@ function BuyMetalEquipment() {  //ignoring max level, ignoring min level, buying
             boughtSomething = true;
         }
     } else {
-        cost = Math.ceil(getNextPrestigeCost(upgrade) * (Math.pow(1 - game.portal.Artisanistry.modifier, game.portal.Artisanistry.level)));
-        if (CanAffordEquipmentUpgrade(upgrade) === true && cost < game.resources.metal.owned * constants.getEquipmentCostRatio()) {
+        if (CanAffordEquipmentUpgrade(upgrade) === true && bestUpgradeCost < game.resources.metal.owned * constants.getEquipmentCostRatio()) {
             document.getElementById(bestUpgrade).click();
             time = new Date();
             console.debug("Best buy " + bestUpgrade + time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds());
