@@ -78,7 +78,7 @@ var constantsLateGame = (function () {
         tributeCostRatio = 0.8,
         nurseryCostRatio = 0.15,
         maxLevel = 15,
-        equipmentCostRatio = 0.2,
+        equipmentCostRatio = 0.8,
         otherWorkersFocusRatio = 0.5,
         numTrapsForAutoTrapping = 10000,
         shieldCostRatio = 0.05,
@@ -660,7 +660,7 @@ function BuyMetalEquipment() {  //ignoring max level, ignoring min level, buying
         cost = GetEquipmentPrice(currentEquip);
         multiplier = currentEquip.healthCalculated ? 1/8 : 1;
         gainPerMetal = (currentEquip.healthCalculated || currentEquip.attackCalculated) * multiplier / cost;
-        DebugHpToAtkRatio.push([anEquipment, gainPerMetal * 1000]);
+        DebugHpToAtkRatio.push([anEquipment, gainPerMetal * 1000000]);
         if (gainPerMetal > bestEquipGainPerMetal) {
             bestEquipGainPerMetal = gainPerMetal;
             bestEquipment = anEquipment;
@@ -688,6 +688,7 @@ function BuyMetalEquipment() {  //ignoring max level, ignoring min level, buying
             stat = (typeof currentEquip.health !== 'undefined') ? "health" : "attack";
             gain = Math.round(currentEquip[stat] * Math.pow(1.19, ((currentEquip.prestige) * game.global.prestige[stat]) + 1));
             gainPerMetal = gain * multiplier / cost;
+            DebugHpToAtkRatio.push([upgrade, gainPerMetal * 1000000]);
             if (gainPerMetal > bestUpgradeGainPerMetal) {
                 bestUpgradeGainPerMetal = gainPerMetal;
                 bestUpgrade = upgrade;
@@ -698,16 +699,20 @@ function BuyMetalEquipment() {  //ignoring max level, ignoring min level, buying
     }
     if (bestEquipGainPerMetal === 0 && bestUpgradeGainPerMetal === 0)   //nothing to buy
         return;
+    var boughtSomething = false;
     if (bestEquipGainPerMetal > bestUpgradeGainPerMetal){
         if (CanBuyNonUpgrade(game.equipment[bestEquipment], constants.getEquipmentCostRatio()) === true) {
             document.getElementById(bestEquipment).click();
+            console.debug("Best buy " + bestEquipment);
+            boughtSomething = true;
         }
     } else {
         if (CanAffordEquipmentUpgrade(upgrade) === true && CanBuyNonUpgrade(bestUpgradesEquipment, constants.getEquipmentCostRatio()) === true) {
             document.getElementById(bestUpgrade).click();
+            console.debug("Best buy " + bestUpgrade);
+            boughtSomething = true;
         }
     }
-
     for (anEquipment in game.equipment) {
         currentEquip = game.equipment[anEquipment];
         if (currentEquip.locked === 1 || anEquipment === "Shield" || constants.getShouldSkipHpEquipment() === true && typeof currentEquip.health !== 'undefined') {
@@ -715,6 +720,26 @@ function BuyMetalEquipment() {  //ignoring max level, ignoring min level, buying
         }
         if (CanBuyNonUpgrade(game.equipment[anEquipment], 0.1) === true) {
             document.getElementById(anEquipment).click();
+            console.debug("Low cost buy for " + anEquipment);
+        }
+    }
+    for (upgrade in game.upgrades) {
+        currentUpgrade = game.upgrades[upgrade];
+        if (typeof currentUpgrade.prestiges !== 'undefined' && currentUpgrade.locked === 0 && upgrade !== "Supershield") {
+            if (constants.getShouldSkipHpEquipment() === true && typeof currentEquip.health !== 'undefined') { //don't buy hp equips in late late game
+                continue;
+            }
+            cost = Math.ceil(getNextPrestigeCost(upgrade) * (Math.pow(1 - game.portal.Artisanistry.modifier, game.portal.Artisanistry.level)));
+            if (CanAffordEquipmentUpgrade(upgrade) === true && cost < game.resources.metal.owned * 0.1) {
+                document.getElementById(upgrade).click();
+                console.debug("Low cost buy for " + upgrade);
+            }
+        }
+    }
+    var entry;
+    if (boughtSomething === true){
+        for (entry in DebugHpToAtkRatio){
+            console.debug(DebugHpToAtkRatio[entry][0] + ":" + DebugHpToAtkRatio[entry][1]);
         }
     }
     tooltip('hide');
