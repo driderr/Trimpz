@@ -72,7 +72,7 @@ var constantsLateGame = (function () {
         minScienceOwned = 10,
         housingCostRatio = 0.1,
         gymCostRatio = 0.95,
-        maxGyms = 160,
+        maxGyms = 170,
         tributeCostRatio = 0.8,
         nurseryCostRatio = 0.15,
         maxLevel = 15,
@@ -116,7 +116,7 @@ var constantsLateLateGame = (function () {
     "use strict";
     var zoneToStartAt = 55,
         runInterval = 1500,
-        minerMultiplier = 6,
+        minerMultiplier = 1,
         trainerCostRatio = 0.01,
         explorerCostRatio = 0.01,
         minFoodOwned = 15,
@@ -125,7 +125,7 @@ var constantsLateLateGame = (function () {
         minScienceOwned = 10,
         housingCostRatio = 0.05,
         gymCostRatio = 0.8,
-        maxGyms = 160,
+        maxGyms = 170,
         tributeCostRatio = 0.9,
         nurseryCostRatio = 0.01,
         maxLevel = 15,
@@ -133,13 +133,19 @@ var constantsLateLateGame = (function () {
         otherWorkersFocusRatio = 0.5,
         numTrapsForAutoTrapping = 10000,
         shieldCostRatio = 0.01,
-        lumberjackMultiplier = 0.5, //half of farmers
+        lumberjackMultiplier = 3,
         maxWormholes = 7,
         shouldSkipHpEquipment = true,
         minimumWarpStations = 10,
         minimumEquipmentLevel = 5;
     return {
-        getZoneToStartAt: function () { return zoneToStartAt; },
+        getZoneToStartAt: function () { //don't start until enough block since last constants should be getting gyms
+            if (game.global.soldierCurrentBlock > 750 * 1000000000000000) { //need about 750Qa to beat 59 boss
+                return zoneToStartAt; //enough block, begin!
+            } else {
+                return constantsEndGame.getZoneToStartAt(); //not enough block, but need to start next constants if too late
+            }
+        },
         getRunInterval: function () { return runInterval; },
         getTrainerCostRatio: function () { return trainerCostRatio; },
         getMinerMultiplier: function () { return minerMultiplier; },
