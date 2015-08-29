@@ -584,7 +584,7 @@ function BuyBuildings() {
     BuyBuilding("Hotel", constants.getHousingCostRatio());
     BuyBuilding("Resort", constants.getHousingCostRatio());
     BuyBuilding("Gateway", 1);
-    BuyBuilding("Wormhole", constants.getMaxWormholes());
+    BuyBuilding("Wormhole", 1, constants.getMaxWormholes());
     BuyBuilding("Collector", 1);
     BuyBuilding("Warpstation", 1);
     tooltip('hide');
