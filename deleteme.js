@@ -30,7 +30,7 @@ var constantsEarlyGame = (function () {
         lumberjackMultiplier = 1,
         maxWormholes = 7,
         shouldSkipHpEquipment = false,
-        minimumWarpStations = 10,
+        minimumWarpStations = 20,
         minimumEquipmentLevel = 5,
         shouldRunMaps = true;
     return {
@@ -85,7 +85,7 @@ var constantsLateGame = (function () {
         lumberjackMultiplier = 4,
         maxWormholes = 7,
         shouldSkipHpEquipment = false,
-        minimumWarpStations = 10,
+        minimumWarpStations = 20,
         minimumEquipmentLevel = 5,
         shouldRunMaps = true;
     return {
@@ -140,7 +140,7 @@ var constantsLateLateGame = (function () {
         lumberjackMultiplier = 1,
         maxWormholes = 7,
         shouldSkipHpEquipment = true,
-        minimumWarpStations = 10,
+        minimumWarpStations = 20,
         minimumEquipmentLevel = 5,
         shouldRunMaps = false;
     return {
@@ -197,10 +197,10 @@ var constantsEndGame = (function () {
         otherWorkersFocusRatio = 0.5,
         numTrapsForAutoTrapping = 10000,
         shieldCostRatio = 0.01,
-        lumberjackMultiplier = 1,
+        lumberjackMultiplier = 0.3,
         maxWormholes = 7,
         shouldSkipHpEquipment = false,
-        minimumWarpStations = 5,
+        minimumWarpStations = 20,
         minimumEquipmentLevel = 5,
         shouldRunMaps = true;
     return {
@@ -257,7 +257,7 @@ function CanBuyNonUpgrade(nonUpgradeItem, ratio) {
     return true;
 }
 
-function GetEquipmentPrice(nonUpgradeItem) {
+function GetNonUpgradePrice(nonUpgradeItem) {
     "use strict";
     var aResource;
     var needed;
@@ -585,7 +585,9 @@ function BuyBuildings() {
     BuyBuilding("Resort", constants.getHousingCostRatio());
     BuyBuilding("Gateway", 1);
     BuyBuilding("Wormhole", 1, constants.getMaxWormholes());
-    BuyBuilding("Collector", 1);
+    if (game.buildings.Warpstation.locked === 1 || GetNonUpgradePrice(game.buildings.Warpstation) < GetNonUpgradePrice(game.buildings.Collector) * 2) {
+        BuyBuilding("Collector", 1);
+    }
     BuyBuilding("Warpstation", 1);
     tooltip('hide');
 }
@@ -633,7 +635,7 @@ function FindBestEquipmentToLevel(debugHpToAtkRatio) {
         if (currentEquip.locked === 1 || anEquipment === "Shield" || (constants.getShouldSkipHpEquipment() === true && typeof currentEquip.health !== 'undefined')) {
             continue;
         }
-        cost = GetEquipmentPrice(currentEquip);
+        cost = GetNonUpgradePrice(currentEquip);
         multiplier = currentEquip.healthCalculated ? 1 / 8 : 1;
         gainPerMetal = (currentEquip.healthCalculated || currentEquip.attackCalculated) * multiplier / cost;
         debugHpToAtkRatio.push([anEquipment, gainPerMetal * 1000000]);
@@ -719,7 +721,7 @@ function BuyCheapEquipment(timeStr) {
         if (currentEquip.locked === 1 || anEquipment === "Shield" || (constants.getShouldSkipHpEquipment() === true && typeof currentEquip.health !== 'undefined')) {
             continue;
         }
-        if (CanBuyNonUpgrade(game.equipment[anEquipment], 0.1) === true) {
+        if (CanBuyNonUpgrade(game.equipment[anEquipment], 0.05) === true) {
             document.getElementById(anEquipment).click();
             console.debug("Low cost buy for " + anEquipment + timeStr);
         }
