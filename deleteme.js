@@ -6,6 +6,7 @@ var autoFighting = false;   //Autofight on?
 var workersFocused = false;
 var workersFocusedOn;
 var workersMoved = [];
+var skipShieldBlock = true;
 var constantsEarlyGame = (function () {
     "use strict";
     var zoneToStartAt = 0,
@@ -365,6 +366,9 @@ function ClickAllNonEquipmentUpgrades() {
         if (upgrade === "Gigastation" && game.buildings.Warpstation.owned < constants.getMinimumWarpStations()){
             continue;
         }
+        if (skipShieldBlock === true && upgrade === "Shieldblock"){
+            continue;
+        }
         if (typeof game.upgrades[upgrade].prestiges === 'undefined' && game.upgrades[upgrade].locked === 0) {
             document.getElementById(upgrade).click();  //Upgrade!
         }
@@ -458,6 +462,9 @@ function UpgradeNonEquipment() {
     for (upgrade in game.upgrades) {
         if (typeof game.upgrades[upgrade].prestiges === 'undefined' && game.upgrades[upgrade].locked === 0) {
             if (upgrade === "Gigastation" && game.buildings.Warpstation.owned < constants.getMinimumWarpStations()){
+                continue;
+            }
+            if (skipShieldBlock === true && upgrade === "Shieldblock"){
                 continue;
             }
             for (aResource in game.upgrades[upgrade].cost.resources) {
