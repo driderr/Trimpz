@@ -108,8 +108,18 @@ var constantsLateGame = (function () {
         getEquipmentCostRatio: function () {return equipmentCostRatio;},
         getOtherWorkersFocusRatio: function () {return otherWorkersFocusRatio;},
         getNumTrapsForAutoTrapping: function () {return numTrapsForAutoTrapping;},
-        getShieldCostRatio: function () {return shieldCostRatio;},
-        getLumberjackMultiplier: function () {return lumberjackMultiplier;},
+        getShieldCostRatio: function () {
+            if (skipShieldBlock === false) {
+                return shieldCostRatio;
+            }
+            return 0.6;
+        },
+        getLumberjackMultiplier: function () {
+            if (skipShieldBlock === false) {
+                return lumberjackMultiplier;
+            }
+            return 1;
+        },
         getMaxWormholes: function () {return maxWormholes;},
         getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
         getMinimumWarpStations: function () {return minimumWarpStations;},
@@ -168,7 +178,12 @@ var constantsLateLateGame = (function () {
         getEquipmentCostRatio: function () {return equipmentCostRatio;},
         getOtherWorkersFocusRatio: function () {return otherWorkersFocusRatio;},
         getNumTrapsForAutoTrapping: function () {return numTrapsForAutoTrapping;},
-        getShieldCostRatio: function () {return shieldCostRatio;},
+        getShieldCostRatio: function () {
+            if (skipShieldBlock === false) {
+                return shieldCostRatio;
+            }
+            return 0.6;
+        },
         getLumberjackMultiplier: function () {return lumberjackMultiplier;},
         getMaxWormholes: function () {return maxWormholes;},
         getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
@@ -223,8 +238,18 @@ var constantsEndGame = (function () {
         getEquipmentCostRatio: function () {return equipmentCostRatio;},
         getOtherWorkersFocusRatio: function () {return otherWorkersFocusRatio;},
         getNumTrapsForAutoTrapping: function () {return numTrapsForAutoTrapping;},
-        getShieldCostRatio: function () {return shieldCostRatio;},
-        getLumberjackMultiplier: function () {return lumberjackMultiplier;},
+        getShieldCostRatio: function () {
+            if (skipShieldBlock === false) {
+                return shieldCostRatio;
+            }
+            return 0.6;
+        },
+        getLumberjackMultiplier: function () {
+            if (skipShieldBlock === false) {
+                return lumberjackMultiplier;
+            }
+            return 1;
+        },
         getMaxWormholes: function () {return maxWormholes;},
         getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
         getMinimumWarpStations: function () {return minimumWarpStations;},
