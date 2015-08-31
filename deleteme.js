@@ -114,12 +114,7 @@ var constantsLateGame = (function () {
             }
             return 0.6;
         },
-        getLumberjackMultiplier: function () {
-            if (skipShieldBlock === false) {
-                return lumberjackMultiplier;
-            }
-            return 1;
-        },
+        getLumberjackMultiplier: function () {return lumberjackMultiplier;},
         getMaxWormholes: function () {return maxWormholes;},
         getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
         getMinimumWarpStations: function () {return minimumWarpStations;},
@@ -843,10 +838,10 @@ function GotoMapsScreen() {
 function RunNewMap() {
     "use strict";
     var newMap;
-    GotoMapsScreen();
     var size = 9;
     var difficulty = 9;
 
+    GotoMapsScreen();
     document.getElementById("difficultyAdvMapsRange").value = difficulty;
     adjustMap('difficulty', difficulty);
     document.getElementById("sizeAdvMapsRange").value = size;
