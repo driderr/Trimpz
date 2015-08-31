@@ -1,4 +1,4 @@
-/*global game,tooltip,resolvePow,getNextPrestigeCost,adjustMap,updateMapCost,addSpecials,debug*/
+/*global game,tooltip,resolvePow,getNextPrestigeCost,adjustMap,updateMapCost,addSpecials*/
 /*jslint plusplus: true */
 var openTrapsForDefault;    //Open traps as default action?
 var trimpz = 0;             //"Trimpz" running indicator
@@ -7,6 +7,8 @@ var workersFocused = false;
 var workersFocusedOn;
 var workersMoved = [];
 var skipShieldBlock = true;
+var mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50]; //removed from array when done, reset on portal or refresh
+var uniqueMaps = ["The Block", "The Wall",  "Dimension of Anger", "Trimple Of Doom"];
 var constantsEarlyGame = (function () {
     "use strict";
     var zoneToStartAt = 0,
@@ -32,8 +34,7 @@ var constantsEarlyGame = (function () {
         maxWormholes = 0,
         shouldSkipHpEquipment = false,
         minimumWarpStations = 20,
-        minimumEquipmentLevel = 5,
-        shouldRunMaps = true;
+        minimumEquipmentLevel = 5;
     return {
         getZoneToStartAt: function () { return zoneToStartAt; },
         getRunInterval: function () { return runInterval; },
@@ -58,8 +59,7 @@ var constantsEarlyGame = (function () {
         getMaxWormholes: function () {return maxWormholes;},
         getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
         getMinimumWarpStations: function () {return minimumWarpStations;},
-        getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;},
-        getShouldRunMaps: function () {return shouldRunMaps;}
+        getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;}
     };
 })();
 var constantsLateGame = (function () {
@@ -87,8 +87,7 @@ var constantsLateGame = (function () {
         maxWormholes = 0,
         shouldSkipHpEquipment = false,
         minimumWarpStations = 20,
-        minimumEquipmentLevel = 5,
-        shouldRunMaps = true;
+        minimumEquipmentLevel = 5;
     return {
         getZoneToStartAt: function () { return zoneToStartAt; },
         getRunInterval: function () { return runInterval; },
@@ -118,8 +117,7 @@ var constantsLateGame = (function () {
         getMaxWormholes: function () {return maxWormholes;},
         getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
         getMinimumWarpStations: function () {return minimumWarpStations;},
-        getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;},
-        getShouldRunMaps: function () {return shouldRunMaps;}
+        getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;}
     };
 })();
 var constantsLateLateGame = (function () {
@@ -147,8 +145,7 @@ var constantsLateLateGame = (function () {
         maxWormholes = 0,
         shouldSkipHpEquipment = true,
         minimumWarpStations = 20,
-        minimumEquipmentLevel = 5,
-        shouldRunMaps = false;
+        minimumEquipmentLevel = 5;
     return {
         getZoneToStartAt: function () { //don't start until enough block since last constants should be getting gyms
             if (game.global.soldierCurrentBlock > 750 * 1000000000000000) { //need about 750Qa to beat 59 boss
@@ -183,8 +180,7 @@ var constantsLateLateGame = (function () {
         getMaxWormholes: function () {return maxWormholes;},
         getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
         getMinimumWarpStations: function () {return minimumWarpStations;},
-        getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;},
-        getShouldRunMaps: function () {return shouldRunMaps;}
+        getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;}
     };
 })();
 var constantsEndGame = (function () {
@@ -212,8 +208,7 @@ var constantsEndGame = (function () {
         maxWormholes = 0,
         shouldSkipHpEquipment = false,
         minimumWarpStations = 20,
-        minimumEquipmentLevel = 5,
-        shouldRunMaps = true;
+        minimumEquipmentLevel = 5;
     return {
         getZoneToStartAt: function () { return zoneToStartAt; },
         getRunInterval: function () { return runInterval; },
@@ -248,8 +243,7 @@ var constantsEndGame = (function () {
         getMaxWormholes: function () {return maxWormholes;},
         getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
         getMinimumWarpStations: function () {return minimumWarpStations;},
-        getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;},
-        getShouldRunMaps: function () {return shouldRunMaps;}
+        getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;}
     };
 })();
 var constantsSets = [constantsEarlyGame, constantsLateGame, constantsLateLateGame, constantsEndGame];
@@ -835,7 +829,7 @@ function GotoMapsScreen() {
     }
 }
 
-function RunNewMap() {
+function RunNewMap(zoneToCreate) {
     "use strict";
     var newMap;
     var size = 9;
@@ -846,6 +840,9 @@ function RunNewMap() {
     adjustMap('difficulty', difficulty);
     document.getElementById("sizeAdvMapsRange").value = size;
     adjustMap('size', size);
+    if (typeof zoneToCreate !== 'undefined') {
+        document.getElementById("mapLevelInput").value = zoneToCreate;
+    }
     var cost = updateMapCost(true);
     while (cost > game.resources.fragments.owned){
         if (size === 1){
@@ -882,24 +879,81 @@ function RunWorld() {
 function RunMaps() {
     "use strict";
     var map;
+    var theMap;
     var itemsAvailable;
+
     if (game.global.world < 7 || game.global.mapsActive === true){ //no map ability(wait one) or already running a map(repeat should be off)
         return;
     }
-    var itemsAvailableInNewMap = addSpecials(true,true,{ id: "map999", name: "My Map", location: "Sea", clears: 0, level: game.global.world, difficulty: 1.11, size: 40, loot: 1.2, noRecycle: false });
-    for (map in game.global.mapsOwnedArray){
-        itemsAvailable = addSpecials(true,true,game.global.mapsOwnedArray[map]);
-        if (itemsAvailable >= itemsAvailableInNewMap && itemsAvailable > 0) {
-            RunMap(game.global.mapsOwnedArray[map]);
-            return;
+
+    if (game.upgrades.Bounty.done === 0 && game.upgrades.Bounty.locked === 1) { //Look for Bounty upgrade
+        for (map in game.global.mapsOwnedArray) {
+            theMap = game.global.mapsOwnedArray[map];
+            if (theMap.name === "The Wall" && addSpecials(true, true, theMap) > 0){
+                RunMap(theMap);
+                return;
+            }
         }
     }
-    if (itemsAvailableInNewMap > 0 && constants.getShouldRunMaps() === true){
+
+    var itemsAvailableInNewMap = addSpecials(true,true,{ id: "map999", name: "My Map", location: "Sea", clears: 0, level: game.global.world, difficulty: 1.11, size: 40, loot: 1.2, noRecycle: false });
+    if (game.global.preMapsActive === true && itemsAvailableInNewMap === 0){
+        RunWorld();
+        return;
+    }
+    if (itemsAvailableInNewMap === 0){
+        return;
+    }
+
+    var uniqueMapIndex = mapsWithDesiredUniqueDrops.indexOf(game.global.world); //Run new map if on zone with unique map drop then remove
+    if (uniqueMapIndex > -1 && itemsAvailableInNewMap > 0){
+        mapsWithDesiredUniqueDrops.splice(uniqueMapIndex,1);
         RunNewMap();
         return;
     }
+
+    //Any equipment upgrades available?
+    var upgrade;
+    var currentUpgrade;
+    var currentEquip;
+    var totalUpgrades = 0;
+    for (upgrade in game.upgrades) {
+        currentUpgrade = game.upgrades[upgrade];
+        currentEquip = game.equipment[game.upgrades[upgrade].prestiges];
+        if (typeof currentUpgrade.prestiges !== 'undefined' && currentUpgrade.locked === 0 && upgrade !== "Supershield") {
+            if (constants.getShouldSkipHpEquipment() === true && typeof currentEquip.health !== 'undefined') { //don't buy hp equips in late late game
+                continue;
+            }
+            totalUpgrades++;
+        }
+    }
+    if (totalUpgrades === 0){ //if not equipment upgrades, go get some! (can make this a "< constant" later if desired)
+        //what's the lowest zone map I can create and get items?
+        var zoneToTry;
+        for (zoneToTry = 6; zoneToTry <= game.global.world; zoneToTry++){
+            itemsAvailableInNewMap = addSpecials(true,true,{ id: "map999", name: "My Map", location: "Sea", clears: 0, level: zoneToTry, difficulty: 1.11, size: 40, loot: 1.2, noRecycle: false });
+            if (itemsAvailableInNewMap > 0)
+            {
+                break;
+            }
+        }
+
+        for (map in game.global.mapsOwnedArray){ //look for an existing map first
+            theMap = game.global.mapsOwnedArray[map];
+            if (uniqueMaps.indexOf(theMap.name) > -1){
+                continue;
+            }
+            itemsAvailable = addSpecials(true,true,game.global.mapsOwnedArray[map]);
+            if (itemsAvailable > 0 && theMap.level === zoneToTry) {
+                RunMap(game.global.mapsOwnedArray[map]);
+                return;
+            }
+        }
+        RunNewMap(zoneToTry);
+    }
     if (game.global.preMapsActive === true){
         RunWorld();
+        return;
     }
 }
 
@@ -935,6 +989,7 @@ function CheckLateGame() {
     if (game.resources.trimps.owned < 1000) {
         constants = constantsSets[0];
         constantsIndex = 0;
+        mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50];
         return;
     }
     if (constantsIndex === constantsSets.length - 1){ //check for last element
