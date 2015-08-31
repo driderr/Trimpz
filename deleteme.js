@@ -66,7 +66,7 @@ var constantsLateGame = (function () {
     "use strict";
     var zoneToStartAt = 45,
         runInterval = 1500,
-        minerMultiplier = 2,
+        minerMultiplier = 0.5,
         trainerCostRatio = 0.2,
         explorerCostRatio = 0.2,
         minFoodOwned = 15,
@@ -83,7 +83,7 @@ var constantsLateGame = (function () {
         otherWorkersFocusRatio = 0.5,
         numTrapsForAutoTrapping = 10000,
         shieldCostRatio = 0.05,
-        lumberjackMultiplier = 4,
+        lumberjackMultiplier = 0.5,
         maxWormholes = 0,
         shouldSkipHpEquipment = false,
         minimumWarpStations = 20,
@@ -124,7 +124,7 @@ var constantsLateLateGame = (function () {
     "use strict";
     var zoneToStartAt = 55,
         runInterval = 1500,
-        minerMultiplier = 2,
+        minerMultiplier = 1,
         trainerCostRatio = 0.01,
         explorerCostRatio = 0.01,
         minFoodOwned = 15,
