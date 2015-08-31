@@ -606,7 +606,7 @@ function BuyBuildings() {
     BuyBuilding("Resort", constants.getHousingCostRatio());
     BuyBuilding("Gateway", 1);
     BuyBuilding("Wormhole", 1, constants.getMaxWormholes());
-    if (game.buildings.Warpstation.locked === 1 || GetNonUpgradePrice(game.buildings.Warpstation) < GetNonUpgradePrice(game.buildings.Collector) * 2) {
+    if (game.buildings.Warpstation.locked === 1 || GetNonUpgradePrice(game.buildings.Warpstation) > GetNonUpgradePrice(game.buildings.Collector) * 2) {
         BuyBuilding("Collector", 1);
     }
     BuyBuilding("Warpstation", 1);
