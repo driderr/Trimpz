@@ -928,27 +928,28 @@ function RunMaps() {
         }
     }
     if (totalUpgrades === 0){ //if not equipment upgrades, go get some! (can make this a "< constant" later if desired)
-        for (map in game.global.mapsOwnedArray){ //look for an existing map first
-            theMap = game.global.mapsOwnedArray[map];
-            if (uniqueMaps.indexOf(theMap.name) > -1){
-                continue;
-            }
-            itemsAvailable = addSpecials(true,true,game.global.mapsOwnedArray[map]);
-            if (itemsAvailable > 0) {
-                RunMap(game.global.mapsOwnedArray[map]);
-                return;
-            }
-        }
         //what's the lowest zone map I can create and get items?
         var zoneToTry;
         for (zoneToTry = 6; zoneToTry <= game.global.world; zoneToTry++){
             itemsAvailableInNewMap = addSpecials(true,true,{ id: "map999", name: "My Map", location: "Sea", clears: 0, level: zoneToTry, difficulty: 1.11, size: 40, loot: 1.2, noRecycle: false });
             if (itemsAvailableInNewMap > 0)
             {
-                RunNewMap(zoneToTry);
+                break;
+            }
+        }
+
+        for (map in game.global.mapsOwnedArray){ //look for an existing map first
+            theMap = game.global.mapsOwnedArray[map];
+            if (uniqueMaps.indexOf(theMap.name) > -1){
+                continue;
+            }
+            itemsAvailable = addSpecials(true,true,game.global.mapsOwnedArray[map]);
+            if (itemsAvailable > 0 && theMap.level === zoneToTry) {
+                RunMap(game.global.mapsOwnedArray[map]);
                 return;
             }
         }
+        RunNewMap(zoneToTry);
     }
     if (game.global.preMapsActive === true){
         RunWorld();
