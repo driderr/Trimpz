@@ -7,7 +7,7 @@ var workersFocused = false;
 var workersFocusedOn;
 var workersMoved = [];
 var skipShieldBlock = true;
-var mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50];
+var mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50]; //removed from array when done, reset on portal or refresh
 var uniqueMaps = ["The Block", "The Wall",  "Dimension of Anger", "Trimple Of Doom"];
 var constantsEarlyGame = (function () {
     "use strict";
@@ -909,6 +909,9 @@ function RunMaps() {
         RunWorld();
         return;
     }
+    if (itemsAvailableInNewMap === 0){
+        return;
+    }
 
     var uniqueMapIndex = mapsWithDesiredUniqueDrops.indexOf(game.global.world); //Run new map if on zone with unique map drop then remove
     if (uniqueMapIndex > -1 && itemsAvailableInNewMap > 0){
@@ -955,6 +958,10 @@ function RunMaps() {
             }
         }
     }
+    if (game.global.preMapsActive === true){
+        RunWorld();
+        return;
+    }
 }
 
 
@@ -989,6 +996,7 @@ function CheckLateGame() {
     if (game.resources.trimps.owned < 1000) {
         constants = constantsSets[0];
         constantsIndex = 0;
+        mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50];
         return;
     }
     if (constantsIndex === constantsSets.length - 1){ //check for last element
