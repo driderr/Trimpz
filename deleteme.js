@@ -281,7 +281,13 @@ function GetNonUpgradePrice(nonUpgradeItem) {
         if (typeof needed[1] !== 'undefined') {
             needed = resolvePow(needed, nonUpgradeItem);
         }
-        needed = Math.ceil(needed * (Math.pow(1 - game.portal.Artisanistry.modifier, game.portal.Artisanistry.level)));
+        if (typeof nonUpgradeItem.prestige !== 'undefined') {//Discount equipment
+            needed = Math.ceil(needed * (Math.pow(1 - game.portal.Artisanistry.modifier, game.portal.Artisanistry.level)));
+        }
+        if (aResource === "gems" && nonUpgradeItem === game.buildings.Warpstation)
+        {
+            return needed;
+        }
     }
     return needed;
 }
