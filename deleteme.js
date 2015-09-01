@@ -187,7 +187,7 @@ var constantsEndGame = (function () {
     "use strict";
     var zoneToStartAt = 60,
         runInterval = 1500,
-        minerMultiplier = 2,
+        minerMultiplier = 1,
         trainerCostRatio = 0.1,
         explorerCostRatio = 0.1,
         minFoodOwned = 15,
