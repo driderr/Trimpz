@@ -882,7 +882,7 @@ function RunMaps() {
     var theMap;
     var itemsAvailable;
 
-    if (game.global.world < 7 || game.global.mapsActive === true){ //no map ability(wait one) or already running a map(repeat should be off)
+    if (game.global.world < 7 || (game.global.mapsActive === true && game.global.preMapsActive === false)){ //no map ability(wait one) or already running a map(repeat should be off)
         return;
     }
 
