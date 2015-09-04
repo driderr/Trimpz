@@ -10,6 +10,8 @@ var skipShieldBlock = true;
 var mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50]; //removed from array when done, reset on portal or refresh
 var uniqueMaps = ["The Block", "The Wall",  "Dimension of Anger", "Trimple Of Doom"];
 var minimumUpgradesOnHand = 10; //0 will run maps only when no equipment upgrades left, 10 will run maps if any equipment upgrade is missing
+var helium = -1;
+var heliumHistory = [];
 var constantsEarlyGame = (function () {
     "use strict";
     var zoneToStartAt = 0,
@@ -998,6 +1000,8 @@ function CheckLateGame() {
         constants = constantsSets[0];
         constantsIndex = 0;
         mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50];
+        heliumHistory = [];
+        helium = -1;
         return;
     }
     if (constantsIndex === constantsSets.length - 1){ //check for last element
@@ -1009,6 +1013,43 @@ function CheckLateGame() {
         constants = constantsSets[nextSet];
         constantsIndex = nextSet;
         ReallocateWorkers();
+    }
+}
+
+
+function CheckHelium() {
+    var date;
+    var oldHelium;
+    var rate;
+    var totalHelium;
+    var totalTime;
+    var cumulativeRate;
+    if (helium === -1){
+        helium = game.resources.helium.owned;
+        heliumHistory.push([
+            helium,
+            Date.now(),
+            0,
+            0,
+            0
+        ])
+    } else if (game.resources.helium.owned < helium){ //must have spent some helium
+        helium = game.resources.helium.owned;
+    } else if (game.resources.helium.owned > helium) {
+        date = Date.now();
+        oldHelium = helium;
+        helium = game.resources.helium.owned;
+        rate = (helium - oldHelium)/((date - heliumHistory[heliumHistory.length - 1][1])/(1000*60*60));
+        totalTime = (date - heliumHistory[0][1])/(1000*60*60);
+        totalHelium = helium - heliumHistory[0][0];
+        cumulativeRate = totalHelium / totalTime;
+        heliumHistory.push([
+            helium,
+            date,
+            rate,
+            totalTime,
+            cumulativeRate
+        ])
     }
 }
 
@@ -1027,6 +1068,7 @@ function CheckLateGame() {
         //Main loop code
         ShowRunningIndicator();
         CheckLateGame();
+        CheckHelium();
         TurnOnAutoBuildTraps();
         AssignFreeWorkers();
         Fight();
