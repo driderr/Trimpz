@@ -11,6 +11,7 @@ var mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50]; //remo
 var uniqueMaps = ["The Block", "The Wall",  "Dimension of Anger", "Trimple Of Doom"];
 var minimumUpgradesOnHand = 10; //0 will run maps only when no equipment upgrades left, 10 will run maps if any equipment upgrade is missing
 var helium = -1;
+var minBreedingSpeed = 1;
 var heliumHistory = [];
 var constantsEarlyGame = (function () {
     "use strict";
@@ -295,6 +296,9 @@ function GetNonUpgradePrice(nonUpgradeItem) {
     return needed;
 }
 
+/**
+ * @return {boolean}
+ */
 function CanBuyWorkerWithResource(job, ratio, food, extraWorkers){
     var cost = job.cost.food;
     var price = 0;
@@ -302,11 +306,11 @@ function CanBuyWorkerWithResource(job, ratio, food, extraWorkers){
         price =  Math.floor((cost[0] * Math.pow(cost[1], job.owned + extraWorkers)) * ((Math.pow(cost[1], 1) - 1) / (cost[1] - 1)));
     else
         price = cost;
-    if (food * ratio < price) {
-        return false;
-    }
-    return true;
+    return food * ratio >= price;
 }
+/**
+ * @return {number}
+ */
 function WorkerCost(job, extraWorkers){
     var cost = job.cost.food;
     var price = 0;
@@ -328,7 +332,7 @@ function AssignFreeWorkers() {
         "Miner" : 0,
         "Lumberjack" : 0,
         "Farmer" : 0
-    }
+    };
     if (trimps.owned === 0 || game.global.firing) {
         return;
     }
@@ -588,7 +592,7 @@ function UpgradeAndGather(trappingSpan) {
     if (collectingForNonEquipment === false) {
         //Collect trimps if breeding speed is low
         if ((game.resources.trimps.owned < game.resources.trimps.realMax() &&
-            document.getElementById("trimpsPs").innerHTML.match(/\d+/)[0] < 1) ||
+            document.getElementById("trimpsPs").innerHTML.match(/\d+/)[0] < minBreedingSpeed) ||
             openTrapsForDefault === true) {
             document.getElementById("trimpsCollectBtn").click();
         } else if (game.global.buildingsQueue.length > 0) {
@@ -654,6 +658,11 @@ function BuyBuilding(buildingName, ratio, max){
 
 function BuyBuildings() {
     "use strict";
+    if (game.resources.trimps.owned < game.resources.trimps.realMax() &&
+        document.getElementById("trimpsPs").innerHTML.match(/\d+/)[0] < minBreedingSpeed){
+        return;
+    }
+
     BuyBuilding("Gym", constants.getGymCostRatio(), constants.getMaxGyms());
     BuyBuilding("Nursery", constants.getNurseryCostRatio());
     BuyBuilding("Tribute", constants.getTributeCostRatio());
