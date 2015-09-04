@@ -9,6 +9,7 @@ var workersMoved = [];
 var skipShieldBlock = true;
 var mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50]; //removed from array when done, reset on portal or refresh
 var uniqueMaps = ["The Block", "The Wall",  "Dimension of Anger", "Trimple Of Doom"];
+var minimumUpgradesOnHand = 10; //0 will run maps only when no equipment upgrades left, 10 will run maps if any equipment upgrade is missing
 var constantsEarlyGame = (function () {
     "use strict";
     var zoneToStartAt = 0,
@@ -188,14 +189,14 @@ var constantsEndGame = (function () {
     var zoneToStartAt = 60,
         runInterval = 1500,
         minerMultiplier = 1,
-        trainerCostRatio = 0.1,
-        explorerCostRatio = 0.1,
+        trainerCostRatio = 0,
+        explorerCostRatio = 0,
         minFoodOwned = 15,
         minWoodOwned = 15,
         minTrimpsOwned = 10,
         minScienceOwned = 10,
-        housingCostRatio = 0.01,
-        gymCostRatio = 0.6,
+        housingCostRatio = 0,
+        gymCostRatio = 0,
         maxGyms = 10000,
         tributeCostRatio = 0.7,
         nurseryCostRatio = 0.20,
@@ -612,7 +613,7 @@ function BuyBuildings() {
     BuyBuilding("Resort", constants.getHousingCostRatio());
     BuyBuilding("Gateway", 1);
     BuyBuilding("Wormhole", 1, constants.getMaxWormholes());
-    if (game.buildings.Warpstation.locked === 1 || GetNonUpgradePrice(game.buildings.Warpstation) > GetNonUpgradePrice(game.buildings.Collector) * 2) {
+    if (game.buildings.Warpstation.locked === 1 || GetNonUpgradePrice(game.buildings.Warpstation) > GetNonUpgradePrice(game.buildings.Collector) * game.buildings.Warpstation.increase.by / game.buildings.Collector.increase.by) {
         BuyBuilding("Collector", 1);
     }
     BuyBuilding("Warpstation", 1);
@@ -933,7 +934,8 @@ function RunMaps() {
             totalUpgrades++;
         }
     }
-    if (totalUpgrades === 0){ //if not equipment upgrades, go get some! (can make this a "< constant" later if desired)
+
+    if (totalUpgrades < minimumUpgradesOnHand){//=== 0){ //if not equipment upgrades, go get some! (can make this a "< constant" later if desired)
         //what's the lowest zone map I can create and get items?
         var zoneToTry;
         for (zoneToTry = 6; zoneToTry <= game.global.world; zoneToTry++){
