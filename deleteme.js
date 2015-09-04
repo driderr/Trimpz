@@ -295,48 +295,97 @@ function GetNonUpgradePrice(nonUpgradeItem) {
     return needed;
 }
 
+function CanBuyWorkerWithResource(job, ratio, food, extraWorkers){
+    var cost = job.cost.food;
+    var price = 0;
+    if (typeof cost[1] !== 'undefined')
+        price =  Math.floor((cost[0] * Math.pow(cost[1], job.owned + extraWorkers)) * ((Math.pow(cost[1], 1) - 1) / (cost[1] - 1)));
+    else
+        price = cost;
+    if (food * ratio < price) {
+        return false;
+    }
+    return true;
+}
+function WorkerCost(job, extraWorkers){
+    var cost = job.cost.food;
+    var price = 0;
+    if (typeof cost[1] !== 'undefined')
+        price =  Math.floor((cost[0] * Math.pow(cost[1], job.owned + extraWorkers)) * ((Math.pow(cost[1], 1) - 1) / (cost[1] - 1)));
+    else
+        price = cost;
+    return price;
+}
+
 function AssignFreeWorkers() {
     "use strict";
-    var trimpsAssigned = 0;
     var trimps = game.resources.trimps;
-    if (trimps.owned === 0) {
-        return;
+    var food = game.resources.food.owned;
+    var buy = {
+        "Trainer" : 0,
+        "Explorer" : 0,
+        "Scientist" : 0,
+        "Miner" : 0,
+        "Lumberjack" : 0,
+        "Farmer" : 0
     }
-    if (game.global.firing){
+    if (trimps.owned === 0 || game.global.firing) {
         return;
     }
     var free = (Math.ceil(trimps.realMax() / 2) - trimps.employed);
     if (free > 0){
         document.getElementById("tab1").click();    //hire 1 at a time
+    } else
+    {
+        return;
     }
-    while (free > 0 && Math.floor(game.resources.trimps.owned) > game.resources.trimps.employed && trimpsAssigned < 1000) {
-        trimps = game.resources.trimps;
-        free = (Math.ceil(trimps.realMax() / 2) - trimps.employed);
-        if (free === 0) {
-            break;
-        }
+    if (free > game.resources.trimps.owned){
+        free = Math.floor(game.resources.trimps.owned);
+    }
+    while (free > 0) {
         if (game.jobs.Trainer.locked === 0 &&
-            CanBuyNonUpgrade(game.jobs.Trainer, constants.getTrainerCostRatio()) === true){
-            document.getElementById("Trainer").click();
+            CanBuyWorkerWithResource(game.jobs.Trainer, constants.getTrainerCostRatio(), food , buy.Trainer) === true){
+            food -= WorkerCost(game.jobs.Trainer, buy.Trainer);
+            buy.Trainer += 1;
+            free--;
         } else if (game.jobs.Explorer.locked === 0 &&
-            CanBuyNonUpgrade(game.jobs.Explorer, constants.getExplorerCostRatio()) === true){
-            document.getElementById("Explorer").click();
-        } else if (game.jobs.Scientist.locked === 0 && game.jobs.Scientist.owned < game.global.world + 1 &&
-            CanBuyNonUpgrade(game.jobs.Scientist, 1) === true) {
-            document.getElementById("Scientist").click();
-        } else if (game.jobs.Miner.locked === 0 && game.jobs.Miner.owned < game.jobs.Farmer.owned * constants.getMinerMultiplier() &&
-            CanBuyNonUpgrade(game.jobs.Miner, 1) === true) {
-            document.getElementById("Miner").click();
-        } else if (game.jobs.Lumberjack.locked === 0 && game.jobs.Lumberjack.owned < game.jobs.Farmer.owned * constants.getLumberjackMultiplier() &&
-            CanBuyNonUpgrade(game.jobs.Lumberjack, 1) === true){
-            document.getElementById("Lumberjack").click();
-        } else if (CanBuyNonUpgrade(game.jobs.Farmer, 1) === true){
-            document.getElementById("Farmer").click();
+            CanBuyWorkerWithResource(game.jobs.Explorer, constants.getExplorerCostRatio(), food, buy.Explorer) === true){
+            food -= WorkerCost(game.jobs.Explorer, buy.Explorer);
+            buy.Explorer += 1;
+            free--;
+        } else if (game.jobs.Scientist.locked === 0 && game.jobs.Scientist.owned + buy.Scientist < game.global.world + 1 &&
+            CanBuyWorkerWithResource(game.jobs.Scientist, 1, food, buy.Scientist) === true) {
+            food -= WorkerCost(game.jobs.Scientist, buy.Scientist);
+            buy.Scientist += 1;
+            free--;
+        } else if (game.jobs.Miner.locked === 0 && game.jobs.Miner.owned + buy.Miner < (game.jobs.Farmer.owned + buy.Farmer) * constants.getMinerMultiplier() &&
+            CanBuyWorkerWithResource(game.jobs.Miner, 1, food, buy.Miner) === true) {
+            food -= WorkerCost(game.jobs.Miner, buy.Miner);
+            buy.Miner += 1;
+            free--;
+        } else if (game.jobs.Lumberjack.locked === 0 && game.jobs.Lumberjack.owned + buy.Lumberjack < (game.jobs.Farmer.owned + buy.Farmer) * constants.getLumberjackMultiplier() &&
+            CanBuyWorkerWithResource(game.jobs.Lumberjack, 1, food, buy.Lumberjack) === true){
+            food -= WorkerCost(game.jobs.Lumberjack, buy.Lumberjack);
+            buy.Lumberjack += 1;
+            free--;
+        } else if (CanBuyWorkerWithResource(game.jobs.Farmer, 1, food, buy.Farmer) === true){
+            food -= WorkerCost(game.jobs.Farmer, buy.Farmer);
+            buy.Farmer += 1;
+            free--;
         } else {
-            return; //Can't afford anything!
+            break; //Can't afford anything!
         }
-        trimpsAssigned++;
     }
+    var jobName;
+    var numberToBuy;
+    for (jobName in buy){
+        numberToBuy = buy[jobName];
+        if (numberToBuy > 0){
+            game.global.buyAmt = numberToBuy;
+            document.getElementById(jobName).click();
+        }
+    }
+    game.global.buyAmt = 1;
     tooltip('hide');
 }
 function Fight() {
