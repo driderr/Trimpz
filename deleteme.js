@@ -1086,12 +1086,12 @@ function CheckHelium() {
     if (helium === -1){
         helium = game.resources.helium.owned;
         heliumHistory.push([
-            game.global.world,
             helium,
             Date.now(),
             0,
             0,
-            0
+            0,
+            game.global.world
         ])
     } else if (game.resources.helium.owned < helium){ //must have spent some helium
         helium = game.resources.helium.owned;
@@ -1104,12 +1104,12 @@ function CheckHelium() {
         totalHelium = helium - heliumHistory[0][0];
         cumulativeRate = totalHelium / totalTime;
         heliumHistory.push([
-            game.global.world,
             helium,
             date,
             rate,
             totalTime,
-            cumulativeRate
+            cumulativeRate,
+            game.global.world
         ])
     }
 }
