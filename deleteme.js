@@ -9,9 +9,9 @@ var workersMoved = [];
 var skipShieldBlock = true;
 var mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50]; //removed from array when done, reset on portal or refresh
 var uniqueMaps = ["The Block", "The Wall",  "Dimension of Anger", "Trimple Of Doom"];
-var minimumUpgradesOnHand = 10; //0 will run maps only when no equipment upgrades left, 10 will run maps if any equipment upgrade is missing
+var minimumUpgradesOnHand = 4; //0 will run maps only when no equipment upgrades left, 10 will run maps if any equipment upgrade is missing
 var helium = -1;
-var minBreedingSpeed = 1;
+var minBreedingSpeed = 100;
 var heliumHistory = [];
 var portalAt = 42;
 var constantsEarlyGame = (function () {
@@ -345,7 +345,7 @@ function AssignFreeWorkers() {
         return;
     }
     if (free > game.resources.trimps.owned){
-        free = Math.floor(game.resources.trimps.owned);
+        free = Math.floor(game.resources.trimps.owned / 3);
     }
     while (free > 0) {
         if (game.jobs.Trainer.locked === 0 &&
@@ -400,7 +400,7 @@ function Fight() {
     }
     autoFighting = false;
     var pauseFightButton = document.getElementById("pauseFight");
-    if (pauseFightButton.offsetHeight > 0) {
+    if (pauseFightButton.offsetHeight > 0 && game.resources.trimps.owned === game.resources.trimps.realMax()) {
         if (pauseFightButton.innerHTML !== "AutoFight On") {
             pauseFightButton.click();
         }
