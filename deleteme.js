@@ -14,6 +14,7 @@ var helium = -1;
 var minBreedingSpeed = 100;
 var heliumHistory = [];
 var portalAt = 42;
+var portalObtained = false;
 var constantsEarlyGame = (function () {
     "use strict";
     var zoneToStartAt = 0,
@@ -1061,6 +1062,7 @@ function CheckLateGame() {
         mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50];
         heliumHistory = [];
         helium = -1;
+        portalObtained = false;
         return;
     }
     if (constantsIndex === constantsSets.length - 1){ //check for last element
@@ -1119,6 +1121,23 @@ function CheckHelium() {
  * @return {boolean}
  */
 function CheckPortal() {
+    var map;
+    var theMap;
+    var itemsAvailable;
+    if (game.global.world >= portalAt - 2 && portalObtained === false)
+    {
+        for (map in game.global.mapsOwnedArray){
+            theMap = game.global.mapsOwnedArray[map];
+            if (theMap.name !== "Dimension of Anger"){
+                continue;
+            }
+            itemsAvailable = addSpecials(true,true,game.global.mapsOwnedArray[map]);
+            if (itemsAvailable > 0) {
+                portalObtained = true;
+                RunMap(game.global.mapsOwnedArray[map]);
+            }
+        }
+    }
     if (game.global.world >= portalAt) {
         document.getElementById("portalBtn").click();
         document.getElementById("activatePortalBtn").click();
