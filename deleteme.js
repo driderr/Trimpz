@@ -13,6 +13,7 @@ var minimumUpgradesOnHand = 10; //0 will run maps only when no equipment upgrade
 var helium = -1;
 var minBreedingSpeed = 1;
 var heliumHistory = [];
+var portalAt = 42;
 var constantsEarlyGame = (function () {
     "use strict";
     var zoneToStartAt = 0,
@@ -1085,6 +1086,7 @@ function CheckHelium() {
     if (helium === -1){
         helium = game.resources.helium.owned;
         heliumHistory.push([
+            game.global.world,
             helium,
             Date.now(),
             0,
@@ -1102,6 +1104,7 @@ function CheckHelium() {
         totalHelium = helium - heliumHistory[0][0];
         cumulativeRate = totalHelium / totalTime;
         heliumHistory.push([
+            game.global.world,
             helium,
             date,
             rate,
@@ -1109,6 +1112,20 @@ function CheckHelium() {
             cumulativeRate
         ])
     }
+}
+
+
+/**
+ * @return {boolean}
+ */
+function CheckPortal() {
+    if (game.global.world >= portalAt) {
+        document.getElementById("portalBtn").click();
+        document.getElementById("activatePortalBtn").click();
+        document.getElementsByClassName("activatePortalBtn")[0].click();
+        return true;
+    }
+    return false;
 }
 
 //Main
@@ -1127,6 +1144,9 @@ function CheckHelium() {
         ShowRunningIndicator();
         CheckLateGame();
         CheckHelium();
+        if (CheckPortal() === true){
+            return;
+        }
         TurnOnAutoBuildTraps();
         AssignFreeWorkers();
         Fight();
