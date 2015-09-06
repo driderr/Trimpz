@@ -345,8 +345,16 @@ function AssignFreeWorkers() {
     {
         return;
     }
+    var breedCount = (trimps.owned - trimps.employed > 2) ? Math.floor(trimps.owned - trimps.employed) : 0;
     if (free > game.resources.trimps.owned){
         free = Math.floor(game.resources.trimps.owned / 3);
+    }
+    if (autoFighting === false){
+        if (breedCount - trimps.employed > 0){
+            free = Math.min(free,Math.floor((breedCount - trimps.employed)/2));
+        } else {
+            return;
+        }
     }
     while (free > 0) {
         if (game.jobs.Trainer.locked === 0 &&
