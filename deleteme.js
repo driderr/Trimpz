@@ -13,7 +13,7 @@ var minimumUpgradesOnHand = 4; //0 will run maps only when no equipment upgrades
 var helium = -1;
 var minBreedingSpeed = 100;
 var heliumHistory = [];
-var portalAt = 42;
+var portalAt = 45;
 var portalObtained = false;
 var constantsEarlyGame = (function () {
     "use strict";
