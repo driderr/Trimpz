@@ -13,8 +13,9 @@ var minimumUpgradesOnHand = 4; //0 will run maps only when no equipment upgrades
 var helium = -1;
 var minBreedingSpeed = 100;
 var heliumHistory = [];
-var portalAt = 45;
+var portalAt = 150;
 var portalObtained = false;
+var pauseTrimpz = false;
 var constantsEarlyGame = (function () {
     "use strict";
     var zoneToStartAt = 0,
@@ -299,7 +300,7 @@ function GetNonUpgradePrice(nonUpgradeItem) {
 }
 
 /**
- * @return {boolean}
+ * @return {number}
  */
 function CanBuyWorkerWithResource(job, ratio, food, extraWorkers){
     var cost = job.cost.food;
@@ -308,19 +309,11 @@ function CanBuyWorkerWithResource(job, ratio, food, extraWorkers){
         price =  Math.floor((cost[0] * Math.pow(cost[1], job.owned + extraWorkers)) * ((Math.pow(cost[1], 1) - 1) / (cost[1] - 1)));
     else
         price = cost;
-    return food * ratio >= price;
-}
-/**
- * @return {number}
- */
-function WorkerCost(job, extraWorkers){
-    var cost = job.cost.food;
-    var price = 0;
-    if (typeof cost[1] !== 'undefined')
-        price =  Math.floor((cost[0] * Math.pow(cost[1], job.owned + extraWorkers)) * ((Math.pow(cost[1], 1) - 1) / (cost[1] - 1)));
-    else
-        price = cost;
-    return price;
+    if ( food * ratio >= price)
+        return price;
+    else{
+        return -1;
+    }
 }
 
 function AssignFreeWorkers() {
@@ -356,34 +349,35 @@ function AssignFreeWorkers() {
             return;
         }
     }
+    var cost;
     while (free > 0) {
         if (game.jobs.Trainer.locked === 0 &&
-            CanBuyWorkerWithResource(game.jobs.Trainer, constants.getTrainerCostRatio(), food , buy.Trainer) === true){
-            food -= WorkerCost(game.jobs.Trainer, buy.Trainer);
+            (cost = CanBuyWorkerWithResource(game.jobs.Trainer, constants.getTrainerCostRatio(), food , buy.Trainer)) !== -1){
+            food -= cost;
             buy.Trainer += 1;
             free--;
         } else if (game.jobs.Explorer.locked === 0 &&
-            CanBuyWorkerWithResource(game.jobs.Explorer, constants.getExplorerCostRatio(), food, buy.Explorer) === true){
-            food -= WorkerCost(game.jobs.Explorer, buy.Explorer);
+            (cost = CanBuyWorkerWithResource(game.jobs.Explorer, constants.getExplorerCostRatio(), food, buy.Explorer)) !== -1){
+            food -= cost;
             buy.Explorer += 1;
             free--;
         } else if (game.jobs.Scientist.locked === 0 && game.jobs.Scientist.owned + buy.Scientist < game.global.world + 1 &&
-            CanBuyWorkerWithResource(game.jobs.Scientist, 1, food, buy.Scientist) === true) {
-            food -= WorkerCost(game.jobs.Scientist, buy.Scientist);
+            (cost = CanBuyWorkerWithResource(game.jobs.Scientist, 1, food, buy.Scientist)) !== -1) {
+            food -= cost;
             buy.Scientist += 1;
             free--;
         } else if (game.jobs.Miner.locked === 0 && game.jobs.Miner.owned + buy.Miner < (game.jobs.Farmer.owned + buy.Farmer) * constants.getMinerMultiplier() &&
-            CanBuyWorkerWithResource(game.jobs.Miner, 1, food, buy.Miner) === true) {
-            food -= WorkerCost(game.jobs.Miner, buy.Miner);
+            (cost = CanBuyWorkerWithResource(game.jobs.Miner, 1, food, buy.Miner)) !== -1) {
+            food -= cost;
             buy.Miner += 1;
             free--;
         } else if (game.jobs.Lumberjack.locked === 0 && game.jobs.Lumberjack.owned + buy.Lumberjack < (game.jobs.Farmer.owned + buy.Farmer) * constants.getLumberjackMultiplier() &&
-            CanBuyWorkerWithResource(game.jobs.Lumberjack, 1, food, buy.Lumberjack) === true){
-            food -= WorkerCost(game.jobs.Lumberjack, buy.Lumberjack);
+            (cost = CanBuyWorkerWithResource(game.jobs.Lumberjack, 1, food, buy.Lumberjack)) !== -1){
+            food -= cost;
             buy.Lumberjack += 1;
             free--;
-        } else if (CanBuyWorkerWithResource(game.jobs.Farmer, 1, food, buy.Farmer) === true){
-            food -= WorkerCost(game.jobs.Farmer, buy.Farmer);
+        } else if ((cost = CanBuyWorkerWithResource(game.jobs.Farmer, 1, food, buy.Farmer)) !== -1){
+            food -= cost;
             buy.Farmer += 1;
             free--;
         } else {
@@ -1168,6 +1162,9 @@ function CheckPortal() {
     }
     setInterval(function () {
         //Main loop code
+        if (pauseTrimpz === true){
+            return;
+        }
         ShowRunningIndicator();
         CheckLateGame();
         CheckHelium();
