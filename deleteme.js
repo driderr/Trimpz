@@ -350,7 +350,11 @@ function AssignFreeWorkers() {
         }
     }
     var cost;
+    var beginTime = Date.now();
     while (free > 0) {
+        if (Date.now() - beginTime > 2000) { //too long in here, finish later
+            break;
+        }
         if (game.jobs.Trainer.locked === 0 &&
             (cost = CanBuyWorkerWithResource(game.jobs.Trainer, constants.getTrainerCostRatio(), food , buy.Trainer)) !== -1){
             food -= cost;
