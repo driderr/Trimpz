@@ -214,7 +214,7 @@ var constantsEndGame = (function () {
         lumberjackMultiplier = 0.3,
         maxWormholes = 0,
         shouldSkipHpEquipment = false,
-        minimumWarpStations = 20,
+        minimumWarpStations = 30,
         minimumEquipmentLevel = 5;
     return {
         getZoneToStartAt: function () { return zoneToStartAt; },
@@ -586,15 +586,13 @@ function UpgradeNonEquipment() {
 /**
  * @return {boolean} return.collectingForNonEquipment Is it collecting for upgrade?
  */
-function UpgradeAndGather(trappingSpan) {
+function UpgradeAndGather() {
     "use strict";
     var collectingForNonEquipment = UpgradeNonEquipment();
     if (openTrapsForDefault === true && game.buildings.Trap.owned < 10){ //traps exhausted, turn off "Trapping"
-        trappingSpan.innerHTML = "Building";
         openTrapsForDefault = false;
     }
     if (openTrapsForDefault === false && game.buildings.Trap.owned > constants.getNumTrapsForAutoTrapping()){ //traps overflowing, use them
-        trappingSpan.innerHTML = "Trapping";
         openTrapsForDefault = true;
     }
     if (collectingForNonEquipment === false) {
@@ -1156,7 +1154,7 @@ function CheckPortal() {
 //Main
 (function () {
     "use strict";
-    var trappingSpan = CreateButtonForTrapping();
+    CreateButtonForPausing();
     var i;
     for(i = 0; i < constantsSets.length; ++i){
         if (game.global.world >= constantsSets[i].getZoneToStartAt()) {
@@ -1184,7 +1182,7 @@ function CheckPortal() {
             tooltip('hide');
             return;
         }
-        var collectingForUpgrade = UpgradeAndGather(trappingSpan);
+        var collectingForUpgrade = UpgradeAndGather();
         if (collectingForUpgrade === false) { //allow resources to accumulate for upgrades if true
             BuyBuildings();
             BuyShield();
@@ -1195,7 +1193,7 @@ function CheckPortal() {
     }, constants.getRunInterval());
 })();
 
-function CreateButtonForTrapping() {
+function CreateButtonForPausing() {
     "use strict";
     var addElementsHere = document.getElementById("battleBtnsColumn");
     var newDiv = document.createElement("DIV");
@@ -1204,14 +1202,14 @@ function CreateButtonForTrapping() {
 
     var newSpan = document.createElement("SPAN");
     newSpan.className = "btn btn-primary fightBtn";
-    openTrapsForDefault = false;
-    newSpan.innerHTML = "Building";
+    pauseTrimpz = false;
+    newSpan.innerHTML = "Running";
     newSpan.onclick = function () {
-        openTrapsForDefault = ! openTrapsForDefault;
-        if (openTrapsForDefault === true){
-            newSpan.innerHTML = "Trapping";
+        pauseTrimpz = ! pauseTrimpz;
+        if (pauseTrimpz === true){
+            newSpan.innerHTML = "Paused";
         } else{
-            newSpan.innerHTML = "Building";
+            newSpan.innerHTML = "Running";
         }
     };
     newDiv.appendChild(newSpan);
