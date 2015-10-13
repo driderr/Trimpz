@@ -17,6 +17,7 @@ var portalAt = 160;
 var portalObtained = false;
 var pauseTrimpz = false;
 var doElectricChallenge = true;
+var formationDone = false;
 const CheapEquipmentRatio = 0.01;
 const CheapEqUpgradeRatio = 0.2;
 var constantsEarlyGame = (function () {
@@ -1073,6 +1074,7 @@ function CheckLateGame() {
         constantsIndex = 0;
         mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50];
         heliumHistory = [];
+        formationDone = false;
         helium = -1;
         portalObtained = false;
         return;
@@ -1163,6 +1165,18 @@ function CheckPortal() {
     return false;
 }
 
+function CheckFormation() {
+    if (game.global.world < 70 || formationDone === true)
+    {
+        return;
+    }
+    if (document.getElementById("formation2").style.display === "block")
+    {
+        document.getElementById("formation2").click();
+        formationDone = true;
+    }
+}
+
 //Main
 (function () {
     "use strict";
@@ -1182,6 +1196,7 @@ function CheckPortal() {
         ShowRunningIndicator();
         CheckLateGame();
         CheckHelium();
+        CheckFormation();
         if (CheckPortal() === true){
             return;
         }
