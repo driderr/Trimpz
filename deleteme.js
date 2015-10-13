@@ -16,6 +16,7 @@ var heliumHistory = [];
 var portalAt = 160;
 var portalObtained = false;
 var pauseTrimpz = false;
+var doElectricChallenge = true;
 const CheapEquipmentRatio = 0.05;
 const CheapEqUpgradeRatio = 0.1;
 var constantsEarlyGame = (function () {
@@ -1151,6 +1152,10 @@ function CheckPortal() {
     }
     if (game.global.world >= portalAt) {
         document.getElementById("portalBtn").click();
+        if (doElectricChallenge)
+        {
+            document.getElementById("challengeElectricity").click();
+        }
         document.getElementById("activatePortalBtn").click();
         document.getElementsByClassName("activatePortalBtn")[0].click();
         return true;
