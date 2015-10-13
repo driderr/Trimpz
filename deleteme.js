@@ -7,15 +7,17 @@ var workersFocused = false;
 var workersFocusedOn;
 var workersMoved = [];
 var skipShieldBlock = true;
-var mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50]; //removed from array when done, reset on portal or refresh
-var uniqueMaps = ["The Block", "The Wall",  "Dimension of Anger", "Trimple Of Doom"];
+var mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50,80]; //removed from array when done, reset on portal or refresh
+var uniqueMaps = ["The Block", "The Wall",  "Dimension of Anger", "Trimple Of Doom", "The Prison"];
 var minimumUpgradesOnHand = 4; //0 will run maps only when no equipment upgrades left, 10 will run maps if any equipment upgrade is missing
 var helium = -1;
 var minBreedingSpeed = 100;
 var heliumHistory = [];
-var portalAt = 150;
+var portalAt = 160;
 var portalObtained = false;
 var pauseTrimpz = false;
+const CheapEquipmentRatio = 0.05;
+const CheapEqUpgradeRatio = 0.1;
 var constantsEarlyGame = (function () {
     "use strict";
     var zoneToStartAt = 0,
@@ -214,7 +216,7 @@ var constantsEndGame = (function () {
         lumberjackMultiplier = 0.3,
         maxWormholes = 0,
         shouldSkipHpEquipment = false,
-        minimumWarpStations = 30,
+        minimumWarpStations = 40,
         minimumEquipmentLevel = 5;
     return {
         getZoneToStartAt: function () { return zoneToStartAt; },
@@ -664,11 +666,6 @@ function BuyBuilding(buildingName, ratio, max){
 
 function BuyBuildings() {
     "use strict";
-    if (game.resources.trimps.owned < game.resources.trimps.realMax() &&
-        document.getElementById("trimpsPs").innerHTML.match(/\d+/)[0] < minBreedingSpeed){
-        return;
-    }
-
     BuyBuilding("Gym", constants.getGymCostRatio(), constants.getMaxGyms());
     BuyBuilding("Nursery", constants.getNurseryCostRatio());
     BuyBuilding("Tribute", constants.getTributeCostRatio());
@@ -815,7 +812,7 @@ function BuyCheapEquipment(timeStr) {
         if (currentEquip.locked === 1 || anEquipment === "Shield" || (constants.getShouldSkipHpEquipment() === true && typeof currentEquip.health !== 'undefined')) {
             continue;
         }
-        if (CanBuyNonUpgrade(game.equipment[anEquipment], 0.05) === true) {
+        if (CanBuyNonUpgrade(game.equipment[anEquipment], CheapEquipmentRatio) === true) {
             document.getElementById(anEquipment).click();
             console.debug("Low cost buy for " + anEquipment + timeStr);
         }
@@ -836,7 +833,7 @@ function BuyCheapEquipmentUpgrades(timeStr) {
                 continue;
             }
             cost = Math.ceil(getNextPrestigeCost(upgrade) * (Math.pow(1 - game.portal.Artisanistry.modifier, game.portal.Artisanistry.level)));
-            if (CanAffordEquipmentUpgrade(upgrade) === true && cost < game.resources.metal.owned * 0.1) {
+            if (CanAffordEquipmentUpgrade(upgrade) === true && cost < game.resources.metal.owned * CheapEqUpgradeRatio) {
                 document.getElementById(upgrade).click();
                 console.debug("Low cost buy for " + upgrade + timeStr);
             }
@@ -963,6 +960,16 @@ function RunMaps() {
         for (map in game.global.mapsOwnedArray) {
             theMap = game.global.mapsOwnedArray[map];
             if (theMap.name === "The Wall" && addSpecials(true, true, theMap) > 0){
+                RunMap(theMap);
+                return;
+            }
+        }
+    }
+
+    if (game.global.challengeActive == "Electricity" && game.global.world > 80) { //Do Prison to turn off elec challenge
+        for (map in game.global.mapsOwnedArray) {
+            theMap = game.global.mapsOwnedArray[map];
+            if (theMap.name === "The Prison" && addSpecials(true, true, theMap) > 0){
                 RunMap(theMap);
                 return;
             }
