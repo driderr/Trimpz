@@ -17,8 +17,8 @@ var portalAt = 160;
 var portalObtained = false;
 var pauseTrimpz = false;
 var doElectricChallenge = true;
-const CheapEquipmentRatio = 0.05;
-const CheapEqUpgradeRatio = 0.1;
+const CheapEquipmentRatio = 0.01;
+const CheapEqUpgradeRatio = 0.2;
 var constantsEarlyGame = (function () {
     "use strict";
     var zoneToStartAt = 0,
