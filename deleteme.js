@@ -13,7 +13,7 @@ var minimumUpgradesOnHand = 4; //0 will run maps only when no equipment upgrades
 var helium = -1;
 var minBreedingSpeed = 100;
 var heliumHistory = [];
-var portalAt = 160;
+var portalAt = 83;
 var portalObtained = false;
 var pauseTrimpz = false;
 var doElectricChallenge = true;
@@ -218,7 +218,7 @@ var constantsEndGame = (function () {
         lumberjackMultiplier = 0.3,
         maxWormholes = 0,
         shouldSkipHpEquipment = false,
-        minimumWarpStations = 40,
+        minimumWarpStations = 5,
         minimumEquipmentLevel = 5;
     return {
         getZoneToStartAt: function () { return zoneToStartAt; },
@@ -968,7 +968,7 @@ function RunMaps() {
         }
     }
 
-    if (game.global.challengeActive == "Electricity" && game.global.world > 80) { //Do Prison to turn off elec challenge
+    if (game.global.challengeActive === "Electricity" && game.global.world > 80) { //Do Prison to turn off elec challenge
         for (map in game.global.mapsOwnedArray) {
             theMap = game.global.mapsOwnedArray[map];
             if (theMap.name === "The Prison" && addSpecials(true, true, theMap) > 0){
@@ -990,7 +990,7 @@ function RunMaps() {
     var uniqueMapIndex = mapsWithDesiredUniqueDrops.indexOf(game.global.world); //Run new map if on zone with unique map drop then remove
     if (uniqueMapIndex > -1 && itemsAvailableInNewMap > 0){
         mapsWithDesiredUniqueDrops.splice(uniqueMapIndex,1);
-        RunNewMap();
+        RunNewMap(game.global.world);
         return;
     }
 
@@ -1152,7 +1152,7 @@ function CheckPortal() {
             }
         }
     }
-    if (game.global.world >= portalAt) {
+    if (game.global.world >= portalAt && game.global.challengeActive !== "Electricity") {
         document.getElementById("portalBtn").click();
         if (doElectricChallenge)
         {
