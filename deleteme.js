@@ -13,7 +13,7 @@ var minimumUpgradesOnHand = 4; //0 will run maps only when no equipment upgrades
 var helium = -1;
 var minBreedingSpeed = 100;
 var heliumHistory = [];
-var portalAt = 83;
+var portalAt = 96;
 var portalObtained = false;
 var pauseTrimpz = false;
 var doElectricChallenge = true;
@@ -1072,9 +1072,10 @@ function CheckLateGame() {
     if (game.resources.trimps.owned < 1000) {
         constants = constantsSets[0];
         constantsIndex = 0;
-        mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50];
+        mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50,80];
         heliumHistory = [];
         formationDone = false;
+        autoFighting = false;
         helium = -1;
         portalObtained = false;
         return;
