@@ -355,10 +355,25 @@ function AssignFreeWorkers() {
     }
     var cost;
     var beginTime = Date.now();
+    var maxFreeForAssignOneAtATime = 500000;
+    var totalMultipliers;
+    var assignThisMany;
     while (free > 0) {
         if (Date.now() - beginTime > 1000) { //too long in here, finish later
             break;
         }
+        if (free > maxFreeForAssignOneAtATime){
+            totalMultipliers = constants.getMinerMultiplier() + constants.getLumberjackMultiplier() + 1; //1 for default/reference farmer
+            assignThisMany = constants.getMinerMultiplier() / totalMultipliers * (free - maxFreeForAssignOneAtATime);
+            buy.Miner += Math.floor(assignThisMany);
+            assignThisMany = constants.getLumberjackMultiplier() / totalMultipliers * (free - maxFreeForAssignOneAtATime);
+            buy.Lumberjack += Math.floor(assignThisMany);
+            assignThisMany = free - maxFreeForAssignOneAtATime - buy.Miner - buy.Lumberjack;
+            buy.Farmer += assignThisMany;
+
+            free = free - (buy.Miner + buy.Lumberjack + buy.Farmer);
+        }
+
         if (game.jobs.Trainer.locked === 0 &&
             (cost = CanBuyWorkerWithResource(game.jobs.Trainer, constants.getTrainerCostRatio(), food , buy.Trainer)) !== -1){
             food -= cost;
