@@ -13,7 +13,7 @@ var minimumUpgradesOnHand = 4; //0 will run maps only when no equipment upgrades
 var helium = -1;
 var minBreedingSpeed = 100;
 var heliumHistory = [];
-var portalAt = 96;
+var portalAt = 107;
 var portalObtained = false;
 var pauseTrimpz = false;
 var doElectricChallenge = true;
@@ -356,7 +356,7 @@ function AssignFreeWorkers() {
     var cost;
     var beginTime = Date.now();
     while (free > 0) {
-        if (Date.now() - beginTime > 2000) { //too long in here, finish later
+        if (Date.now() - beginTime > 1000) { //too long in here, finish later
             break;
         }
         if (game.jobs.Trainer.locked === 0 &&
@@ -549,7 +549,7 @@ function UpgradeNonEquipment() {
     ClickAllNonEquipmentUpgrades();
     for (upgrade in game.upgrades) {
         if (typeof game.upgrades[upgrade].prestiges === 'undefined' && game.upgrades[upgrade].locked === 0) {
-            if (upgrade === "Gigastation" && game.buildings.Warpstation.owned < constants.getMinimumWarpStations()){
+            if (upgrade === "Gigastation" && game.buildings.Warpstation.owned < constants.getMinimumWarpStations() || CanBuyNonUpgrade(game.buildings.Warpstation, 2) === true){ //ratio 2 for "can buy soon"
                 continue;
             }
             if (skipShieldBlock === true && upgrade === "Shieldblock"){
@@ -605,8 +605,8 @@ function UpgradeAndGather() {
             document.getElementById("trimpsPs").innerHTML.match(/\d+/)[0] < minBreedingSpeed) ||
             openTrapsForDefault === true) {
             document.getElementById("trimpsCollectBtn").click();
-        } else if (game.global.buildingsQueue.length > 0) {
-            document.getElementById("buildingsCollectBtn").click();
+//        } else if (game.global.buildingsQueue.length > 0) {
+//            document.getElementById("buildingsCollectBtn").click();
         } else { //nothing to build
             document.getElementById("metalCollectBtn").click();
         }
