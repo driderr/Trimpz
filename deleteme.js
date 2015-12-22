@@ -13,7 +13,7 @@ var minimumUpgradesOnHand = 4; //0 will run maps only when no equipment upgrades
 var helium = -1;
 var minBreedingSpeed = 100;
 var heliumHistory = [];
-var portalAt = 107;
+var portalAt = 112;
 var portalObtained = false;
 var pauseTrimpz = false;
 var doElectricChallenge = true;
@@ -409,11 +409,14 @@ function AssignFreeWorkers() {
     }
     var jobName;
     var numberToBuy;
+    var element;
     for (jobName in buy){
         numberToBuy = buy[jobName];
         if (numberToBuy > 0){
             game.global.buyAmt = numberToBuy;
-            document.getElementById(jobName).click();
+            element = document.getElementById(jobName);
+            if (element !== 'undefined')
+                element.click();
         }
     }
     game.global.buyAmt = 1;
@@ -426,7 +429,7 @@ function Fight() {
     }
     autoFighting = false;
     var pauseFightButton = document.getElementById("pauseFight");
-    if (pauseFightButton.offsetHeight > 0 && game.resources.trimps.owned === game.resources.trimps.realMax()) {
+    if (pauseFightButton.offsetHeight > 0 && game.resources.trimps.owned === game.resources.trimps.realMax() || game.resources.trimps.owned > 5000000) {
         if (pauseFightButton.innerHTML !== "AutoFight On") {
             pauseFightButton.click();
         }
