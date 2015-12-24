@@ -275,6 +275,9 @@ function CanBuyNonUpgrade(nonUpgradeItem, ratio) {
         }
         if (typeof nonUpgradeItem.prestige !== 'undefined') {//Discount equipment
             needed = Math.ceil(needed * (Math.pow(1 - game.portal.Artisanistry.modifier, game.portal.Artisanistry.level)));
+        } else if (game.portal.Resourceful.level)
+        {
+            needed = Math.ceil(needed * (Math.pow(1 - game.portal.Resourceful.modifier, game.portal.Resourceful.level)));
         }
         if (game.resources[aResource].owned * ratio < needed) {
             return false;
