@@ -325,14 +325,13 @@ function CanBuyWorkerWithResource(job, ratio, food, extraWorkers){
     }
 }
 
-function getTotalTimeForBreeding() {
+function getTotalTimeForBreeding(almostOwnedGeneticists) {
     "use strict";
     var trimps = game.resources.trimps;
-    checkAchieve("trimps", trimps.owned);
     var trimpsMax = trimps.realMax();
     var potencyMod = trimps.potency;
     potencyMod += (potencyMod * game.portal.Pheromones.level * game.portal.Pheromones.modifier);
-    if (game.jobs.Geneticist.owned > 0) potencyMod *= Math.pow(.98, game.jobs.Geneticist.owned);
+    if (game.jobs.Geneticist.owned + almostOwnedGeneticists> 0) potencyMod *= Math.pow(.98, (game.jobs.Geneticist.owned + almostOwnedGeneticists));
     if (game.unlocks.quickTrimps) potencyMod *= 2;
 
     var adjustedMax = (game.portal.Coordinated.level) ? game.portal.Coordinated.currentSend : trimps.maxSoldiers;
@@ -398,7 +397,7 @@ function AssignFreeWorkers() {
         if (game.jobs.Geneticist.locked === 0 &&
             game.global.challengeActive !== "Electricity" &&
             (cost = CanBuyWorkerWithResource(game.jobs.Geneticist, 1, food , buy.Geneticist)) !== -1 &&
-            getTotalTimeForBreeding() < targetBreedTime){
+            getTotalTimeForBreeding(buy.Geneticist) < targetBreedTime){
             food -= cost;
             buy.Geneticist += 1;
             free--;
