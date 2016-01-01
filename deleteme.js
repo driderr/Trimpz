@@ -1003,6 +1003,12 @@ function RunMaps() {
         return;
     }
 
+    if (game.resources.trimps.owned < game.resources.trimps.realMax()) {
+        if (game.global.preMapsActive === true)
+            RunWorld();
+        return;
+    }
+
     if (game.upgrades.Bounty.done === 0 && game.upgrades.Bounty.locked === 1) { //Look for Bounty upgrade
         for (map in game.global.mapsOwnedArray) {
             theMap = game.global.mapsOwnedArray[map];
