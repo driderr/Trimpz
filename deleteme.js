@@ -13,13 +13,15 @@ var minimumUpgradesOnHand = 4; //0 will run maps only when no equipment upgrades
 var helium = -1;
 var minBreedingSpeed = 100;
 var heliumHistory = [];
-var portalAt = 112;
+var portalAt = 120;
+var targetBreedTime = 30;
 var portalObtained = false;
 var pauseTrimpz = false;
 var doElectricChallenge = true;
 var formationDone = false;
 const CheapEquipmentRatio = 0.01;
 const CheapEqUpgradeRatio = 0.2;
+
 var constantsEarlyGame = (function () {
     "use strict";
     var zoneToStartAt = 0,
@@ -323,11 +325,28 @@ function CanBuyWorkerWithResource(job, ratio, food, extraWorkers){
     }
 }
 
+function getTotalTimeForBreeding() {
+    "use strict";
+    var trimps = game.resources.trimps;
+    checkAchieve("trimps", trimps.owned);
+    var trimpsMax = trimps.realMax();
+    var potencyMod = trimps.potency;
+    potencyMod += (potencyMod * game.portal.Pheromones.level * game.portal.Pheromones.modifier);
+    if (game.jobs.Geneticist.owned > 0) potencyMod *= Math.pow(.98, game.jobs.Geneticist.owned);
+    if (game.unlocks.quickTrimps) potencyMod *= 2;
+
+    var adjustedMax = (game.portal.Coordinated.level) ? game.portal.Coordinated.currentSend : trimps.maxSoldiers;
+    var totalTime = log10((trimpsMax - trimps.employed) / ((trimpsMax - adjustedMax) - trimps.employed)) / log10(1 + (potencyMod / 10));
+    if (!game.global.brokenPlanet) totalTime /= 10;
+    return totalTime;
+}
+
 function AssignFreeWorkers() {
     "use strict";
     var trimps = game.resources.trimps;
     var food = game.resources.food.owned;
     var buy = {
+        "Geneticist" : 0,
         "Trainer" : 0,
         "Explorer" : 0,
         "Scientist" : 0,
@@ -376,8 +395,14 @@ function AssignFreeWorkers() {
 
             free = free - (buy.Miner + buy.Lumberjack + buy.Farmer);
         }
-
-        if (game.jobs.Trainer.locked === 0 &&
+        if (game.jobs.Geneticist.locked === 0 &&
+            game.global.challengeActive !== "Electricity" &&
+            (cost = CanBuyWorkerWithResource(game.jobs.Geneticist, 1, food , buy.Geneticist)) !== -1 &&
+            getTotalTimeForBreeding() < targetBreedTime){
+            food -= cost;
+            buy.Geneticist += 1;
+            free--;
+        } else if (game.jobs.Trainer.locked === 0 &&
             (cost = CanBuyWorkerWithResource(game.jobs.Trainer, constants.getTrainerCostRatio(), food , buy.Trainer)) !== -1){
             food -= cost;
             buy.Trainer += 1;
