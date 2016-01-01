@@ -375,14 +375,10 @@ function AssignFreeWorkers() {
         }
     }
     var cost;
-    var beginTime = Date.now();
     var maxFreeForAssignOneAtATime = 1000;
     var totalMultipliers;
     var assignThisMany;
     while (free > 0) {
-        if (Date.now() - beginTime > 1000) { //too long in here, finish later
-            break;
-        }
         if (free > maxFreeForAssignOneAtATime){
             totalMultipliers = constants.getMinerMultiplier() + constants.getLumberjackMultiplier() + 1; //1 for default/reference farmer
             assignThisMany = constants.getMinerMultiplier() / totalMultipliers * (free - maxFreeForAssignOneAtATime);
