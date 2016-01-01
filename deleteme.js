@@ -376,7 +376,7 @@ function AssignFreeWorkers() {
     }
     var cost;
     var beginTime = Date.now();
-    var maxFreeForAssignOneAtATime = 500000;
+    var maxFreeForAssignOneAtATime = 1000;
     var totalMultipliers;
     var assignThisMany;
     while (free > 0) {
