@@ -1018,10 +1018,11 @@ function RunMaps() {
         return;
     }
 
-    if (game.resources.trimps.owned < game.resources.trimps.realMax()) {
-        if (game.global.preMapsActive === true)
-            RunWorld();
-        return;
+    if (game.global.preMapsActive === false)
+    {
+        if (game.resources.trimps.owned < game.resources.trimps.realMax()) {
+            return;
+        }
     }
 
     if (game.upgrades.Bounty.done === 0 && game.upgrades.Bounty.locked === 1) { //Look for Bounty upgrade
