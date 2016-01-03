@@ -7,17 +7,18 @@ var workersFocused = false;
 var workersFocusedOn;
 var workersMoved = [];
 var skipShieldBlock = true;
-var mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50,80]; //removed from array when done, reset on portal or refresh
+var mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50,80,125]; //removed from array when done, reset on portal or refresh
 var uniqueMaps = ["The Block", "The Wall",  "Dimension of Anger", "Trimple Of Doom", "The Prison"];
 var minimumUpgradesOnHand = 4; //0 will run maps only when no equipment upgrades left, 10 will run maps if any equipment upgrade is missing
 var helium = -1;
 var minBreedingSpeed = 100;
 var heliumHistory = [];
-var portalAt = 120;
+var portalAt = 129;
 var targetBreedTime = 30;
 var targetBreedTimeHysteresis = 5;
 var portalObtained = false;
 var pauseTrimpz = false;
+var bionicDone = false;
 var doElectricChallenge = true;
 var formationDone = false;
 const CheapEquipmentRatio = 0.01;
@@ -1045,6 +1046,17 @@ function RunMaps() {
         }
     }
 
+    if (bionicDone === false && game.global.world >= 125) { //For Bionic speed run achieve
+        for (map in game.global.mapsOwnedArray) {
+            theMap = game.global.mapsOwnedArray[map];
+            if (theMap.name === "Bionic Wonderland"){
+                bionicDone = true;
+                RunMap(theMap);
+                return;
+            }
+        }
+    }
+
     var itemsAvailableInNewMap = addSpecials(true,true,{ id: "map999", name: "My Map", location: "Sea", clears: 0, level: game.global.world, difficulty: 1.11, size: 40, loot: 1.2, noRecycle: false });
     if (game.global.preMapsActive === true && itemsAvailableInNewMap === 0){
         RunWorld();
@@ -1139,12 +1151,13 @@ function CheckLateGame() {
     if (game.resources.trimps.owned < 1000) {
         constants = constantsSets[0];
         constantsIndex = 0;
-        mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50,80];
+        mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50,80,125];
         heliumHistory = [];
         formationDone = false;
         autoFighting = false;
         helium = -1;
         portalObtained = false;
+        bionicDone = false;
         return;
     }
     if (constantsIndex === constantsSets.length - 1){ //check for last element
