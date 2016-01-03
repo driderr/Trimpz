@@ -15,6 +15,7 @@ var minBreedingSpeed = 100;
 var heliumHistory = [];
 var portalAt = 120;
 var targetBreedTime = 30;
+var targetBreedTimeHysteresis = 5;
 var portalObtained = false;
 var pauseTrimpz = false;
 var doElectricChallenge = true;
@@ -340,6 +341,23 @@ function getTotalTimeForBreeding(almostOwnedGeneticists) {
     return totalTime;
 }
 
+function getRemainingTimeForBreeding() {
+    "use strict";
+    var trimps = game.resources.trimps;
+    var trimpsMax = trimps.realMax();
+    var potencyMod = trimps.potency;
+
+    //Pheromones
+    potencyMod += (potencyMod * game.portal.Pheromones.level * game.portal.Pheromones.modifier);
+    if (game.jobs.Geneticist.owned > 0) potencyMod *= Math.pow(.98, game.jobs.Geneticist.owned);
+    if (game.unlocks.quickTrimps) potencyMod *= 2;
+
+    var timeRemaining = log10((trimpsMax - trimps.employed) / (trimps.owned - trimps.employed)) / log10(1 + (potencyMod / 10));
+    if (!game.global.brokenPlanet) timeRemaining /= 10;
+    timeRemaining = Math.floor(timeRemaining);
+    return timeRemaining;
+}
+
 function AssignFreeWorkers() {
     "use strict";
     var trimps = game.resources.trimps;
@@ -393,7 +411,8 @@ function AssignFreeWorkers() {
         if (game.jobs.Geneticist.locked === 0 &&
             game.global.challengeActive !== "Electricity" &&
             (cost = CanBuyWorkerWithResource(game.jobs.Geneticist, 1, food , buy.Geneticist)) !== -1 &&
-            getTotalTimeForBreeding(buy.Geneticist) < targetBreedTime){
+            getTotalTimeForBreeding(buy.Geneticist) < targetBreedTime &&
+            getRemainingTimeForBreeding() < targetBreedTime){
             food -= cost;
             buy.Geneticist += 1;
             free--;
@@ -1225,6 +1244,27 @@ function CheckFormation() {
     }
 }
 
+function FireGeneticists() {
+    "use strict";
+    var jobButton;
+    var job = "Geneticist";
+
+    if (game.jobs.Geneticist.locked !== 0 ||
+        game.global.challengeActive === "Electricity" ||
+        game.jobs.Geneticist.owned === 0) {
+        return;
+    }
+
+    while(getTotalTimeForBreeding(0) >= targetBreedTime + targetBreedTimeHysteresis ||
+          getRemainingTimeForBreeding() >= targetBreedTime + targetBreedTimeHysteresis) {
+        game.global.firing = true;
+        game.global.buyAmt = 1;
+        jobButton = document.getElementById(job);
+        jobButton.click();
+        game.global.firing = false;
+    }
+}
+
 //Main
 (function () {
     "use strict";
@@ -1250,6 +1290,7 @@ function CheckFormation() {
         }
         TurnOnAutoBuildTraps();
         AssignFreeWorkers();
+        FireGeneticists();
         Fight();
         UpgradeStorage();
         var shouldReturn = BeginPriorityAction();
