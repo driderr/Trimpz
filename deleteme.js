@@ -414,7 +414,7 @@ function AssignFreeWorkers() {
             (cost = CanBuyWorkerWithResource(game.jobs.Geneticist, 1, food , buy.Geneticist)) !== -1 &&
             getTotalTimeForBreeding(buy.Geneticist) < targetBreedTime &&
             getRemainingTimeForBreeding() < targetBreedTime &&
-            game.global.lastBreedTime < targetBreedTime - getRemainingTimeForBreeding() + targetBreedTimeHysteresis ){
+            game.global.lastBreedTime / 1000 < targetBreedTime - getRemainingTimeForBreeding() + targetBreedTimeHysteresis ){
             food -= cost;
             buy.Geneticist += 1;
             free--;
