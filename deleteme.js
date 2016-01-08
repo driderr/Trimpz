@@ -40,7 +40,7 @@ var constantsEarlyGame = (function () {
         maxGyms = 10000,
         tributeCostRatio = 0.5,
         nurseryCostRatio = 0.5,
-        maxLevel = 15,
+        maxLevel = 100,
         equipmentCostRatio = 0.5,
         otherWorkersFocusRatio = 0.5,
         numTrapsForAutoTrapping = 10000,
@@ -93,7 +93,7 @@ var constantsLateGame = (function () {
         maxGyms = 170,
         tributeCostRatio = 0.8,
         nurseryCostRatio = 0.15,
-        maxLevel = 15,
+        maxLevel = 5,
         equipmentCostRatio = 0.8,
         otherWorkersFocusRatio = 0.5,
         numTrapsForAutoTrapping = 10000,
@@ -151,7 +151,7 @@ var constantsLateLateGame = (function () {
         maxGyms = 170,
         tributeCostRatio = 0.9,
         nurseryCostRatio = 0.01,
-        maxLevel = 15,
+        maxLevel = 4,
         equipmentCostRatio = 0.9,
         otherWorkersFocusRatio = 0.5,
         numTrapsForAutoTrapping = 10000,
@@ -214,7 +214,7 @@ var constantsEndGame = (function () {
         maxGyms = 10000,
         tributeCostRatio = 0.7,
         nurseryCostRatio = 0.20,
-        maxLevel = 15,
+        maxLevel = 4,
         equipmentCostRatio = 0.9,
         otherWorkersFocusRatio = 0.5,
         numTrapsForAutoTrapping = 10000,
@@ -789,6 +789,9 @@ function FindBestEquipmentToLevel(debugHpToAtkRatio) {
     for (anEquipment in game.equipment) {
         currentEquip = game.equipment[anEquipment];
         if (currentEquip.locked === 1 || anEquipment === "Shield" || (constants.getShouldSkipHpEquipment() === true && typeof currentEquip.health !== 'undefined')) {
+            continue;
+        }
+        if (currentEquip.level >= constants.getMaxLevel()) {
             continue;
         }
         cost = GetNonUpgradePrice(currentEquip);
