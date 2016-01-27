@@ -13,7 +13,7 @@ var minimumUpgradesOnHand = 4; //0 will run maps only when no equipment upgrades
 var helium = -1;
 var minBreedingSpeed = 100;
 var heliumHistory = [];
-var portalAt = 129;
+var portalAt = 150;
 var targetBreedTime = 30;
 var targetBreedTimeHysteresis = 5;
 var portalObtained = false;
@@ -21,6 +21,7 @@ var pauseTrimpz = false;
 var bionicDone = false;
 var doElectricChallenge = true;
 var formationDone = false;
+var heliumLog = [];
 const CheapEquipmentRatio = 0.01;
 const CheapEqUpgradeRatio = 0.2;
 
@@ -40,7 +41,7 @@ var constantsEarlyGame = (function () {
         maxGyms = 10000,
         tributeCostRatio = 0.5,
         nurseryCostRatio = 0.5,
-        maxLevel = 100,
+        maxLevel = 10,
         equipmentCostRatio = 0.5,
         otherWorkersFocusRatio = 0.5,
         numTrapsForAutoTrapping = 10000,
@@ -1239,6 +1240,7 @@ function CheckPortal() {
         }
     }
     if (game.global.world >= portalAt && game.global.challengeActive !== "Electricity") {
+        heliumLog.push(heliumHistory);
         document.getElementById("portalBtn").click();
         if (doElectricChallenge)
         {
