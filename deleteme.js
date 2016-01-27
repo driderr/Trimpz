@@ -333,13 +333,27 @@ function getTotalTimeForBreeding(almostOwnedGeneticists) {
     var trimps = game.resources.trimps;
     var trimpsMax = trimps.realMax();
     var potencyMod = trimps.potency;
-    potencyMod += (potencyMod * game.portal.Pheromones.level * game.portal.Pheromones.modifier);
-    if (game.jobs.Geneticist.owned + almostOwnedGeneticists> 0) potencyMod *= Math.pow(.98, (game.jobs.Geneticist.owned + almostOwnedGeneticists));
-    if (game.unlocks.quickTrimps) potencyMod *= 2;
 
+    //Broken Planet
+    if (game.global.brokenPlanet) potencyMod /= 10;
+    //Pheromones
+    potencyMod *= 1+ (game.portal.Pheromones.level * game.portal.Pheromones.modifier);
+    //Geneticist
+    if (game.jobs.Geneticist.owned + almostOwnedGeneticists > 0) potencyMod *= Math.pow(.98, game.jobs.Geneticist.owned + almostOwnedGeneticists);
+    //Quick Trimps
+    if (game.unlocks.quickTrimps) potencyMod *= 2;
+    if (game.global.challengeActive == "Toxicity" && game.challenges.Toxicity.stacks > 0){
+        potencyMod *= Math.pow(game.challenges.Toxicity.stackMult, game.challenges.Toxicity.stacks);
+    }
+    potencyMod = (1 + (potencyMod / 10));
     var adjustedMax = (game.portal.Coordinated.level) ? game.portal.Coordinated.currentSend : trimps.maxSoldiers;
-    var totalTime = log10((trimpsMax - trimps.employed) / ((trimpsMax - adjustedMax) - trimps.employed)) / log10(1 + (potencyMod / 10));
-    if (!game.global.brokenPlanet) totalTime /= 10;
+    var totalTime;
+    if (game.options.menu.showFullBreed.enabled == 1) totalTime = log10((trimpsMax - trimps.employed) / (trimpsMax - adjustedMax - trimps.employed)) / log10(potencyMod);
+    else {
+        var threshold = Math.ceil((trimpsMax - trimps.employed) * 0.95);
+        totalTime = log10(threshold / (threshold - adjustedMax)) / log10(potencyMod);
+    }
+    totalTime /= 10;
     return totalTime;
 }
 
@@ -349,14 +363,20 @@ function getRemainingTimeForBreeding() {
     var trimpsMax = trimps.realMax();
     var potencyMod = trimps.potency;
 
+    //Broken Planet
+    if (game.global.brokenPlanet) potencyMod /= 10;
     //Pheromones
-    potencyMod += (potencyMod * game.portal.Pheromones.level * game.portal.Pheromones.modifier);
-    if (game.jobs.Geneticist.owned > 0) potencyMod *= Math.pow(.98, game.jobs.Geneticist.owned);
+    potencyMod *= 1+ (game.portal.Pheromones.level * game.portal.Pheromones.modifier);
+    //Geneticist
+    if (game.jobs.Geneticist.owned  > 0) potencyMod *= Math.pow(.98, game.jobs.Geneticist.owned);
+    //Quick Trimps
     if (game.unlocks.quickTrimps) potencyMod *= 2;
-
-    var timeRemaining = log10((trimpsMax - trimps.employed) / (trimps.owned - trimps.employed)) / log10(1 + (potencyMod / 10));
-    if (!game.global.brokenPlanet) timeRemaining /= 10;
-    timeRemaining = Math.floor(timeRemaining);
+    if (game.global.challengeActive == "Toxicity" && game.challenges.Toxicity.stacks > 0){
+        potencyMod *= Math.pow(game.challenges.Toxicity.stackMult, game.challenges.Toxicity.stacks);
+    }
+    potencyMod = (1 + (potencyMod / 10));
+    var timeRemaining = log10((trimpsMax - trimps.employed) / (trimps.owned - trimps.employed)) / log10(potencyMod);
+    timeRemaining /= 10;
     return timeRemaining;
 }
 
