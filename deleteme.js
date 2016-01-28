@@ -19,8 +19,9 @@ var targetBreedTimeHysteresis = 5;
 var portalObtained = false;
 var pauseTrimpz = false;
 var bionicDone = false;
-var doElectricChallenge = false;
-var doCrushedChallenge = true;
+var doElectricChallenge = false; //don't portal before 81
+var doCrushedChallenge = true; //don't portal before 126
+var doToxicChallenge = false; //don't portal before 166
 var formationDone = false;
 var heliumLog = [];
 const CheapEquipmentRatio = 0.01;
@@ -1269,6 +1270,9 @@ function CheckPortal() {
         } else if (doCrushedChallenge)
         {
             document.getElementById("challengeCrushed").click();
+        } else if (doToxicChallenge)
+        {
+            document.getElementById("challengeToxicity").click();
         }
         document.getElementById("activatePortalBtn").click();
         document.getElementsByClassName("activatePortalBtn")[0].click();
