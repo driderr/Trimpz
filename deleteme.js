@@ -8,12 +8,12 @@ var workersFocusedOn;
 var workersMoved = [];
 var skipShieldBlock = true;
 var mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50,80,125]; //removed from array when done, reset on portal or refresh
-var uniqueMaps = ["The Block", "The Wall",  "Dimension of Anger", "Trimple Of Doom", "The Prison"];
+var uniqueMaps = ["The Block", "The Wall",  "Dimension of Anger", "Trimple Of Doom", "The Prison", "Bionic Wonderland"];
 var minimumUpgradesOnHand = 4; //0 will run maps only when no equipment upgrades left, 10 will run maps if any equipment upgrade is missing
 var helium = -1;
 var minBreedingSpeed = 100;
 var heliumHistory = [];
-var portalAt = 150;
+var portalAt = 144;
 var targetBreedTime = 30;
 var targetBreedTimeHysteresis = 5;
 var portalObtained = false;
@@ -737,6 +737,9 @@ function BeginPriorityAction() { //this is really just for the beginning (after 
     return false;
 }
 
+/**
+ * @return {boolean}
+ */
 function BuyBuilding(buildingName, ratio, max){
     "use strict";
     var useMax;
@@ -749,7 +752,9 @@ function BuyBuilding(buildingName, ratio, max){
     if (theBuilding.locked === 0 && theBuilding.owned < useMax &&
         CanBuyNonUpgrade(theBuilding, ratio) === true) {
         document.getElementById(buildingName).click();
+        return true;
     }
+    return false;
 }
 
 function BuyBuildings() {
@@ -767,7 +772,7 @@ function BuyBuildings() {
     if (game.buildings.Warpstation.locked === 1 || GetNonUpgradePrice(game.buildings.Warpstation) > GetNonUpgradePrice(game.buildings.Collector) * game.buildings.Warpstation.increase.by / game.buildings.Collector.increase.by) {
         BuyBuilding("Collector", 1);
     }
-    BuyBuilding("Warpstation", 1);
+    while (BuyBuilding("Warpstation", 1));
     tooltip('hide');
 }
 
