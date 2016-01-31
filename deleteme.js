@@ -22,6 +22,9 @@ var bionicDone = false;
 var doElectricChallenge = false; //don't portal before 81
 var doCrushedChallenge = true; //don't portal before 126
 var doToxicChallenge = false; //don't portal before 166
+var doRunMapsForBonus = true;
+var doRunMapsForEquipment = true;
+var numberOfDeathsAllowedToKillBoss = 3; //minimum of just under one
 var formationDone = false;
 var heliumLog = [];
 const CheapEquipmentRatio = 0.01;
@@ -984,6 +987,89 @@ function CanAffordEquipmentUpgrade(upgrade) {
     return canBuyUpgrade;
 }
 
+function unprettify(splitArray) {
+    "use strict";
+    var suffices = [
+        'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc', 'Ud',
+        'Dd', 'Td', 'Qad', 'Qid', 'Sxd', 'Spd', 'Od', 'Nd', 'V', 'Uv', 'Dv',
+        'Tv', 'Qav', 'Qiv', 'Sxv', 'Spv', 'Ov', 'Nv', 'Tt'
+    ];
+    var suffixIndex = suffices.indexOf(splitArray[2]);
+    var base = suffixIndex + 1;
+    var number = splitArray[1] * Math.pow(1000,base);
+    return number;
+}
+
+function getAverageOfPrettifiedString(attackString) {
+    "use strict";
+    var splitArray = attackString.split("-");
+    var minArray = splitArray[0].match(/(\d+(?:\.\d+)?)(\D+)/); //[1] is number, [2] is unit
+    var maxArray= splitArray[1].match(/(\d+(?:\.\d+)?)(\D+)/); //[1] is number, [2] is unit
+
+    var min;
+    var max;
+    if (minArray === null){
+        min = splitArray[0];
+    } else{
+        min = unprettify(minArray);
+    }
+    if (maxArray === null){
+        max = splitArray[0];
+    } else{
+        max = unprettify(maxArray);
+    }
+    return (max + min)/2
+}
+
+function getBossAttack() {
+    "use strict";
+    var cell = game.global.gridArray[99];
+    var baseAttack = game.global.getEnemyAttack(cell.level, cell.name);
+    if (game.global.challengeActive == "Toxicity"){
+        baseAttack *= 5;
+    }
+    var attackString = calculateDamage(baseAttack, true);
+    var finalAttack = getAverageOfPrettifiedString(attackString);
+    return finalAttack;
+}
+
+function getBossHealth() {
+    "use strict";
+    var cell = game.global.gridArray[99];
+    var health = game.global.getEnemyHealth(cell.level, cell.name);
+    if (game.global.challengeActive == "Toxicity"){
+        health *= 2;
+    }
+    return health;
+}
+
+function getSoldierAttack(){
+    "use strict";
+    var attackString = document.getElementById("goodGuyAttack").innerHTML;
+    var finalAttack = getAverageOfPrettifiedString(attackString);
+    return finalAttack;
+}
+
+function canTakeOnBoss(){
+    "use strict";
+    var bossAttack = getBossAttack();
+    var bossHealth = getBossHealth();
+    var soldierAttack = getSoldierAttack();
+    var soldierHealth = game.global.soldierHealthMax;
+
+    var attacksToKillBoss = bossHealth/soldierAttack;
+    var attacksToKillSoldiers = soldierHealth/bossAttack;
+    var numberOfDeaths = attacksToKillBoss/attacksToKillSoldiers;
+
+    if (attacksToKillSoldiers < 1)
+        return false;
+    if (numberOfDeaths > numberOfDeathsAllowedToKillBoss)
+        return false;
+    return true;
+}
+
+
+
 function GotoMapsScreen() {
     "use strict";
     if (game.global.preMapsActive === true) {
@@ -998,14 +1084,19 @@ function GotoMapsScreen() {
 function RunNewMap(zoneToCreate) {
     "use strict";
     var newMap;
-    var size = 9;
-    var difficulty = 9;
+    var size = 9;   //0-9
+    var difficulty = 9; //0-9
+    var loot = 0; //0-9
+    var biome = "Random";
 
     GotoMapsScreen();
     document.getElementById("difficultyAdvMapsRange").value = difficulty;
     adjustMap('difficulty', difficulty);
     document.getElementById("sizeAdvMapsRange").value = size;
     adjustMap('size', size);
+    document.getElementById("lootAdvMapsRange").value = loot;
+    adjustMap('loot', loot);
+    document.getElementById("biomeAdvMapsSelect").value = biome;
     if (typeof zoneToCreate !== 'undefined') {
         document.getElementById("mapLevelInput").value = zoneToCreate;
     }
@@ -1021,6 +1112,46 @@ function RunNewMap(zoneToCreate) {
         }
         document.getElementById("sizeAdvMapsRange").value = size;
         adjustMap('size', size);
+        document.getElementById("difficultyAdvMapsRange").value = difficulty;
+        adjustMap('difficulty', difficulty);
+        cost = updateMapCost(true);
+    }
+    document.getElementById("mapCreateBtn").click();
+    newMap = game.global.mapsOwnedArray[game.global.mapsOwnedArray.length - 1];
+    RunMap(newMap);
+}
+
+function RunNewMapForLoot(zoneToCreate) {
+    "use strict";
+    var newMap;
+    var size = 0;   //0-9
+    var difficulty = 9; //0-9
+    var loot = 9; //0-9
+    var biome = "Mountain";
+
+    GotoMapsScreen();
+    document.getElementById("difficultyAdvMapsRange").value = difficulty;
+    adjustMap('difficulty', difficulty);
+    document.getElementById("sizeAdvMapsRange").value = size;
+    adjustMap('size', size);
+    document.getElementById("lootAdvMapsRange").value = loot;
+    adjustMap('loot', loot);
+    document.getElementById("biomeAdvMapsSelect").value = biome;
+    if (typeof zoneToCreate !== 'undefined') {
+        document.getElementById("mapLevelInput").value = zoneToCreate;
+    }
+    var cost = updateMapCost(true);
+    while (cost > game.resources.fragments.owned){
+        if (loot === 1){
+            difficulty--;
+            if (difficulty === 1) {
+                return;         //need more fragments!
+            }
+        } else {
+            loot--;
+        }
+        document.getElementById("lootAdvMapsRange").value = loot;
+        adjustMap('loot', loot);
         document.getElementById("difficultyAdvMapsRange").value = difficulty;
         adjustMap('difficulty', difficulty);
         cost = updateMapCost(true);
@@ -1089,6 +1220,35 @@ function RunMaps() {
             }
         }
     }
+
+    if (doRunMapsForBonus && game.global.lastClearedCell < 98){
+        if (!canTakeOnBoss()){
+            var mapLevel = game.global.world - game.portal.Siphonology.level;
+            if (game.global.mapBonus < 10){
+                for (map in game.global.mapsOwnedArray) {
+                    theMap = game.global.mapsOwnedArray[map];
+                    if (theMap.level === mapLevel && theMap.size <= 40){
+                        RunMap(theMap);
+                        return;
+                    }
+                }
+                RunNewMap(mapLevel);
+                return;
+            }
+            if (doRunMapsForEquipment){
+                for (map in game.global.mapsOwnedArray) {
+                    theMap = game.global.mapsOwnedArray[map];
+                    if (theMap.level === mapLevel && theMap.loot >= 1.40){
+                        RunMap(theMap);
+                        return;
+                    }
+                }
+                RunNewMapForLoot(mapLevel);
+                return;
+            }
+        }
+    }
+
 
     var itemsAvailableInNewMap = addSpecials(true,true,{ id: "map999", name: "My Map", location: "Sea", clears: 0, level: game.global.world, difficulty: 1.11, size: 40, loot: 1.2, noRecycle: false });
     if (game.global.preMapsActive === true && itemsAvailableInNewMap === 0){
