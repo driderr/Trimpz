@@ -13,7 +13,7 @@ var minimumUpgradesOnHand = 4; //0 will run maps only when no equipment upgrades
 var helium = -1;
 var minBreedingSpeed = 100;
 var heliumHistory = [];
-var portalAt = 144;
+var portalAt = 190;
 var targetBreedTime = 30;
 var targetBreedTimeHysteresis = 5;
 var portalObtained = false;
@@ -1057,6 +1057,10 @@ function canTakeOnBoss(){
     var soldierAttack = getSoldierAttack();
     var soldierHealth = game.global.soldierHealthMax;
 
+    if (game.global.challengeActive == "Toxicity" || game.global.challengeActive == "Nom") {
+        bossAttack += game.global.soldierHealthMax * 0.05;
+    }
+
     var attacksToKillBoss = bossHealth/soldierAttack;
     var attacksToKillSoldiers = soldierHealth/bossAttack;
     var numberOfDeaths = attacksToKillBoss/attacksToKillSoldiers;
@@ -1065,6 +1069,27 @@ function canTakeOnBoss(){
         return false;
     if (numberOfDeaths > numberOfDeathsAllowedToKillBoss)
         return false;
+
+    if (game.global.challengeActive == "Nom" && numberOfDeaths > 1){
+        var cbossAttack = bossAttack;
+        var cbossHealth = bossHealth;
+        var csoldierAttack = soldierAttack;
+        var cattacksToKillSoldiers = attacksToKillSoldiers;
+
+        for (var i = 0; i < numberOfDeaths; i++){
+            cbossHealth -= (cattacksToKillSoldiers - 1) * csoldierAttack;
+            cbossHealth += 0.05 * bossHealth;
+            if (cbossHealth <= 0){
+                return true;
+            }
+            cbossAttack = (cbossAttack-(game.global.soldierHealthMax * 0.05) * 1.25) + game.global.soldierHealthMax * 0.05;
+            cattacksToKillSoldiers = soldierHealth/cbossAttack;
+            if (cattacksToKillSoldiers < 1)
+                return false;
+        }
+        return false;
+    }
+
     return true;
 }
 
@@ -1223,26 +1248,33 @@ function RunMaps() {
 
     if (doRunMapsForBonus && game.global.lastClearedCell < 98){
         if (!canTakeOnBoss()){
+            console.debug("Can't take on Boss!");
             var mapLevel = game.global.world - game.portal.Siphonology.level;
             if (game.global.mapBonus < 10){
+                console.debug("Let's increase bonus.");
                 for (map in game.global.mapsOwnedArray) {
                     theMap = game.global.mapsOwnedArray[map];
                     if (theMap.level === mapLevel && theMap.size <= 40){
+                        console.debug("Found map to increase bonus on.");
                         RunMap(theMap);
                         return;
                     }
                 }
+                console.debug("Need a new map to increase bonus.");
                 RunNewMap(mapLevel);
                 return;
             }
             if (doRunMapsForEquipment){
+                console.debug("Bonus maxed.  Let's level equipment.");
                 for (map in game.global.mapsOwnedArray) {
                     theMap = game.global.mapsOwnedArray[map];
                     if (theMap.level === mapLevel && theMap.loot >= 1.40){
+                        console.debug("Found a loot map to run for equipment.");
                         RunMap(theMap);
                         return;
                     }
                 }
+                console.debug("Making a new loot map.");
                 RunNewMapForLoot(mapLevel);
                 return;
             }
