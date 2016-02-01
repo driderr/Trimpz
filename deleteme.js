@@ -13,14 +13,15 @@ var minimumUpgradesOnHand = 4; //0 will run maps only when no equipment upgrades
 var helium = -1;
 var minBreedingSpeed = 100;
 var heliumHistory = [];
-var portalAt = 190;
+var portalAt = 155;
 var targetBreedTime = 30;
 var targetBreedTimeHysteresis = 5;
 var portalObtained = false;
 var pauseTrimpz = false;
 var bionicDone = false;
 var doElectricChallenge = false; //don't portal before 81
-var doCrushedChallenge = true; //don't portal before 126
+var doCrushedChallenge = false; //don't portal before 126
+var doNomChallenge = true; //don't portal before 126
 var doToxicChallenge = false; //don't portal before 166
 var doRunMapsForBonus = true;
 var doRunMapsForEquipment = true;
@@ -1470,6 +1471,9 @@ function CheckPortal() {
         } else if (doToxicChallenge)
         {
             document.getElementById("challengeToxicity").click();
+        } else if (doNomChallenge)
+        {
+            document.getElementById("challengeNom").click();
         }
         document.getElementById("activatePortalBtn").click();
         document.getElementsByClassName("activatePortalBtn")[0].click();
