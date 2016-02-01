@@ -21,7 +21,7 @@ var pauseTrimpz = false;
 var bionicDone = false;
 var doElectricChallenge = false; //don't portal before 81
 var doCrushedChallenge = false; //don't portal before 126
-var doNomChallenge = true; //don't portal before 126
+var doNomChallenge = true; //don't portal before 146
 var doToxicChallenge = false; //don't portal before 166
 var doRunMapsForBonus = true;
 var doRunMapsForEquipment = true;
@@ -1247,7 +1247,7 @@ function RunMaps() {
         }
     }
 
-    if (doRunMapsForBonus && game.global.lastClearedCell < 98){
+    if (doRunMapsForBonus && game.global.lastClearedCell < 98 && game.global.world > 10){
         if (!canTakeOnBoss()){
             console.debug("Can't take on Boss!");
             var mapLevel = game.global.world - game.portal.Siphonology.level;
