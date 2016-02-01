@@ -1211,7 +1211,7 @@ function RunMaps() {
 
     if (game.global.preMapsActive === false)
     {
-        if (game.resources.trimps.owned < game.resources.trimps.realMax()) {
+        if (game.resources.trimps.owned < game.resources.trimps.realMax() && game.resources.trimps.soldiers !== 0) {
             return;
         }
     }
