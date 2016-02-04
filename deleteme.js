@@ -13,9 +13,9 @@ var minimumUpgradesOnHand = 4; //0 will run maps only when no equipment upgrades
 var helium = -1;
 var minBreedingSpeed = 100;
 var heliumHistory = [];
-var portalAt = 155;
-var targetBreedTime = 30;
-var targetBreedTimeHysteresis = 5;
+var portalAt = 146;
+var targetBreedTime = 9;
+var targetBreedTimeHysteresis = 1;
 var portalObtained = false;
 var pauseTrimpz = false;
 var bionicDone = false;
@@ -521,17 +521,20 @@ function ShowRunningIndicator() {
 }
 function UpgradeStorage() {
     "use strict";
-    if (game.resources.food.owned > game.buildings.Barn.cost.food()) {
+    if (game.resources.food.owned > game.buildings.Barn.cost.food() &&
+        game.resources.food.owned > 0.9 * game.resources.food.max) {
         if (game.buildings.Barn.locked === 0) {
             document.getElementById("Barn").click();
         }
     }
-    if (game.resources.wood.owned > game.buildings.Shed.cost.wood()) {
+    if (game.resources.wood.owned > game.buildings.Shed.cost.wood() &&
+        game.resources.wood.owned > 0.9 * game.resources.wood.max) {
         if (game.buildings.Shed.locked === 0) {
             document.getElementById("Shed").click();
         }
     }
-    if (game.resources.metal.owned > game.buildings.Forge.cost.metal()) {
+    if (game.resources.metal.owned > game.buildings.Forge.cost.metal() &&
+        game.resources.metal.owned > 0.9 * game.resources.metal.max) {
         if (game.buildings.Forge.locked === 0) {
             document.getElementById("Forge").click();
         }
