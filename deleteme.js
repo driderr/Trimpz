@@ -519,27 +519,36 @@ function ShowRunningIndicator() {
     }
     document.getElementById("trimpTitle").innerHTML = "Trimpz " + rotater;
 }
+
+function getMaxResource(resource)
+{
+    var theResource = game.resources[resource]
+    return theResource.max + (theResource.max * game.portal.Packrat.modifier * game.portal.Packrat.level);
+}
+
 function UpgradeStorage() {
     "use strict";
+
     if (game.resources.food.owned > game.buildings.Barn.cost.food() &&
-        game.resources.food.owned > 0.9 * game.resources.food.max) {
+        game.resources.food.owned > 0.9 * getMaxResource("food")) {
         if (game.buildings.Barn.locked === 0) {
             document.getElementById("Barn").click();
         }
     }
     if (game.resources.wood.owned > game.buildings.Shed.cost.wood() &&
-        game.resources.wood.owned > 0.9 * game.resources.wood.max) {
+        game.resources.wood.owned > 0.9 * getMaxResource("wood")) {
         if (game.buildings.Shed.locked === 0) {
             document.getElementById("Shed").click();
         }
     }
     if (game.resources.metal.owned > game.buildings.Forge.cost.metal() &&
-        game.resources.metal.owned > 0.9 * game.resources.metal.max) {
+        game.resources.metal.owned > 0.9 * getMaxResource("metal")) {
         if (game.buildings.Forge.locked === 0) {
             document.getElementById("Forge").click();
         }
     }
 }
+
 function ClickAllNonEquipmentUpgrades() {
     "use strict";
     var upgrade;
