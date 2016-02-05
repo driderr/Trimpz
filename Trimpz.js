@@ -1067,17 +1067,10 @@ function getSoldierAttack(){
 
 function canTakeOnBoss(){
     "use strict";
-    var bossAttackBase = getBossAttack();
+    var bossAttack = getBossAttack();
     var bossHealth = getBossHealth();
     var soldierAttack = getSoldierAttack();
     var soldierHealth = game.global.soldierHealthMax;
-
-    var attackAndBlock = bossAttackBase - game.global.soldierCurrentBlock;
-    if (game.global.brokenPlanet){
-        var overpower = (game.global.formation == 3) ? bossAttackBase * 0.1 : bossAttackBase * 0.2;
-        if (attackAndBlock < overpower) attackAndBlock = overpower;
-    }
-    var bossAttack = attackAndBlock;
 
     if (game.global.challengeActive == "Toxicity" || game.global.challengeActive == "Nom") {
         bossAttack += game.global.soldierHealthMax * 0.05;
@@ -1093,7 +1086,7 @@ function canTakeOnBoss(){
         return false;
 
     if (game.global.challengeActive == "Nom" && numberOfDeaths > 1){
-        var cbossAttackBase = bossAttackBase;
+        var cbossAttack = bossAttack;
         var cbossHealth = bossHealth;
         var csoldierAttack = soldierAttack;
         var cattacksToKillSoldiers = attacksToKillSoldiers;
@@ -1104,15 +1097,7 @@ function canTakeOnBoss(){
             if (cbossHealth <= 0){
                 return true;
             }
-            cbossAttackBase *= 1.25;
-
-            var cattackAndBlock = cbossAttackBase - game.global.soldierCurrentBlock;
-            if (game.global.brokenPlanet){
-                var coverpower = (game.global.formation == 3) ? cbossAttackBase * 0.1 : cbossAttackBase * 0.2;
-                if (cattackAndBlock < coverpower) cattackAndBlock = coverpower;
-            }
-            var cbossAttack = cattackAndBlock;
-            cbossAttack = cbossAttackBase + game.global.soldierHealthMax * 0.05;
+            cbossAttack = (cbossAttack-(game.global.soldierHealthMax * 0.05) * 1.25) + game.global.soldierHealthMax * 0.05;
             cattacksToKillSoldiers = soldierHealth/cbossAttack;
             if (cattacksToKillSoldiers < 1)
                 return false;
