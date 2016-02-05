@@ -1238,10 +1238,10 @@ function RunMaps() {
         }
     }
 
-    if (game.global.challengeActive === "Electricity" && game.global.world > 80) { //Do Prison to turn off elec challenge
+    if (game.global.challengeActive === "Electricity" && game.global.world >= 80) { //Do Prison to turn off elec challenge
         for (map in game.global.mapsOwnedArray) {
             theMap = game.global.mapsOwnedArray[map];
-            if (theMap.name === "The Prison" && addSpecials(true, true, theMap) > 0){
+            if (theMap.name === "The Prison"){
                 RunMap(theMap);
                 return;
             }
