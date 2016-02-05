@@ -1,64 +1,53 @@
 /*global game,tooltip,resolvePow,getNextPrestigeCost,adjustMap,updateMapCost,addSpecials*/
 /*jslint plusplus: true */
-var openTrapsForDefault;    //Open traps as default action?
-var trimpz = 0;             //"Trimpz" running indicator
-var autoFighting = false;   //Autofight on?
-var workersFocused = false;
-var workersFocusedOn;
-var workersMoved = [];
+
+//For users of script: recommended settable constants
 var skipShieldBlock = true;
-var mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50,80,125]; //removed from array when done, reset on portal or refresh
-var uniqueMaps = ["The Block", "The Wall",  "Dimension of Anger", "Trimple Of Doom", "The Prison", "Bionic Wonderland", "Bionic Wonderland II", "Bionic Wonderland III", "Bionic Wonderland IV", "Bionic Wonderland V", "Bionic Wonderland VI"];
-var minimumUpgradesOnHand = 4; //0 will run maps only when no equipment upgrades left, 10 will run maps if any equipment upgrade is missing
-var helium = -1;
-var minBreedingSpeed = 100;
-var heliumHistory = [];
-var portalAt = 146;
-var targetBreedTime = 9;
-var targetBreedTimeHysteresis = 1;
-var deltaIncreaseInMinimumWarpstationsPerGigastationPurchase = 2;
-var portalObtained = false;
-var pauseTrimpz = false;
-var bionicDone = false;
+var minimumUpgradesOnHand = 4; //0 will not run maps for equipment upgrades, 4 will run maps to keep 4 available equipment upgrades (that will be autopurchased eventually)
+var portalAt = 146;            //portal when this zone is reached
+var targetBreedTime = 9;       //Hire/Fire geneticists to maintain this breeding time in seconds
+var targetBreedTimeHysteresis = 1; //How many seconds over before we start firing Geneticists?
+var deltaIncreaseInMinimumWarpstationsPerGigastationPurchase = 2; //Increase the minimum number of warpstations required to purchase a gigastation by this number for each gigastation purchased
+//Only pick one challenge to be true, if any
 var doElectricChallenge = false; //don't portal before 81
 var doCrushedChallenge = false; //don't portal before 126
 var doNomChallenge = true; //don't portal before 146
 var doToxicChallenge = false; //don't portal before 166
-var doRunMapsForBonus = true;
-var doRunMapsForEquipment = true;
-var numberOfDeathsAllowedToKillBoss = 3; //minimum of just under one
-var formationDone = false;
-var heliumLog = [];
-var lastFoughtInWorld = true;
-const CheapEquipmentRatio = 0.01;
-const CheapEqUpgradeRatio = 0.2;
+var doRunMapsForBonus = true; //enable running of maps based to increase map bonus, based on difficulty of boss fight
+var doRunMapsForEquipment = true; //enable running of maps for loot, will run if needed based on difficulty of boss fight, requires doRunMapsForBonus to be true too
+var numberOfDeathsAllowedToKillBoss = 3; //setting for "doRunMaps...", minimum of just under one, maps will run to keep you from dying this many times during boss fight
+const CheapEquipmentRatio = 0.01; //0.01 means buy equipment if it only costs 1% of resources, regardless of any other limits
+const CheapEqUpgradeRatio = 0.2; //0.2 means buy equipment upgrades if it only costs 20% of resources, regardless of any other limits
 
+//sets of constants to modify that will be switched out over the course of the game
+//generally speaking, and by default, it starts with constantsEarlyGame and then uses the next set at 45,55, and then 60
+//if you add an entirely new constant set, be sure to add it in order in the array "constantsSets" and set the set's "zoneToStartAt" appropriately
 var constantsEarlyGame = (function () {
     "use strict";
-    var zoneToStartAt = 0,
-        runInterval = 1500,
-        minerMultiplier = 2,
-        trainerCostRatio = 0.2,
-        explorerCostRatio = 0.2,
-        minFoodOwned = 15,
-        minWoodOwned = 15,
-        minTrimpsOwned = 10,
-        minScienceOwned = 10,
-        housingCostRatio = 0.3,
-        gymCostRatio = 0.6,
-        maxGyms = 10000,
-        tributeCostRatio = 0.5,
-        nurseryCostRatio = 0.5,
-        maxLevel = 10,
-        equipmentCostRatio = 0.5,
-        otherWorkersFocusRatio = 0.5,
-        numTrapsForAutoTrapping = 10000,
-        shieldCostRatio = 1,
-        lumberjackMultiplier = 1,
-        maxWormholes = 0,
-        shouldSkipHpEquipment = false,
-        minimumWarpStations = 20,
-        minimumEquipmentLevel = 5;
+    var zoneToStartAt = 0,                  //where this set of constants begins being used
+        runInterval = 1500,                 //how often Trimpz main loop is run
+        minerMultiplier = 2,                //how many more miners than farmers? (multiplied)
+        trainerCostRatio = 0.2,             //buy trainers with enough resources (0.2 = 20% of resources)
+        explorerCostRatio = 0.2,            //buy explorers with enough resources (0.2 = 20% of resources)
+        minFoodOwned = 15,                  //minimum food on hand, required for beginning of the game
+        minWoodOwned = 15,                  //minimum wood on hand, required for beginning of the game
+        minTrimpsOwned = 10,                //minimum trimps on hand, required for beginning of the game
+        minScienceOwned = 10,               //minimum science on hand, required for beginning of the game
+        housingCostRatio = 0.3,             //buy housing with enough resources (0.2 = 20% of resources)
+        gymCostRatio = 0.6,                 //buy gyms with enough resources (0.2 = 20% of resources)
+        maxGyms = 10000,                    //maximum number of gyms to buy
+        tributeCostRatio = 0.5,             //buy tributes with enough resources (0.2 = 20% of resources)
+        nurseryCostRatio = 0.5,             //buy nursery with enough resources (0.2 = 20% of resources)
+        maxLevel = 10,                      //maximum level of all equipment per tier unless it's really cheap(see constant above)
+        equipmentCostRatio = 0.5,           //buy equipment with enough resources (0.2 = 20% of resources)
+        otherWorkersFocusRatio = 0.5,       //what percent of trimps to take from each other job to focus on gaining resources for an upgrade, including science
+        numTrapsForAutoTrapping = 10000,    //maximum number of traps to build
+        shieldCostRatio = 1,                //buy shield with enough resources (1 = 100% of resources)
+        lumberjackMultiplier = 1,           //how many more lumberjacks than farmers? (multiplied)
+        maxWormholes = 0,                   //maximum number of wormholes to buy
+        shouldSkipHpEquipment = false,      //true to not buy or prestige/upgrade health equipment
+        minimumWarpStations = 20,           //minimum number of warpstations on hand before buying a gigastation
+        minimumEquipmentLevel = 5;          //currently unused
     return {
         getZoneToStartAt: function () { return zoneToStartAt; },
         getRunInterval: function () { return runInterval; },
@@ -270,9 +259,29 @@ var constantsEndGame = (function () {
         getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;}
     };
 })();
+
+//game variables, not for user setting
 var constantsSets = [constantsEarlyGame, constantsLateGame, constantsLateLateGame, constantsEndGame];
 var constantsIndex;
 var constants;
+var openTrapsForDefault;    //Open traps as default action?
+var trimpz = 0;             //"Trimpz" running indicator
+var autoFighting = false;   //Autofight on?
+var workersFocused = false;
+var workersFocusedOn;
+var workersMoved = [];
+var mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50,80,125]; //removed from array when done, reset on portal or refresh
+var uniqueMaps = ["The Block", "The Wall",  "Dimension of Anger", "Trimple Of Doom", "The Prison", "Bionic Wonderland", "Bionic Wonderland II", "Bionic Wonderland III", "Bionic Wonderland IV", "Bionic Wonderland V", "Bionic Wonderland VI"];
+var helium = -1;
+var minBreedingSpeed = 100;
+var heliumHistory = [];
+var portalObtained = false;
+var pauseTrimpz = false;
+var bionicDone = false;
+var formationDone = false;
+var heliumLog = [];
+var lastFoughtInWorld = true;
+
 
 /**
  * @return {boolean} return.canAfford affordable respecting the ratio?
