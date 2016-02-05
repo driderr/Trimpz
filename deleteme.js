@@ -8,7 +8,7 @@ var workersFocusedOn;
 var workersMoved = [];
 var skipShieldBlock = true;
 var mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50,80,125]; //removed from array when done, reset on portal or refresh
-var uniqueMaps = ["The Block", "The Wall",  "Dimension of Anger", "Trimple Of Doom", "The Prison", "Bionic Wonderland"];
+var uniqueMaps = ["The Block", "The Wall",  "Dimension of Anger", "Trimple Of Doom", "The Prison", "Bionic Wonderland", "Bionic Wonderland II", "Bionic Wonderland III", "Bionic Wonderland IV", "Bionic Wonderland V", "Bionic Wonderland VI"];
 var minimumUpgradesOnHand = 4; //0 will run maps only when no equipment upgrades left, 10 will run maps if any equipment upgrade is missing
 var helium = -1;
 var minBreedingSpeed = 100;
