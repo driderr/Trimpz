@@ -16,6 +16,7 @@ var heliumHistory = [];
 var portalAt = 146;
 var targetBreedTime = 9;
 var targetBreedTimeHysteresis = 1;
+var deltaIncreaseInMinimumWarpstationsPerGigastationPurchase = 2;
 var portalObtained = false;
 var pauseTrimpz = false;
 var bionicDone = false;
@@ -553,7 +554,7 @@ function ClickAllNonEquipmentUpgrades() {
     "use strict";
     var upgrade;
     for (upgrade in game.upgrades) {
-        if (upgrade === "Gigastation" && game.buildings.Warpstation.owned < constants.getMinimumWarpStations()){
+        if (upgrade === "Gigastation"){
             continue;
         }
         if (skipShieldBlock === true && upgrade === "Shieldblock"){
@@ -651,7 +652,8 @@ function UpgradeNonEquipment() {
     ClickAllNonEquipmentUpgrades();
     for (upgrade in game.upgrades) {
         if (typeof game.upgrades[upgrade].prestiges === 'undefined' && game.upgrades[upgrade].locked === 0) {
-            if (upgrade === "Gigastation" && game.buildings.Warpstation.owned < constants.getMinimumWarpStations() || CanBuyNonUpgrade(game.buildings.Warpstation, 2) === true){ //ratio 2 for "can buy soon"
+            if (upgrade === "Gigastation" && game.buildings.Warpstation.owned < constants.getMinimumWarpStations() + deltaIncreaseInMinimumWarpstationsPerGigastationPurchase * game.upgrades.Gigastation.done
+                || CanBuyNonUpgrade(game.buildings.Warpstation, 2) === true){ //ratio 2 for "can buy soon"
                 continue;
             }
             if (skipShieldBlock === true && upgrade === "Shieldblock"){
