@@ -1496,32 +1496,31 @@ function CheckHelium() {
     var cumulativeRate;
     if (helium === -1){
         helium = game.resources.helium.owned;
-        heliumHistory.push([
-            helium,
-            Date.now(),
-            0,
-            0,
-            0,
-            game.global.world
-        ])
+        heliumHistory.push({
+            totalHelium: helium,
+            date: Date.now(),
+            heliumPerHourInZone: 0,
+            totalHours: 0,
+            totalHeliumPerHour: 0,
+            zone: game.global.world});
     } else if (game.resources.helium.owned < helium){ //must have spent some helium
         helium = game.resources.helium.owned;
     } else if (game.resources.helium.owned > helium) {
         date = Date.now();
         oldHelium = helium;
         helium = game.resources.helium.owned;
-        rate = (helium - oldHelium)/((date - heliumHistory[heliumHistory.length - 1][1])/(1000*60*60));
-        totalTime = (date - heliumHistory[0][1])/(1000*60*60);
-        totalHelium = helium - heliumHistory[0][0];
+        rate = (helium - oldHelium)/((date - heliumHistory[heliumHistory.length - 1].date)/(1000*60*60));
+        totalTime = (date - heliumHistory[0].date)/(1000*60*60);
+        totalHelium = helium - heliumHistory[0].totalHelium;
         cumulativeRate = totalHelium / totalTime;
-        heliumHistory.push([
-            helium,
-            date,
-            rate,
-            totalTime,
-            cumulativeRate,
-            game.global.world
-        ])
+        heliumHistory.push({
+            totalHelium: helium,
+            date: date,
+            heliumPerHourInZone: rate,
+            totalHours: totalTime,
+            totalHeliumPerHour: cumulativeRate,
+            zone: game.global.world
+        })
     }
 }
 
