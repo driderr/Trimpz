@@ -29,6 +29,7 @@ var doRunMapsForEquipment = true;
 var numberOfDeathsAllowedToKillBoss = 3; //minimum of just under one
 var formationDone = false;
 var heliumLog = [];
+var lastFoughtInWorld = true;
 const CheapEquipmentRatio = 0.01;
 const CheapEqUpgradeRatio = 0.2;
 
@@ -1070,6 +1071,10 @@ function canTakeOnBoss(){
     var bossAttackBase = getBossAttack();
     var bossHealth = getBossHealth();
     var soldierAttack = getSoldierAttack();
+    if (!lastFoughtInWorld)
+    {
+        soldierAttack *= 1 + (0.2 * game.global.mapBonus);
+    }
     var soldierHealth = game.global.soldierHealthMax;
 
     var attackAndBlock = bossAttackBase - game.global.soldierCurrentBlock;
@@ -1219,12 +1224,14 @@ function RunNewMapForLoot(zoneToCreate) {
 function RunMap(map) {
     "use strict";
     GotoMapsScreen();
+    lastFoughtInWorld = false;
     document.getElementById(map.id).click();
     document.getElementById("selectMapBtn").click();
 }
 
 function RunWorld() {
     "use strict";
+    lastFoughtInWorld = true;
     document.getElementById("mapsBtn").click();  //mapsClicked();
 }
 
@@ -1254,8 +1261,9 @@ function getMaxEnemyHealthForMapLevel(mapLevel) {  //adapted from Trimps getEnem
 
 function getLevelOfOneShotMap() {
     var soldierAttack = getSoldierAttack();
-    var mapBonusMult = 1 + (0.2 * game.global.mapBonus);
-    soldierAttack /= mapBonusMult;
+    if (lastFoughtInWorld){
+        soldierAttack /= 1 + (0.2 * game.global.mapBonus);
+    }
 
     for (var mapLevel = game.global.world; mapLevel > 6; mapLevel--) {
         var maxEnemyHealth = getMaxEnemyHealthForMapLevel(mapLevel);
