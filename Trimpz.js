@@ -1125,8 +1125,6 @@ function canTakeOnBoss(){
     return true;
 }
 
-
-
 function GotoMapsScreen() {
     "use strict";
     if (game.global.preMapsActive === true) {
@@ -1230,6 +1228,47 @@ function RunWorld() {
     document.getElementById("mapsBtn").click();  //mapsClicked();
 }
 
+function getMaxEnemyHealthForMapLevel(mapLevel) {  //adapted from Trimps getEnemyHealth()
+    var world = mapLevel;
+    var level = 75;
+    var name = "Mountimp";
+    var difficulty = 0.84;
+
+    var amt = 0;
+    amt += 130 * Math.sqrt(world * Math.pow(3.265, world));
+    amt -= 110;
+    if (world == 1 || world == 2 && level < 10){
+        amt *= 0.6;
+        amt = (amt * 0.25) + ((amt * 0.72) * (level / 100));
+    }
+    else if (world < 60)
+        amt = (amt * 0.4) + ((amt * 0.4) * (level / 110));
+    else{
+        amt = (amt * 0.5) + ((amt * 0.8) * (level / 100));
+        amt *= Math.pow(1.1, world - 59);
+    }
+    if (world > 5) amt *= 1.1;
+    amt *= game.badGuys[name].health;
+    return Math.floor(amt * difficulty);
+}
+
+function getLevelOfOneShotMap() {
+    var soldierAttack = getSoldierAttack();
+    var mapBonusMult = 1 + (0.2 * game.global.mapBonus);
+    soldierAttack /= mapBonusMult;
+
+    for (var mapLevel = game.global.world; mapLevel > 6; mapLevel--) {
+        var maxEnemyHealth = getMaxEnemyHealthForMapLevel(mapLevel);
+        if (game.global.challengeActive == "Toxicity"){
+            maxEnemyHealth *= 2;
+        }
+        if (soldierAttack >= maxEnemyHealth){
+            return mapLevel;
+        }
+    }
+    return 6;
+}
+
 function RunMaps() {
     "use strict";
     var map;
@@ -1296,6 +1335,7 @@ function RunMaps() {
                 RunNewMap(mapLevel);
                 return;
             }
+            mapLevel = getLevelOfOneShotMap();
             if (doRunMapsForEquipment){
                 console.debug("Bonus maxed.  Let's level equipment.");
                 for (map in game.global.mapsOwnedArray) {
