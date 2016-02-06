@@ -1491,6 +1491,7 @@ function CheckLateGame() {
     {
         constants = constantsSets[nextSet];
         constantsIndex = nextSet;
+        RestoreWorkerFocus();
         ReallocateWorkers();
     }
 }
