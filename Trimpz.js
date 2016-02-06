@@ -537,24 +537,33 @@ function getMaxResource(resource)
     return theResource.max + (theResource.max * game.portal.Packrat.modifier * game.portal.Packrat.level);
 }
 
+function queueContainsItem(item){
+    "use strict";
+    for (var queued in game.global.buildingsQueue) {
+        if (game.global.buildingsQueue[queued].indexOf(item) > -1)
+            return true;
+    }
+    return false;
+}
+
 function UpgradeStorage() {
     "use strict";
 
     if (game.resources.food.owned > game.buildings.Barn.cost.food() &&
         game.resources.food.owned > 0.9 * getMaxResource("food")) {
-        if (game.buildings.Barn.locked === 0) {
+        if (game.buildings.Barn.locked === 0 && !queueContainsItem("Barn")) {
             document.getElementById("Barn").click();
         }
     }
     if (game.resources.wood.owned > game.buildings.Shed.cost.wood() &&
         game.resources.wood.owned > 0.9 * getMaxResource("wood")) {
-        if (game.buildings.Shed.locked === 0) {
+        if (game.buildings.Shed.locked === 0 && !queueContainsItem("Shed")) {
             document.getElementById("Shed").click();
         }
     }
     if (game.resources.metal.owned > game.buildings.Forge.cost.metal() &&
         game.resources.metal.owned > 0.9 * getMaxResource("metal")) {
-        if (game.buildings.Forge.locked === 0) {
+        if (game.buildings.Forge.locked === 0 && !queueContainsItem("Forge")) {
             document.getElementById("Forge").click();
         }
     }
