@@ -675,6 +675,7 @@ function UpgradeNonEquipment() {
                 || CanBuyNonUpgrade(game.buildings.Warpstation, 2) === true)){ //ratio 2 for "can buy soon"
                 continue;
             }
+            if (upgrade == 'Coordination' && !canAffordCoordinationTrimps()) continue;
             if (skipShieldBlock === true && upgrade === "Shieldblock"){
                 continue;
             }
