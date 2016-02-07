@@ -671,8 +671,8 @@ function UpgradeNonEquipment() {
     ClickAllNonEquipmentUpgrades();
     for (upgrade in game.upgrades) {
         if (typeof game.upgrades[upgrade].prestiges === 'undefined' && game.upgrades[upgrade].locked === 0) {
-            if (upgrade === "Gigastation" && game.buildings.Warpstation.owned < constants.getMinimumWarpStations() + deltaIncreaseInMinimumWarpstationsPerGigastationPurchase * game.upgrades.Gigastation.done
-                || CanBuyNonUpgrade(game.buildings.Warpstation, 2) === true){ //ratio 2 for "can buy soon"
+            if (upgrade === "Gigastation" && (game.buildings.Warpstation.owned < constants.getMinimumWarpStations() + deltaIncreaseInMinimumWarpstationsPerGigastationPurchase * game.upgrades.Gigastation.done
+                || CanBuyNonUpgrade(game.buildings.Warpstation, 2) === true)){ //ratio 2 for "can buy soon"
                 continue;
             }
             if (skipShieldBlock === true && upgrade === "Shieldblock"){
