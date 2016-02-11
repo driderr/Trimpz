@@ -15,7 +15,7 @@ var doNomChallenge = true; //don't portal before 146
 var doToxicChallenge = false; //don't portal before 166
 var doRunMapsForBonus = true; //enable running of maps based to increase map bonus, based on difficulty of boss fight
 var doRunMapsForEquipment = true; //enable running of maps for loot, will run if needed based on difficulty of boss fight, requires doRunMapsForBonus to be true too
-var numberOfDeathsAllowedToKillBoss = 3; //setting for "doRunMaps...", minimum of just under one, maps will run to keep you from dying this many times during boss fight
+var numberOfDeathsAllowedToKillBoss = 4; //setting for "doRunMaps...", minimum of just under one, maps will run to keep you from dying this many times during boss fight
 const CheapEquipmentRatio = 0.01; //0.01 means buy equipment if it only costs 1% of resources, regardless of any other limits
 const CheapEqUpgradeRatio = 0.2; //0.2 means buy equipment upgrades if it only costs 20% of resources, regardless of any other limits
 
@@ -25,7 +25,7 @@ const CheapEqUpgradeRatio = 0.2; //0.2 means buy equipment upgrades if it only c
 var constantsEarlyGame = (function () {
     "use strict";
     var zoneToStartAt = 0,                  //where this set of constants begins being used
-        runInterval = 1500,                 //how often Trimpz main loop is run
+        runInterval = 200,                 //how often Trimpz main loop is run
         minerMultiplier = 2,                //how many more miners than farmers? (multiplied)
         trainerCostRatio = 0.2,             //buy trainers with enough resources (0.2 = 20% of resources)
         explorerCostRatio = 0.2,            //buy explorers with enough resources (0.2 = 20% of resources)
@@ -78,7 +78,7 @@ var constantsEarlyGame = (function () {
 var constantsLateGame = (function () {
     "use strict";
     var zoneToStartAt = 45,
-        runInterval = 1500,
+        runInterval = 200,
         minerMultiplier = 0.5,
         trainerCostRatio = 0.2,
         explorerCostRatio = 0.2,
@@ -120,12 +120,7 @@ var constantsLateGame = (function () {
         getEquipmentCostRatio: function () {return equipmentCostRatio;},
         getOtherWorkersFocusRatio: function () {return otherWorkersFocusRatio;},
         getNumTrapsForAutoTrapping: function () {return numTrapsForAutoTrapping;},
-        getShieldCostRatio: function () {
-            if (skipShieldBlock === false) {
-                return shieldCostRatio;
-            }
-            return 0.6;
-        },
+        getShieldCostRatio: function () {return shieldCostRatio;},
         getLumberjackMultiplier: function () {return lumberjackMultiplier;},
         getMaxWormholes: function () {return maxWormholes;},
         getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
@@ -136,7 +131,7 @@ var constantsLateGame = (function () {
 var constantsLateLateGame = (function () {
     "use strict";
     var zoneToStartAt = 55,
-        runInterval = 1500,
+        runInterval = 200,
         minerMultiplier = 1,
         trainerCostRatio = 0.01,
         explorerCostRatio = 0.01,
@@ -183,12 +178,7 @@ var constantsLateLateGame = (function () {
         getEquipmentCostRatio: function () {return equipmentCostRatio;},
         getOtherWorkersFocusRatio: function () {return otherWorkersFocusRatio;},
         getNumTrapsForAutoTrapping: function () {return numTrapsForAutoTrapping;},
-        getShieldCostRatio: function () {
-            if (skipShieldBlock === false) {
-                return shieldCostRatio;
-            }
-            return 0.6;
-        },
+        getShieldCostRatio: function () {return shieldCostRatio;},
         getLumberjackMultiplier: function () {return lumberjackMultiplier;},
         getMaxWormholes: function () {return maxWormholes;},
         getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
@@ -199,8 +189,8 @@ var constantsLateLateGame = (function () {
 var constantsEndGame = (function () {
     "use strict";
     var zoneToStartAt = 60,
-        runInterval = 1500,
-        minerMultiplier = 1,
+        runInterval = 200,
+        minerMultiplier = 4,
         trainerCostRatio = 0,
         explorerCostRatio = 0,
         minFoodOwned = 15,
@@ -217,10 +207,10 @@ var constantsEndGame = (function () {
         otherWorkersFocusRatio = 0.5,
         numTrapsForAutoTrapping = 10000,
         shieldCostRatio = 0.01,
-        lumberjackMultiplier = 0.3,
+        lumberjackMultiplier = 0.33,
         maxWormholes = 0,
         shouldSkipHpEquipment = false,
-        minimumWarpStations = 5,
+        minimumWarpStations = 20,
         minimumEquipmentLevel = 5;
     return {
         getZoneToStartAt: function () { return zoneToStartAt; },
@@ -241,18 +231,8 @@ var constantsEndGame = (function () {
         getEquipmentCostRatio: function () {return equipmentCostRatio;},
         getOtherWorkersFocusRatio: function () {return otherWorkersFocusRatio;},
         getNumTrapsForAutoTrapping: function () {return numTrapsForAutoTrapping;},
-        getShieldCostRatio: function () {
-            if (skipShieldBlock === false) {
-                return shieldCostRatio;
-            }
-            return 0.6;
-        },
-        getLumberjackMultiplier: function () {
-            if (skipShieldBlock === false) {
-                return lumberjackMultiplier;
-            }
-            return 1;
-        },
+        getShieldCostRatio: function () {return shieldCostRatio;},
+        getLumberjackMultiplier: function () {return lumberjackMultiplier;},
         getMaxWormholes: function () {return maxWormholes;},
         getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
         getMinimumWarpStations: function () {return minimumWarpStations;},
@@ -1615,7 +1595,7 @@ function FireGeneticists() {
     }
 }
 
-//Main
+//Start
 (function () {
     "use strict";
     CreateButtonForPausing();
@@ -1626,38 +1606,43 @@ function FireGeneticists() {
             constantsIndex = i;
         }
     }
-    setInterval(function () {
-        //Main loop code
-        if (pauseTrimpz === true){
-            return;
-        }
-        ShowRunningIndicator();
-        CheckLateGame();
-        CheckHelium();
-        CheckFormation();
-        if (CheckPortal() === true){
-            return;
-        }
-        TurnOnAutoBuildTraps();
-        AssignFreeWorkers();
-        FireGeneticists();
-        Fight();
-        UpgradeStorage();
-        var shouldReturn = BeginPriorityAction();
-        if (shouldReturn === true) {
-            tooltip('hide');
-            return;
-        }
-        var collectingForUpgrade = UpgradeAndGather();
-        if (collectingForUpgrade === false) { //allow resources to accumulate for upgrades if true
-            BuyBuildings();
-            BuyShield();
-            BuyMetalEquipment();
-        }
-        RunMaps();
-        //End Main loop code
-    }, constants.getRunInterval());
+    setTimeout(MainLoopRunner, 100);
 })();
+
+function MainLoopRunner(){
+    MainLoop();
+    setTimeout(MainLoopRunner, constants.getRunInterval());
+}
+
+function MainLoop(){
+    if (pauseTrimpz === true){
+        return;
+    }
+    ShowRunningIndicator();
+    CheckLateGame();
+    CheckHelium();
+    CheckFormation();
+    if (CheckPortal() === true){
+        return;
+    }
+    TurnOnAutoBuildTraps();
+    AssignFreeWorkers();
+    FireGeneticists();
+    Fight();
+    UpgradeStorage();
+    var shouldReturn = BeginPriorityAction();
+    if (shouldReturn === true) {
+        tooltip('hide');
+        return;
+    }
+    var collectingForUpgrade = UpgradeAndGather();
+    if (collectingForUpgrade === false) { //allow resources to accumulate for upgrades if true
+        BuyBuildings();
+        BuyShield();
+        BuyMetalEquipment();
+    }
+    RunMaps();
+}
 
 function CreateButtonForPausing() {
     "use strict";
