@@ -416,7 +416,7 @@ function AssignFreeWorkers() {
     var totalMultipliers;
     var assignThisMany;
     while (free > 0) {
-        if (free > maxFreeForAssignOneAtATime){
+        if (free > maxFreeForAssignOneAtATime && game.jobs.Miner.locked === 0){
             totalMultipliers = constants.getMinerMultiplier() + constants.getLumberjackMultiplier() + 1; //1 for default/reference farmer
             assignThisMany = constants.getMinerMultiplier() / totalMultipliers * (free - maxFreeForAssignOneAtATime);
             buy.Miner += Math.floor(assignThisMany);
@@ -513,7 +513,7 @@ function ShowRunningIndicator() {
 
 function getMaxResource(resource)
 {
-    var theResource = game.resources[resource]
+    var theResource = game.resources[resource];
     return theResource.max + (theResource.max * game.portal.Packrat.modifier * game.portal.Packrat.level);
 }
 
@@ -1454,7 +1454,7 @@ function CheckLateGame() {
     "use strict";
     if (game.global.world == 60 && document.getElementById('extraGridInfo').style.display == 'block')
         restoreGrid();
-    if (game.resources.trimps.owned < 1000) {
+    if (game.global.world == 1 && helium !== -1) {
         constants = constantsSets[0];
         constantsIndex = 0;
         mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50,80,125];
