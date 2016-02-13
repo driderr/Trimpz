@@ -380,6 +380,22 @@ function getRemainingTimeForBreeding() {
     return timeRemaining;
 }
 
+function ShouldBuyGeneticist(food, extraGeneticists) {
+    var trimps = game.resources.trimps;
+    var cost;
+    var shouldBuy = game.jobs.Geneticist.locked === 0 &&
+        game.global.challengeActive !== "Electricity" &&
+        (cost = CanBuyWorkerWithResource(game.jobs.Geneticist, 1, food, extraGeneticists)) !== -1 &&
+        getTotalTimeForBreeding(extraGeneticists) < targetBreedTime &&
+        getRemainingTimeForBreeding() < targetBreedTime &&
+        (game.global.lastBreedTime / 1000 < targetBreedTime - getRemainingTimeForBreeding() + targetBreedTimeHysteresis
+        || trimps.owned === trimps.realMax());
+    return {
+        shouldBuy : shouldBuy,
+        cost : cost
+    };
+}
+
 function AssignFreeWorkers() {
     "use strict";
     var trimps = game.resources.trimps;
@@ -396,7 +412,17 @@ function AssignFreeWorkers() {
     if (trimps.owned === 0 || game.global.firing) {
         return;
     }
+
     var free = (Math.ceil(trimps.realMax() / 2) - trimps.employed);
+
+    //make room for a Geneticist
+    if (free === 0 && ShouldBuyGeneticist(food,0).shouldBuy){
+        game.global.firing = true;
+        game.global.buyAmt = 1;
+        document.getElementById("Farmer").click();
+        game.global.firing = false;
+    }
+
     if (free > 0){
         document.getElementById("tab1").click();    //hire 1 at a time
     } else
@@ -430,14 +456,9 @@ function AssignFreeWorkers() {
 
             free -= buy.Miner + buy.Lumberjack + buy.Farmer;
         }
-        if (game.jobs.Geneticist.locked === 0 &&
-            game.global.challengeActive !== "Electricity" &&
-            (cost = CanBuyWorkerWithResource(game.jobs.Geneticist, 1, food , buy.Geneticist)) !== -1 &&
-            getTotalTimeForBreeding(buy.Geneticist) < targetBreedTime &&
-            getRemainingTimeForBreeding() < targetBreedTime &&
-            (game.global.lastBreedTime / 1000 < targetBreedTime - getRemainingTimeForBreeding() + targetBreedTimeHysteresis
-              || trimps.owned === trimps.realMax()) ){
-            food -= cost;
+        var geneticistValues = ShouldBuyGeneticist(food, buy.Geneticist);
+        if (geneticistValues.shouldBuy){
+            food -= geneticistValues.cost;
             buy.Geneticist += 1;
             free--;
         } else if (game.jobs.Trainer.locked === 0 &&
@@ -1585,14 +1606,13 @@ function CheckFormation() {
 
 function FireGeneticists() {
     "use strict";
-    var jobButton = document.getElementById("Geneticist");
-
     if (game.jobs.Geneticist.locked !== 0 ||
         game.global.challengeActive === "Electricity" ||
         game.jobs.Geneticist.owned === 0) {
         return;
     }
 
+    var jobButton = document.getElementById("Geneticist");
     while(getTotalTimeForBreeding(0) >= targetBreedTime + targetBreedTimeHysteresis ||
           getRemainingTimeForBreeding() >= targetBreedTime + targetBreedTimeHysteresis) {
         game.global.firing = true;
