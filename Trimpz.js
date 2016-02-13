@@ -2,6 +2,7 @@
 /*jslint plusplus: true */
 
 //For users of script: recommended settable constants
+var minBreedingSpeed = 100;    //Open traps if breeding speed is lower than this, in trimps/second
 var skipShieldBlock = true;
 var minimumUpgradesOnHand = 4; //0 will not run maps for equipment upgrades, 4 will run maps to keep 4 available equipment upgrades (that will be autopurchased eventually)
 var portalAt = 146;            //portal when this zone is reached
@@ -10,16 +11,16 @@ var targetBreedTimeHysteresis = 1; //How many seconds over before we start firin
 var deltaIncreaseInMinimumWarpstationsPerGigastationPurchase = 2; //Increase the minimum number of warpstations required to purchase a gigastation by this number for each gigastation purchased
 //Only pick one challenge to be true, if any
 var doElectricChallenge = false; //don't portal before 81
-var doCrushedChallenge = false; //don't portal before 126
-var doNomChallenge = true; //don't portal before 146
-var doToxicChallenge = false; //don't portal before 166
+var doCrushedChallenge = false;  //don't portal before 126
+var doNomChallenge = true;       //don't portal before 146
+var doToxicChallenge = false;    //don't portal before 166
 var shouldMaxOutToxicityHelium = false; //max out toxicity stacks for maximum helium for bone trader during toxicity challenge
-var zoneToStartMaxingAt = 50; //zone to begin maxing toxicity stacks for maximum helium
-var doRunMapsForBonus = true; //enable running of maps based to increase map bonus, based on difficulty of boss fight
-var doRunMapsForEquipment = true; //enable running of maps for loot, will run if needed based on difficulty of boss fight, requires doRunMapsForBonus to be true too
+var zoneToStartMaxingAt = 50;    //zone to begin maxing toxicity stacks for maximum helium
+var doRunMapsForBonus = true;    //enable running of maps based to increase map bonus, based on difficulty of boss fight
+var doRunMapsForEquipment = true;//enable running of maps for loot, will run if needed based on difficulty of boss fight, requires doRunMapsForBonus to be true too
 var numberOfDeathsAllowedToKillBoss = 4; //setting for "doRunMaps...", minimum of just under one, maps will run to keep you from dying this many times during boss fight
 const CheapEquipmentRatio = 0.01; //0.01 means buy equipment if it only costs 1% of resources, regardless of any other limits
-const CheapEqUpgradeRatio = 0.2; //0.2 means buy equipment upgrades if it only costs 20% of resources, regardless of any other limits
+const CheapEqUpgradeRatio = 0.2;  //0.2 means buy equipment upgrades if it only costs 20% of resources, regardless of any other limits
 
 //sets of constants to modify that will be switched out over the course of the game
 //generally speaking, and by default, it starts with constantsEarlyGame and then uses the next set at 45,55, and then 60
@@ -246,7 +247,6 @@ var constantsEndGame = (function () {
 var constantsSets = [constantsEarlyGame, constantsLateGame, constantsLateLateGame, constantsEndGame];
 var constantsIndex;
 var constants;
-var openTrapsForDefault;    //Open traps as default action?
 var trimpz = 0;             //"Trimpz" running indicator
 var autoFighting = false;   //Autofight on?
 var workersFocused = false;
@@ -255,7 +255,6 @@ var workersMoved = [];
 var mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50,80,125]; //removed from array when done, reset on portal or refresh
 var uniqueMaps = ["The Block", "The Wall",  "Dimension of Anger", "Trimple Of Doom", "The Prison", "Bionic Wonderland", "Bionic Wonderland II", "Bionic Wonderland III", "Bionic Wonderland IV", "Bionic Wonderland V", "Bionic Wonderland VI"];
 var helium = -1;
-var minBreedingSpeed = 100;
 var heliumHistory = [];
 var portalObtained = false;
 var pauseTrimpz = false;
@@ -693,32 +692,33 @@ function UpgradeNonEquipment() {
     RestoreWorkerFocus();
     return false;
 }
+
+function GetBreedSpeed() {
+    "use strict";
+    var breedArray = document.getElementById("trimpsPs").innerHTML.match(/(\d+(?:\.\d+)?)(\D+)?(?:\/sec)/);
+    return unprettify(breedArray);
+}
+
 /**
  * @return {boolean} return.collectingForNonEquipment Is it collecting for upgrade?
  */
 function UpgradeAndGather() {
     "use strict";
     var collectingForNonEquipment = UpgradeNonEquipment();
-    if (openTrapsForDefault === true && game.buildings.Trap.owned < 10){ //traps exhausted, turn off "Trapping"
-        openTrapsForDefault = false;
-    }
-    if (openTrapsForDefault === false && game.buildings.Trap.owned > constants.getNumTrapsForAutoTrapping()){ //traps overflowing, use them
-        openTrapsForDefault = true;
-    }
-    if (collectingForNonEquipment === false) {
-        //Collect trimps if breeding speed is low
-        if ((game.resources.trimps.owned < game.resources.trimps.realMax() &&
-            document.getElementById("trimpsPs").innerHTML.match(/\d+/)[0] < minBreedingSpeed) ||
-            openTrapsForDefault === true) {
-            document.getElementById("trimpsCollectBtn").click();
+    if (collectingForNonEquipment)
+        return true;
+
+    if (game.resources.trimps.owned < game.resources.trimps.realMax() &&
+        game.buildings.Trap.owned > 0 &&
+        GetBreedSpeed() < minBreedingSpeed){
+        document.getElementById("trimpsCollectBtn").click();
 //        } else if (game.global.buildingsQueue.length > 0) {
 //            document.getElementById("buildingsCollectBtn").click();
-        } else { //nothing to build
-            document.getElementById("metalCollectBtn").click();
-        }
-        tooltip('hide');
+    } else { //nothing to build
+        document.getElementById("metalCollectBtn").click();
     }
-    return collectingForNonEquipment;
+    tooltip('hide');
+    return false;
 }
 /**
  * @return {boolean} return.shouldReturn Was priority found (stop further processing)?
@@ -792,7 +792,7 @@ function BuyBuildings() {
     if (game.buildings.Warpstation.locked === 1 || GetNonUpgradePrice(game.buildings.Warpstation) > GetNonUpgradePrice(game.buildings.Collector) * game.buildings.Warpstation.increase.by / game.buildings.Collector.increase.by) {
         BuyBuilding("Collector", 1);
     }
-    while (BuyBuilding("Warpstation", 1));
+    while (BuyBuilding("Warpstation", 1)){}
     tooltip('hide');
 }
 
@@ -1013,8 +1013,7 @@ function unprettify(splitArray) {
     ];
     var suffixIndex = suffices.indexOf(splitArray[2]);
     var base = suffixIndex + 1;
-    var number = splitArray[1] * Math.pow(1000,base);
-    return number;
+    return splitArray[1] * Math.pow(1000, base);
 }
 
 function getAverageOfPrettifiedString(attackString) {
@@ -1046,8 +1045,7 @@ function getBossAttack() {
         baseAttack *= 5;
     }
     var attackString = calculateDamage(baseAttack, true);
-    var finalAttack = getAverageOfPrettifiedString(attackString);
-    return finalAttack;
+    return getAverageOfPrettifiedString(attackString);
 }
 
 function getBossHealth() {
@@ -1063,8 +1061,7 @@ function getBossHealth() {
 function getSoldierAttack(){
     "use strict";
     var attackString = document.getElementById("goodGuyAttack").innerHTML;
-    var finalAttack = getAverageOfPrettifiedString(attackString);
-    return finalAttack;
+    return getAverageOfPrettifiedString(attackString);
 }
 
 function canTakeOnBoss(){
@@ -1421,7 +1418,6 @@ function RunMaps() {
     }
     if (game.global.preMapsActive === true){
         RunWorld();
-        return;
     }
 }
 
@@ -1631,7 +1627,6 @@ function MaxToxicStacks() {
             }
         }
         RunNewMapForLoot(mapLevel);
-        return;
     }
 }
 
