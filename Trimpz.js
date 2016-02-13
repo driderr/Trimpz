@@ -403,8 +403,8 @@ function AssignFreeWorkers() {
         return;
     }
     var breedCount = (trimps.owned - trimps.employed > 2) ? Math.floor(trimps.owned - trimps.employed) : 0;
-    if (free > game.resources.trimps.owned){
-        free = Math.floor(game.resources.trimps.owned / 3);
+    if (free > trimps.owned){
+        free = Math.floor(trimps.owned / 3);
     }
     if (autoFighting === false){
         if (breedCount - trimps.employed > 0){
@@ -435,7 +435,7 @@ function AssignFreeWorkers() {
             getTotalTimeForBreeding(buy.Geneticist) < targetBreedTime &&
             getRemainingTimeForBreeding() < targetBreedTime &&
             (game.global.lastBreedTime / 1000 < targetBreedTime - getRemainingTimeForBreeding() + targetBreedTimeHysteresis
-              || game.resources.trimps.owned === game.resources.trimps.realMax()) ){
+              || trimps.owned === trimps.realMax()) ){
             food -= cost;
             buy.Geneticist += 1;
             free--;
@@ -492,6 +492,7 @@ function Fight() {
     if (autoFighting === true && game.resources.trimps.owned > 25) { //>25 should reset autoFighting on portal
         return;
     }
+
     autoFighting = false;
     var pauseFightButton = document.getElementById("pauseFight");
     if (pauseFightButton.offsetHeight > 0 && game.resources.trimps.owned === game.resources.trimps.realMax() || game.resources.trimps.owned > 5000000) {
@@ -958,7 +959,7 @@ function BuyCheapEquipmentUpgrades(timeStr) {
         }
     }
 }
-function BuyMetalEquipment() {  //ignoring max level, ignoring min level, buying cheap stuff
+function BuyMetalEquipment() {
     "use strict";
     var debugHpToAtkRatio = [];
     var time = new Date();
@@ -1135,9 +1136,10 @@ function GotoMapsScreen() {
     if (game.global.preMapsActive === true) {
         return;
     }
-    document.getElementById("mapsBtn").click();  //mapsClicked();
-    if (document.getElementById("mapsBtn").innerHTML === "Abandon Soldiers"){
-        document.getElementById("mapsBtn").click();
+    var mapsButton = document.getElementById("mapsBtn");
+    mapsButton.click();  //mapsClicked();
+    if (mapsButton.innerHTML === "Abandon Soldiers"){
+        mapsButton.click();
     }
 }
 
@@ -1330,9 +1332,10 @@ function RunMaps() {
     if (doRunMapsForBonus && game.global.lastClearedCell < 98 && game.global.world > 10){
         if (!canTakeOnBoss()){
             console.debug("Can't take on Boss!");
+            var mapLevel;
             if (game.global.mapBonus < 10){
                 console.debug("Let's increase bonus.");
-                var mapLevel = game.global.world - game.portal.Siphonology.level;
+                mapLevel = game.global.world - game.portal.Siphonology.level;
                 for (map in game.global.mapsOwnedArray) {
                     theMap = game.global.mapsOwnedArray[map];
                     if (theMap.level === mapLevel && theMap.size <= 40){
@@ -1347,7 +1350,7 @@ function RunMaps() {
             }
             if (doRunMapsForEquipment){
                 console.debug("Bonus maxed.  Let's level equipment.");
-                var mapLevel = getLevelOfOneShotMap();
+                mapLevel = getLevelOfOneShotMap();
                 for (map in game.global.mapsOwnedArray) {
                     theMap = game.global.mapsOwnedArray[map];
                     if (theMap.level === mapLevel && theMap.loot >= 1.40){
@@ -1536,10 +1539,10 @@ function CheckPortal() {
             if (theMap.name !== "Dimension of Anger"){
                 continue;
             }
-            itemsAvailable = addSpecials(true,true,game.global.mapsOwnedArray[map]);
+            itemsAvailable = addSpecials(true,true,theMap);
             if (itemsAvailable > 0) {
                 portalObtained = true;
-                RunMap(game.global.mapsOwnedArray[map]);
+                RunMap(theMap);
             }
         }
     }
@@ -1581,8 +1584,7 @@ function CheckFormation() {
 
 function FireGeneticists() {
     "use strict";
-    var jobButton;
-    var job = "Geneticist";
+    var jobButton = document.getElementById("Geneticist");
 
     if (game.jobs.Geneticist.locked !== 0 ||
         game.global.challengeActive === "Electricity" ||
@@ -1594,7 +1596,6 @@ function FireGeneticists() {
           getRemainingTimeForBreeding() >= targetBreedTime + targetBreedTimeHysteresis) {
         game.global.firing = true;
         game.global.buyAmt = 1;
-        jobButton = document.getElementById(job);
         jobButton.click();
         game.global.firing = false;
     }
