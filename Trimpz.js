@@ -18,6 +18,7 @@ var shouldMaxOutToxicityHelium = false; //max out toxicity stacks for maximum he
 var zoneToStartMaxingAt = 50;    //zone to begin maxing toxicity stacks for maximum helium
 var doRunMapsForBonus = true;    //enable running of maps based to increase map bonus, based on difficulty of boss fight
 var doRunMapsForEquipment = true;//enable running of maps for loot, will run if needed based on difficulty of boss fight, requires doRunMapsForBonus to be true too
+var runBionicWonderland = false; //enable to run Bionic Wonderland as soon as it's available one time (for speed achievement)
 var numberOfDeathsAllowedToKillBoss = 4; //setting for "doRunMaps...", minimum of just under one, maps will run to keep you from dying this many times during boss fight
 var CheapEquipmentRatio = 0.01; //0.01 means buy equipment if it only costs 1% of resources, regardless of any other limits
 var CheapEqUpgradeRatio = 0.2;  //0.2 means buy equipment upgrades if it only costs 20% of resources, regardless of any other limits
@@ -1318,7 +1319,7 @@ function RunMaps() {
         }
     }
 
-    if (bionicDone === false && game.global.world >= 125) { //For Bionic speed run achieve
+    if (runBionicWonderland && bionicDone === false && game.global.world >= 125) { //For Bionic speed run achieve
         for (map in game.global.mapsOwnedArray) {
             theMap = game.global.mapsOwnedArray[map];
             if (theMap.name === "Bionic Wonderland"){
@@ -1640,12 +1641,23 @@ function MaxToxicStacks() {
     }
 }
 
+
+function TurnOffIncompatibleSettings() {
+    if (game.global.repeatMap)
+        repeatClicked();
+    if (game.options.menu.confirmhole.enabled)
+        toggleSetting("confirmhole");
+    if (game.global.autoUpgrades)
+        toggleAutoUpgrades();
+}
+
 function MainLoop(){
     "use strict";
     if (pauseTrimpz === true){
         return;
     }
     ShowRunningIndicator();
+    TurnOffIncompatibleSettings();
     CheckLateGame();
     CheckHelium();
     CheckFormation();
