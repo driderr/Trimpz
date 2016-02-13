@@ -19,8 +19,8 @@ var zoneToStartMaxingAt = 50;    //zone to begin maxing toxicity stacks for maxi
 var doRunMapsForBonus = true;    //enable running of maps based to increase map bonus, based on difficulty of boss fight
 var doRunMapsForEquipment = true;//enable running of maps for loot, will run if needed based on difficulty of boss fight, requires doRunMapsForBonus to be true too
 var numberOfDeathsAllowedToKillBoss = 4; //setting for "doRunMaps...", minimum of just under one, maps will run to keep you from dying this many times during boss fight
-const CheapEquipmentRatio = 0.01; //0.01 means buy equipment if it only costs 1% of resources, regardless of any other limits
-const CheapEqUpgradeRatio = 0.2;  //0.2 means buy equipment upgrades if it only costs 20% of resources, regardless of any other limits
+var CheapEquipmentRatio = 0.01; //0.01 means buy equipment if it only costs 1% of resources, regardless of any other limits
+var CheapEqUpgradeRatio = 0.2;  //0.2 means buy equipment upgrades if it only costs 20% of resources, regardless of any other limits
 
 //sets of constants to modify that will be switched out over the course of the game
 //generally speaking, and by default, it starts with constantsEarlyGame and then uses the next set at 45,55, and then 60
@@ -313,6 +313,7 @@ function GetNonUpgradePrice(nonUpgradeItem) {
  * @return {number}
  */
 function CanBuyWorkerWithResource(job, ratio, food, extraWorkers){
+    "use strict";
     var cost = job.cost.food;
     var price = 0;
     if (typeof cost[1] !== 'undefined')
@@ -426,7 +427,7 @@ function AssignFreeWorkers() {
             assignThisMany = free - maxFreeForAssignOneAtATime - buy.Miner - buy.Lumberjack;
             buy.Farmer += assignThisMany;
 
-            free = free - (buy.Miner + buy.Lumberjack + buy.Farmer);
+            free -= buy.Miner + buy.Lumberjack + buy.Farmer;
         }
         if (game.jobs.Geneticist.locked === 0 &&
             game.global.challengeActive !== "Electricity" &&
@@ -514,6 +515,7 @@ function ShowRunningIndicator() {
 
 function getMaxResource(resource)
 {
+    "use strict";
     var theResource = game.resources[resource];
     return theResource.max + (theResource.max * game.portal.Packrat.modifier * game.portal.Packrat.level);
 }
@@ -1034,14 +1036,14 @@ function getAverageOfPrettifiedString(attackString) {
     } else{
         max = unprettify(maxArray);
     }
-    return (max + min)/2
+    return (max + min)/2;
 }
 
 function getBossAttack() {
     "use strict";
     var cell = game.global.gridArray[99];
     var baseAttack = game.global.getEnemyAttack(cell.level, cell.name);
-    if (game.global.challengeActive == "Toxicity"){
+    if (game.global.challengeActive === "Toxicity"){
         baseAttack *= 5;
     }
     var attackString = calculateDamage(baseAttack, true);
@@ -1052,7 +1054,7 @@ function getBossHealth() {
     "use strict";
     var cell = game.global.gridArray[99];
     var health = game.global.getEnemyHealth(cell.level, cell.name);
-    if (game.global.challengeActive == "Toxicity"){
+    if (game.global.challengeActive === "Toxicity"){
         health *= 2;
     }
     return health;
@@ -1117,7 +1119,7 @@ function canTakeOnBoss(){
             }
             if (cattackAndBlock < 0) cattackAndBlock = 1;
             var cbossAttack = cattackAndBlock;
-            cbossAttack = cbossAttackBase + game.global.soldierHealthMax * 0.05;
+            cbossAttack += game.global.soldierHealthMax * 0.05;
             cattacksToKillSoldiers = soldierHealth/cbossAttack;
             if (cattacksToKillSoldiers < 1)
                 return false;
@@ -1234,6 +1236,7 @@ function RunWorld() {
 }
 
 function getMaxEnemyHealthForMapLevel(mapLevel) {  //adapted from Trimps getEnemyHealth()
+    "use strict";
     var world = mapLevel;
     var level = 75;
     var name = "Mountimp";
@@ -1258,6 +1261,7 @@ function getMaxEnemyHealthForMapLevel(mapLevel) {  //adapted from Trimps getEnem
 }
 
 function getLevelOfOneShotMap() {
+    "use strict";
     var soldierAttack = getSoldierAttack();
     if (lastFoughtInWorld){
         soldierAttack /= 1 + (0.2 * game.global.mapBonus);
@@ -1326,9 +1330,9 @@ function RunMaps() {
     if (doRunMapsForBonus && game.global.lastClearedCell < 98 && game.global.world > 10){
         if (!canTakeOnBoss()){
             console.debug("Can't take on Boss!");
-            var mapLevel = game.global.world - game.portal.Siphonology.level;
             if (game.global.mapBonus < 10){
                 console.debug("Let's increase bonus.");
+                var mapLevel = game.global.world - game.portal.Siphonology.level;
                 for (map in game.global.mapsOwnedArray) {
                     theMap = game.global.mapsOwnedArray[map];
                     if (theMap.level === mapLevel && theMap.size <= 40){
@@ -1341,9 +1345,9 @@ function RunMaps() {
                 RunNewMap(mapLevel);
                 return;
             }
-            mapLevel = getLevelOfOneShotMap();
             if (doRunMapsForEquipment){
                 console.debug("Bonus maxed.  Let's level equipment.");
+                var mapLevel = getLevelOfOneShotMap();
                 for (map in game.global.mapsOwnedArray) {
                     theMap = game.global.mapsOwnedArray[map];
                     if (theMap.level === mapLevel && theMap.loot >= 1.40){
@@ -1452,7 +1456,7 @@ function CheckLateGame() {
     "use strict";
     if (game.global.world == 60 && document.getElementById('extraGridInfo').style.display == 'block')
         restoreGrid();
-    if (game.global.world == 1 && helium !== -1) {
+    if (game.global.world === 1 && helium !== -1) {
         constants = constantsSets[0];
         constantsIndex = 0;
         mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50,80,125];
@@ -1479,6 +1483,7 @@ function CheckLateGame() {
 
 
 function CheckHelium() {
+    "use strict";
     var date;
     var oldHelium;
     var rate;
@@ -1511,7 +1516,7 @@ function CheckHelium() {
             totalHours: totalTime,
             totalHeliumPerHour: cumulativeRate,
             zone: game.global.world
-        })
+        });
     }
 }
 
@@ -1520,6 +1525,7 @@ function CheckHelium() {
  * @return {boolean}
  */
 function CheckPortal() {
+    "use strict";
     var map;
     var theMap;
     var itemsAvailable;
@@ -1561,6 +1567,7 @@ function CheckPortal() {
 }
 
 function CheckFormation() {
+    "use strict";
     if (game.global.world < 70 || formationDone === true)
     {
         return;
@@ -1608,15 +1615,17 @@ function FireGeneticists() {
 })();
 
 function MainLoopRunner(){
+    "use strict";
     MainLoop();
     setTimeout(MainLoopRunner, constants.getRunInterval());
 }
 
 function MaxToxicStacks() {
+    "use strict";
     if (game.global.mapsActive === true && game.global.preMapsActive === false){ //no map ability(wait one) or already running a map(repeat should be off)
         return;
     }
-    if(shouldMaxOutToxicityHelium && game.global.challengeActive == 'Toxicity' && game.global.lastClearedCell > 95 && game.challenges.Toxicity.stacks < 1500 && game.global.world >= zoneToStartMaxingAt) {
+    if(shouldMaxOutToxicityHelium && game.global.challengeActive === 'Toxicity' && game.global.lastClearedCell > 95 && game.challenges.Toxicity.stacks < 1500 && game.global.world >= zoneToStartMaxingAt) {
         var mapLevel = getLevelOfOneShotMap();
         var theMap;
         for (var map in game.global.mapsOwnedArray) {
@@ -1631,6 +1640,7 @@ function MaxToxicStacks() {
 }
 
 function MainLoop(){
+    "use strict";
     if (pauseTrimpz === true){
         return;
     }
