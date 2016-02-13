@@ -13,6 +13,8 @@ var doElectricChallenge = false; //don't portal before 81
 var doCrushedChallenge = false; //don't portal before 126
 var doNomChallenge = true; //don't portal before 146
 var doToxicChallenge = false; //don't portal before 166
+var shouldMaxOutToxicityHelium = false; //max out toxicity stacks for maximum helium for bone trader during toxicity challenge
+var zoneToStartMaxingAt = 50; //zone to begin maxing toxicity stacks for maximum helium
 var doRunMapsForBonus = true; //enable running of maps based to increase map bonus, based on difficulty of boss fight
 var doRunMapsForEquipment = true; //enable running of maps for loot, will run if needed based on difficulty of boss fight, requires doRunMapsForBonus to be true too
 var numberOfDeathsAllowedToKillBoss = 4; //setting for "doRunMaps...", minimum of just under one, maps will run to keep you from dying this many times during boss fight
@@ -1614,6 +1616,25 @@ function MainLoopRunner(){
     setTimeout(MainLoopRunner, constants.getRunInterval());
 }
 
+function MaxToxicStacks() {
+    if (game.global.mapsActive === true && game.global.preMapsActive === false){ //no map ability(wait one) or already running a map(repeat should be off)
+        return;
+    }
+    if(shouldMaxOutToxicityHelium && game.global.challengeActive == 'Toxicity' && game.global.lastClearedCell > 95 && game.challenges.Toxicity.stacks < 1500 && game.global.world >= zoneToStartMaxingAt) {
+        var mapLevel = getLevelOfOneShotMap();
+        var theMap;
+        for (var map in game.global.mapsOwnedArray) {
+            theMap = game.global.mapsOwnedArray[map];
+            if (theMap.level === mapLevel && theMap.loot >= 1.40){
+                RunMap(theMap);
+                return;
+            }
+        }
+        RunNewMapForLoot(mapLevel);
+        return;
+    }
+}
+
 function MainLoop(){
     if (pauseTrimpz === true){
         return;
@@ -1630,6 +1651,7 @@ function MainLoop(){
     FireGeneticists();
     Fight();
     UpgradeStorage();
+    MaxToxicStacks();
     var shouldReturn = BeginPriorityAction();
     if (shouldReturn === true) {
         tooltip('hide');
