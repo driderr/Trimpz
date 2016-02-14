@@ -263,7 +263,41 @@ var bionicDone = false;
 var formationDone = false;
 var heliumLog = [];
 var lastFoughtInWorld = true;
+var autoTrimpSettings = new Object();
 
+//Loads the automation settings from browser cache
+function loadPageVariables() {
+    var tmp = JSON.parse(localStorage.getItem('TrimpzSettings'));
+    if (tmp !== null) {
+        autoTrimpSettings = tmp;
+    }
+}
+
+//Saves automation settings to browser cache
+function saveSettings() {
+    // debug('Saved');
+    localStorage.setItem('TrimpzSettings', JSON.stringify(autoTrimpSettings));
+}
+
+//Grabs the automation settings from the page
+
+function getPageSetting(setting) {
+    if (autoTrimpSettings.hasOwnProperty(setting) == false) {
+        return false;
+    }
+    if (autoTrimpSettings[setting].type == 'boolean') {
+        // debug('found a boolean');
+        return autoTrimpSettings[setting].enabled;
+    } else if (autoTrimpSettings[setting].type == 'value') {
+        // debug('found a value');
+        return parseFloat(autoTrimpSettings[setting].value);
+    }
+}
+
+function initializeAutoTrimps() {
+    loadPageVariables();
+    document.head.appendChild(document.createElement('script')).src = 'https://rawgit.com/driderr/AutoTrimps/TrimpzUI/NewUI.js';
+}
 
 /**
  * @return {boolean} return.canAfford affordable respecting the ratio?
@@ -1626,6 +1660,7 @@ function FireGeneticists() {
 (function () {
     "use strict";
     CreateButtonForPausing();
+    initializeAutoTrimps();
     var i;
     for(i = 0; i < constantsSets.length; ++i){
         if (game.global.world >= constantsSets[i].getZoneToStartAt()) {
