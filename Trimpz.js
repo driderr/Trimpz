@@ -1617,28 +1617,6 @@ function FireGeneticists() {
         game.global.firing = false;
     }
 }
-
-//Start
-(function () {
-    "use strict";
-    CreateButtonForPausing();
-    initializeUiAndSettings();
-    var i;
-    for(i = 0; i < constantsSets.length; ++i){
-        if (game.global.world >= constantsSets[i].getZoneToStartAt()) {
-            constants = constantsSets[i];
-            constantsIndex = i;
-        }
-    }
-    setTimeout(MainLoopRunner, 100);
-})();
-
-function MainLoopRunner(){
-    "use strict";
-    MainLoop();
-    setTimeout(MainLoopRunner, constants.getRunInterval());
-}
-
 function MaxToxicStacks() {
     "use strict";
     if (game.global.mapsActive === true && game.global.preMapsActive === false){ //no map ability(wait one) or already running a map(repeat should be off)
@@ -1658,7 +1636,6 @@ function MaxToxicStacks() {
     }
 }
 
-
 function TurnOffIncompatibleSettings() {
     if (game.global.repeatMap)
         repeatClicked();
@@ -1666,6 +1643,28 @@ function TurnOffIncompatibleSettings() {
         toggleSetting("confirmhole");
     if (game.global.autoUpgrades)
         toggleAutoUpgrades();
+}
+
+//Start
+(function () {
+    "use strict";
+    CreateButtonForPausing();
+    initializeUiAndSettings();
+    var i;
+    for(i = 0; i < constantsSets.length; ++i){
+        if (game.global.world >= constantsSets[i].getZoneToStartAt()) {
+            constants = constantsSets[i];
+            constantsIndex = i;
+        }
+    }
+    setTimeout(MainLoopRunner, 100);
+})();
+
+function MainLoopRunner(){
+    "use strict";
+    if (trimpzSettings["portalAt"] !== undefined)
+        MainLoop();
+    setTimeout(MainLoopRunner, constants.getRunInterval());
 }
 
 function MainLoop(){
