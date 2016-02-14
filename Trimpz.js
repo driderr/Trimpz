@@ -263,35 +263,20 @@ var bionicDone = false;
 var formationDone = false;
 var heliumLog = [];
 var lastFoughtInWorld = true;
-var autoTrimpSettings = new Object();
+var trimpzSettings = new Object();
 
 //Loads the automation settings from browser cache
 function loadPageVariables() {
     var tmp = JSON.parse(localStorage.getItem('TrimpzSettings'));
     if (tmp !== null) {
-        autoTrimpSettings = tmp;
+        trimpzSettings = tmp;
     }
 }
 
 //Saves automation settings to browser cache
 function saveSettings() {
     // debug('Saved');
-    localStorage.setItem('TrimpzSettings', JSON.stringify(autoTrimpSettings));
-}
-
-//Grabs the automation settings from the page
-
-function getPageSetting(setting) {
-    if (autoTrimpSettings.hasOwnProperty(setting) == false) {
-        return false;
-    }
-    if (autoTrimpSettings[setting].type == 'boolean') {
-        // debug('found a boolean');
-        return autoTrimpSettings[setting].enabled;
-    } else if (autoTrimpSettings[setting].type == 'value') {
-        // debug('found a value');
-        return parseFloat(autoTrimpSettings[setting].value);
-    }
+    localStorage.setItem('TrimpzSettings', JSON.stringify(trimpzSettings));
 }
 
 function initializeAutoTrimps() {
