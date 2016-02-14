@@ -1,28 +1,6 @@
 /*global game,tooltip,resolvePow,getNextPrestigeCost,adjustMap,updateMapCost,addSpecials*/
 /*jslint plusplus: true */
 
-//For users of script: recommended settable constants
-var minBreedingSpeed = 100;    //Open traps if breeding speed is lower than this, in trimps/second
-var skipShieldBlock = true;
-var minimumUpgradesOnHand = 4; //0 will not run maps for equipment upgrades, 4 will run maps to keep 4 available equipment upgrades (that will be autopurchased eventually)
-var portalAt = 146;            //portal when this zone is reached
-var targetBreedTime = 9;       //Hire/Fire geneticists to maintain this breeding time in seconds
-var targetBreedTimeHysteresis = 1; //How many seconds over before we start firing Geneticists?
-var deltaIncreaseInMinimumWarpstationsPerGigastationPurchase = 2; //Increase the minimum number of warpstations required to purchase a gigastation by this number for each gigastation purchased
-//Only pick one challenge to be true, if any
-var doElectricChallenge = false; //don't portal before 81
-var doCrushedChallenge = false;  //don't portal before 126
-var doNomChallenge = true;       //don't portal before 146
-var doToxicChallenge = false;    //don't portal before 166
-var shouldMaxOutToxicityHelium = false; //max out toxicity stacks for maximum helium for bone trader during toxicity challenge
-var zoneToStartMaxingAt = 50;    //zone to begin maxing toxicity stacks for maximum helium
-var doRunMapsForBonus = true;    //enable running of maps based to increase map bonus, based on difficulty of boss fight
-var doRunMapsForEquipment = true;//enable running of maps for loot, will run if needed based on difficulty of boss fight, requires doRunMapsForBonus to be true too
-var runBionicWonderland = false; //enable to run Bionic Wonderland as soon as it's available one time (for speed achievement)
-var numberOfDeathsAllowedToKillBoss = 4; //setting for "doRunMaps...", minimum of just under one, maps will run to keep you from dying this many times during boss fight
-var CheapEquipmentRatio = 0.01; //0.01 means buy equipment if it only costs 1% of resources, regardless of any other limits
-var CheapEqUpgradeRatio = 0.2;  //0.2 means buy equipment upgrades if it only costs 20% of resources, regardless of any other limits
-
 //sets of constants to modify that will be switched out over the course of the game
 //generally speaking, and by default, it starts with constantsEarlyGame and then uses the next set at 45,55, and then 60
 //if you add an entirely new constant set, be sure to add it in order in the array "constantsSets" and set the set's "zoneToStartAt" appropriately
@@ -50,7 +28,6 @@ var constantsEarlyGame = (function () {
         lumberjackMultiplier = 1,           //how many more lumberjacks than farmers? (multiplied)
         maxWormholes = 0,                   //maximum number of wormholes to buy
         shouldSkipHpEquipment = false,      //true to not buy or prestige/upgrade health equipment
-        minimumWarpStations = 20,           //minimum number of warpstations on hand before buying a gigastation
         minimumEquipmentLevel = 5;          //currently unused
     return {
         getZoneToStartAt: function () { return zoneToStartAt; },
@@ -75,7 +52,6 @@ var constantsEarlyGame = (function () {
         getLumberjackMultiplier: function () {return lumberjackMultiplier;},
         getMaxWormholes: function () {return maxWormholes;},
         getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
-        getMinimumWarpStations: function () {return minimumWarpStations;},
         getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;}
     };
 })();
@@ -103,7 +79,6 @@ var constantsLateGame = (function () {
         lumberjackMultiplier = 0.5,
         maxWormholes = 0,
         shouldSkipHpEquipment = false,
-        minimumWarpStations = 20,
         minimumEquipmentLevel = 5;
     return {
         getZoneToStartAt: function () { return zoneToStartAt; },
@@ -128,7 +103,6 @@ var constantsLateGame = (function () {
         getLumberjackMultiplier: function () {return lumberjackMultiplier;},
         getMaxWormholes: function () {return maxWormholes;},
         getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
-        getMinimumWarpStations: function () {return minimumWarpStations;},
         getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;}
     };
 })();
@@ -156,7 +130,6 @@ var constantsLateLateGame = (function () {
         lumberjackMultiplier = 1,
         maxWormholes = 0,
         shouldSkipHpEquipment = true,
-        minimumWarpStations = 20,
         minimumEquipmentLevel = 5;
     return {
         getZoneToStartAt: function () { //don't start until enough block since last constants should be getting gyms
@@ -186,7 +159,6 @@ var constantsLateLateGame = (function () {
         getLumberjackMultiplier: function () {return lumberjackMultiplier;},
         getMaxWormholes: function () {return maxWormholes;},
         getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
-        getMinimumWarpStations: function () {return minimumWarpStations;},
         getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;}
     };
 })();
@@ -214,7 +186,6 @@ var constantsEndGame = (function () {
         lumberjackMultiplier = 0.33,
         maxWormholes = 0,
         shouldSkipHpEquipment = false,
-        minimumWarpStations = 20,
         minimumEquipmentLevel = 5;
     return {
         getZoneToStartAt: function () { return zoneToStartAt; },
@@ -239,7 +210,6 @@ var constantsEndGame = (function () {
         getLumberjackMultiplier: function () {return lumberjackMultiplier;},
         getMaxWormholes: function () {return maxWormholes;},
         getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
-        getMinimumWarpStations: function () {return minimumWarpStations;},
         getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;}
     };
 })();
@@ -263,7 +233,7 @@ var bionicDone = false;
 var formationDone = false;
 var heliumLog = [];
 var lastFoughtInWorld = true;
-var trimpzSettings = new Object();
+var trimpzSettings = {};
 
 //Loads the automation settings from browser cache
 function loadPageVariables() {
@@ -275,7 +245,6 @@ function loadPageVariables() {
 
 //Saves automation settings to browser cache
 function saveSettings() {
-    // debug('Saved');
     localStorage.setItem('TrimpzSettings', JSON.stringify(trimpzSettings));
 }
 
@@ -402,12 +371,14 @@ function getRemainingTimeForBreeding() {
 function ShouldBuyGeneticist(food, extraGeneticists) {
     var trimps = game.resources.trimps;
     var cost;
+    var targetBreedTime = trimpzSettings["targetBreedTime"].value;
+
     var shouldBuy = game.jobs.Geneticist.locked === 0 &&
         game.global.challengeActive !== "Electricity" &&
         (cost = CanBuyWorkerWithResource(game.jobs.Geneticist, 1, food, extraGeneticists)) !== -1 &&
         getTotalTimeForBreeding(extraGeneticists) < targetBreedTime &&
         getRemainingTimeForBreeding() < targetBreedTime &&
-        (game.global.lastBreedTime / 1000 < targetBreedTime - getRemainingTimeForBreeding() + targetBreedTimeHysteresis
+        (game.global.lastBreedTime / 1000 < targetBreedTime - getRemainingTimeForBreeding() + trimpzSettings["targetBreedTimeHysteresis"].value
         || trimps.owned === trimps.realMax());
     return {
         shouldBuy : shouldBuy,
@@ -601,7 +572,7 @@ function ClickAllNonEquipmentUpgrades() {
         if (upgrade === "Gigastation"){
             continue;
         }
-        if (skipShieldBlock === true && upgrade === "Shieldblock"){
+        if (trimpzSettings["skipShieldBlock"].value === true && upgrade === "Shieldblock"){
             continue;
         }
         if (typeof game.upgrades[upgrade].prestiges === 'undefined' && game.upgrades[upgrade].locked === 0) {
@@ -696,12 +667,13 @@ function UpgradeNonEquipment() {
     ClickAllNonEquipmentUpgrades();
     for (upgrade in game.upgrades) {
         if (typeof game.upgrades[upgrade].prestiges === 'undefined' && game.upgrades[upgrade].locked === 0) {
-            if (upgrade === "Gigastation" && (game.buildings.Warpstation.owned < constants.getMinimumWarpStations() + deltaIncreaseInMinimumWarpstationsPerGigastationPurchase * game.upgrades.Gigastation.done
+            if (upgrade === "Gigastation" && 
+				(game.buildings.Warpstation.owned < trimpzSettings["minimumWarpStations"].value + trimpzSettings["deltaIncreaseInMinimumWarpstationsPerGigastationPurchase"].value * game.upgrades.Gigastation.done
                 || CanBuyNonUpgrade(game.buildings.Warpstation, 2) === true)){ //ratio 2 for "can buy soon"
                 continue;
             }
             if (upgrade == 'Coordination' && !canAffordCoordinationTrimps()) continue;
-            if (skipShieldBlock === true && upgrade === "Shieldblock"){
+            if (trimpzSettings["skipShieldBlock"].value === true && upgrade === "Shieldblock"){
                 continue;
             }
             for (aResource in game.upgrades[upgrade].cost.resources) {
@@ -754,7 +726,7 @@ function UpgradeAndGather() {
 
     if (game.resources.trimps.owned < game.resources.trimps.realMax() &&
         game.buildings.Trap.owned > 0 &&
-        GetBreedSpeed() < minBreedingSpeed){
+        GetBreedSpeed() < trimpzSettings["minBreedingSpeed"].value){
         document.getElementById("trimpsCollectBtn").click();
 //        } else if (game.global.buildingsQueue.length > 0) {
 //            document.getElementById("buildingsCollectBtn").click();
@@ -972,7 +944,7 @@ function BuyCheapEquipment(timeStr) {
         if (currentEquip.locked === 1 || anEquipment === "Shield" || (constants.getShouldSkipHpEquipment() === true && typeof currentEquip.health !== 'undefined')) {
             continue;
         }
-        if (CanBuyNonUpgrade(game.equipment[anEquipment], CheapEquipmentRatio) === true) {
+        if (CanBuyNonUpgrade(game.equipment[anEquipment], trimpzSettings["CheapEquipmentRatio"].value) === true) {
             document.getElementById(anEquipment).click();
             console.debug("Low cost buy for " + anEquipment + timeStr);
         }
@@ -993,7 +965,7 @@ function BuyCheapEquipmentUpgrades(timeStr) {
                 continue;
             }
             cost = Math.ceil(getNextPrestigeCost(upgrade) * (Math.pow(1 - game.portal.Artisanistry.modifier, game.portal.Artisanistry.level)));
-            if (CanAffordEquipmentUpgrade(upgrade) === true && cost < game.resources.metal.owned * CheapEqUpgradeRatio) {
+            if (CanAffordEquipmentUpgrade(upgrade) === true && cost < game.resources.metal.owned * trimpzSettings["CheapEqUpgradeRatio"].value) {
                 document.getElementById(upgrade).click();
                 console.debug("Low cost buy for " + upgrade + timeStr);
             }
@@ -1137,7 +1109,7 @@ function canTakeOnBoss(){
 
     if (attacksToKillSoldiers < 1)
         return false;
-    if (numberOfDeaths > numberOfDeathsAllowedToKillBoss)
+    if (numberOfDeaths > trimpzSettings["numberOfDeathsAllowedToKillBoss"].value)
         return false;
 
     if (game.global.challengeActive == "Nom" && numberOfDeaths > 1){
@@ -1359,7 +1331,7 @@ function RunMaps() {
         }
     }
 
-    if (runBionicWonderland && bionicDone === false && game.global.world >= 125) { //For Bionic speed run achieve
+    if (trimpzSettings["runBionicWonderland"].value && bionicDone === false && game.global.world >= 125) { //For Bionic speed run achieve
         for (map in game.global.mapsOwnedArray) {
             theMap = game.global.mapsOwnedArray[map];
             if (theMap.name === "Bionic Wonderland"){
@@ -1370,7 +1342,7 @@ function RunMaps() {
         }
     }
 
-    if (doRunMapsForBonus && game.global.lastClearedCell < 98 && game.global.world > 10){
+    if (trimpzSettings["doRunMapsForBonus"].value && game.global.lastClearedCell < 98 && game.global.world > 10){
         if (!canTakeOnBoss()){
             console.debug("Can't take on Boss!");
             var mapLevel;
@@ -1389,7 +1361,7 @@ function RunMaps() {
                 RunNewMap(mapLevel);
                 return;
             }
-            if (doRunMapsForEquipment){
+            if (trimpzSettings["doRunMapsForEquipment"].value){
                 console.debug("Bonus maxed.  Let's level equipment.");
                 mapLevel = getLevelOfOneShotMap();
                 for (map in game.global.mapsOwnedArray) {
@@ -1440,7 +1412,7 @@ function RunMaps() {
         }
     }
 
-    if (totalUpgrades < minimumUpgradesOnHand){//=== 0){ //if not equipment upgrades, go get some! (can make this a "< constant" later if desired)
+    if (totalUpgrades < trimpzSettings["minimumUpgradesOnHand"].value){//=== 0){ //if not equipment upgrades, go get some! (can make this a "< constant" later if desired)
         //what's the lowest zone map I can create and get items?
         var zoneToTry;
         for (zoneToTry = 6; zoneToTry <= game.global.world; zoneToTry++){
@@ -1573,7 +1545,7 @@ function CheckPortal() {
     var map;
     var theMap;
     var itemsAvailable;
-    if (game.global.world >= portalAt - 2 && portalObtained === false)
+    if (game.global.world >= trimpzSettings["portalAt"].value - 2 && portalObtained === false)
     {
         for (map in game.global.mapsOwnedArray){
             theMap = game.global.mapsOwnedArray[map];
@@ -1587,21 +1559,25 @@ function CheckPortal() {
             }
         }
     }
-    if (game.global.world >= portalAt && game.global.challengeActive !== "Electricity") {
+    if (game.global.world >= trimpzSettings["portalAt"].value && game.global.challengeActive !== "Electricity") {
         heliumLog.push(heliumHistory);
         document.getElementById("portalBtn").click();
-        if (doElectricChallenge)
-        {
-            document.getElementById("challengeElectricity").click();
-        } else if (doCrushedChallenge)
-        {
-            document.getElementById("challengeCrushed").click();
-        } else if (doToxicChallenge)
-        {
-            document.getElementById("challengeToxicity").click();
-        } else if (doNomChallenge)
-        {
-            document.getElementById("challengeNom").click();
+
+        switch(trimpzSettings["challenge"].selected){
+            case "Electricity":
+                document.getElementById("challengeElectricity").click();
+                break;
+            case "Crushed":
+                document.getElementById("challengeCrushed").click();
+                break;
+            case "Nom":
+                document.getElementById("challengeNom").click();
+                break;
+            case "Toxicity":
+                document.getElementById("challengeToxicity").click();
+                break;
+            default:
+                break;
         }
         document.getElementById("activatePortalBtn").click();
         document.getElementsByClassName("activatePortalBtn")[0].click();
@@ -1630,7 +1606,8 @@ function FireGeneticists() {
         game.jobs.Geneticist.owned === 0) {
         return;
     }
-
+    var targetBreedTime = trimpzSettings["targetBreedTime"].value;
+    var targetBreedTimeHysteresis = trimpzSettings["targetBreedTimeHysteresis"].value;
     var jobButton = document.getElementById("Geneticist");
     while(getTotalTimeForBreeding(0) >= targetBreedTime + targetBreedTimeHysteresis ||
           getRemainingTimeForBreeding() >= targetBreedTime + targetBreedTimeHysteresis) {
@@ -1667,7 +1644,7 @@ function MaxToxicStacks() {
     if (game.global.mapsActive === true && game.global.preMapsActive === false){ //no map ability(wait one) or already running a map(repeat should be off)
         return;
     }
-    if(shouldMaxOutToxicityHelium && game.global.challengeActive === 'Toxicity' && game.global.lastClearedCell > 95 && game.challenges.Toxicity.stacks < 1500 && game.global.world >= zoneToStartMaxingAt) {
+    if(trimpzSettings["shouldMaxOutToxicityHelium"].value && game.global.challengeActive === 'Toxicity' && game.global.lastClearedCell > 95 && game.challenges.Toxicity.stacks < 1500 && game.global.world >= trimpzSettings["zoneToStartMaxingAt"].value) {
         var mapLevel = getLevelOfOneShotMap();
         var theMap;
         for (var map in game.global.mapsOwnedArray) {
