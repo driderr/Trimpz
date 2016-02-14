@@ -572,6 +572,9 @@ function ClickAllNonEquipmentUpgrades() {
         if (upgrade === "Gigastation"){
             continue;
         }
+        if (upgrade === "Potency"){
+            continue;
+        }
         if (trimpzSettings["skipShieldBlock"].value === true && upgrade === "Shieldblock"){
             continue;
         }
@@ -685,6 +688,13 @@ function UpgradeNonEquipment() {
             if (upgrade == 'Coordination' && !canAffordCoordinationTrimps()) continue;
             if (trimpzSettings["skipShieldBlock"].value === true && upgrade === "Shieldblock"){
                 continue;
+            }
+            if (upgrade === "Potency"){
+                var targetBreedTime = trimpzSettings["targetBreedTime"].value;
+                var targetBreedTimeHysteresis = trimpzSettings["targetBreedTimeHysteresis"].value;
+                if (!(getTotalTimeForBreeding(0) >= targetBreedTime + targetBreedTimeHysteresis ||
+                    getRemainingTimeForBreeding() >= targetBreedTime + targetBreedTimeHysteresis))
+                    continue;
             }
             for (aResource in game.upgrades[upgrade].cost.resources) {
                 needed = game.upgrades[upgrade].cost.resources[aResource];
@@ -1634,6 +1644,7 @@ function FireGeneticists() {
         game.global.firing = false;
     }
 }
+
 function MaxToxicStacks() {
     "use strict";
     if (game.global.mapsActive === true && game.global.preMapsActive === false){ //no map ability(wait one) or already running a map(repeat should be off)
@@ -1699,7 +1710,6 @@ function MainLoop(){
     }
     TurnOnAutoBuildTraps();
     AssignFreeWorkers();
-    FireGeneticists();
     Fight();
     UpgradeStorage();
     MaxToxicStacks();
@@ -1710,6 +1720,7 @@ function MainLoop(){
         return;
     }
     var collectingForUpgrade = UpgradeAndGather();
+    FireGeneticists();
     if (collectingForUpgrade === false) { //allow resources to accumulate for upgrades if true
         BuyBuildings();
         BuyShield();
