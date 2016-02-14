@@ -24,7 +24,7 @@ Some of the Features:
 
 - Auto-assigns workers temporarily to perform tasks as needed such as research. For example, when a useful upgrade comes up, it will shift a bunch of workers into research. Or, if that upgrade requires something else like metal, they will get significantly shifted towards metal acquisition.
 
-- Different sets of constants are used for different stages of the game and are stored in constant structures.
+- Different sets of constants are used for different stages of the game and are stored in constant structures (normally changed settings are now in a UI on the menu bar under "Trimpz")
 
 - There are tons of constants to set such as zone to portal at, challenge to run, ratios for workers, ratios for building purchase, minimum number of warpstations before purchasing gigastation. (MANY more)
 
@@ -32,9 +32,9 @@ Some of the Features:
 
 - Turns on auto-fight and auto-trap.
 
-- Hires and fires geneticists to maintain 30s anticipation.
+- Hires and fires geneticists to maintain 30s (or specified) anticipation.
 
-- “Pause” button for pausing the script (the only interactive UI element I added).
+- “Pause” button for pausing the script.
 
 - Buys the most efficient equipment upgrade/prestige and saves up for the correct one.
 
@@ -46,7 +46,9 @@ Some of the Features:
 
 - Buys maps and sets sliders as needed and as affordable.
 
+- UI adapted from AutoTrimps.
+
+
 Use this bookmarklet to run the script while you're at https://trimps.github.io/# :
 javascript:document.body.appendChild(document.createElement('script')).setAttribute('src','https://rawgit.com/driderr/Trimpz/master/Trimpz.js');void(0);
 
-AutoUpgrade, AutoPrestige, Repeat maps, and confirmations must be off.
