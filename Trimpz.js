@@ -693,7 +693,8 @@ function UpgradeNonEquipment() {
                 var targetBreedTime = trimpzSettings["targetBreedTime"].value;
                 var targetBreedTimeHysteresis = trimpzSettings["targetBreedTimeHysteresis"].value;
                 if (!(getTotalTimeForBreeding(0) >= targetBreedTime + targetBreedTimeHysteresis ||
-                    getRemainingTimeForBreeding() >= targetBreedTime + targetBreedTimeHysteresis))
+                    getRemainingTimeForBreeding() >= targetBreedTime + targetBreedTimeHysteresis ||
+                    (game.jobs.Geneticist.locked === 0 && CanBuyWorkerWithResource(game.jobs.Geneticist, 1, game.resources.food.owned, 0) !== -1)))
                     continue;
             }
             for (aResource in game.upgrades[upgrade].cost.resources) {
@@ -823,7 +824,15 @@ function BuyBuilding(buildingName, ratio, max, checkQueue){
 function BuyBuildings() {
     "use strict";
     BuyBuilding("Gym", constants.getGymCostRatio(), constants.getMaxGyms());
-    BuyBuilding("Nursery", constants.getNurseryCostRatio());
+
+
+    var targetBreedTime = trimpzSettings["targetBreedTime"].value;
+    var targetBreedTimeHysteresis = trimpzSettings["targetBreedTimeHysteresis"].value;
+    if (getTotalTimeForBreeding(0) >= targetBreedTime + targetBreedTimeHysteresis ||
+        getRemainingTimeForBreeding() >= targetBreedTime + targetBreedTimeHysteresis ||
+        (game.jobs.Geneticist.locked === 0 && CanBuyWorkerWithResource(game.jobs.Geneticist, 1, game.resources.food.owned, 0) !== -1)){
+            BuyBuilding("Nursery", constants.getNurseryCostRatio());
+    }
     BuyBuilding("Tribute", constants.getTributeCostRatio());
     BuyBuilding("Hut", constants.getHousingCostRatio());
     BuyBuilding("House", constants.getHousingCostRatio());
