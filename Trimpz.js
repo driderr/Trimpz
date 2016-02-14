@@ -248,7 +248,7 @@ function saveSettings() {
     localStorage.setItem('TrimpzSettings', JSON.stringify(trimpzSettings));
 }
 
-function initializeAutoTrimps() {
+function initializeUiAndSettings() {
     loadPageVariables();
     document.head.appendChild(document.createElement('script')).src = 'https://rawgit.com/driderr/AutoTrimps/TrimpzUI/NewUI.js';
 }
@@ -1622,7 +1622,7 @@ function FireGeneticists() {
 (function () {
     "use strict";
     CreateButtonForPausing();
-    initializeAutoTrimps();
+    initializeUiAndSettings();
     var i;
     for(i = 0; i < constantsSets.length; ++i){
         if (game.global.world >= constantsSets[i].getZoneToStartAt()) {
