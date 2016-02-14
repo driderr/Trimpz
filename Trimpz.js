@@ -512,7 +512,7 @@ function Fight() {
             pauseFightButton.click();
         }
         autoFighting = true;
-    } else if (document.getElementById("battleContainer").style.visibility !== "hidden") {
+    } else if (document.getElementById("battleContainer").style.visibility !== "hidden" && game.resources.trimps.owned >= 10) {
         document.getElementById("fightBtn").click();
     }
 }
