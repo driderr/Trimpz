@@ -1733,7 +1733,7 @@ function TurnOffIncompatibleSettings() {
 
 function MainLoopRunner(){
     "use strict";
-    if (trimpzSettings["portalAt"] != undefined)
+    if (trimpzSettings["respecPheromones"] != undefined)
         MainLoop();
     setTimeout(MainLoopRunner, constants.getRunInterval());
 }
