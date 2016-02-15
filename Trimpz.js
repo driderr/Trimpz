@@ -1127,6 +1127,10 @@ function getSoldierAttack(){
 
 function canTakeOnBoss(){
     "use strict";
+
+    if (!document.getElementById("goodGuyAttack").innerHTML)
+        return true; //must have started script in map screen without playing game
+
     var bossAttackBase = getBossAttack();
     var bossHealth = getBossHealth();
     var soldierAttack = getSoldierAttack();
