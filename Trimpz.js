@@ -243,6 +243,20 @@ function loadPageVariables() {
     if (tmp !== null) {
         trimpzSettings = tmp;
     }
+    if (trimpzSettings["respecAmount"] === undefined) {
+        trimpzSettings["respecAmount"] = {
+            id: "respecAmount",
+            name: "",
+            description: "Original value of Pheromones",
+            type: "Code Only",
+            value: 0
+        };
+    } else {
+        respecAmount = trimpzSettings["respecAmount"].value;
+        if (respecAmount){
+            respecDone = true;
+        }
+    }
 }
 
 //Saves automation settings to browser cache
@@ -1616,7 +1630,9 @@ function CheckPortal() {
             ClickButton("activatePortalBtn");
         }
         respecAmount = 0;
-        respecDone = 0;
+        trimpzSettings["respecAmount"].value = respecAmount;
+        saveSettings();
+        respecDone = false;
         ClickButton("portalBtn");
 
         switch(trimpzSettings["challenge"].selected){
@@ -1698,6 +1714,8 @@ function RespecPheremones() {
     if (doRespec && respecDone === false && game.global.world >= 10 && game.portal.Pheromones.level > 1 && game.global.canRespecPerks){
         respecDone = true;
         respecAmount = game.portal.Pheromones.level;
+        trimpzSettings["respecAmount"].value = respecAmount;
+        saveSettings();
         ClickButton("pastUpgradesBtn");
         ClickButton("respecPortalBtn");
         ClickButton("ptabRemove");
@@ -1715,7 +1733,6 @@ function RespecPheremones() {
         }
     }
 }
-
 
 function TurnOffIncompatibleSettings() {
     if (game.global.repeatMap)
