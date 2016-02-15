@@ -694,7 +694,7 @@ function UpgradeNonEquipment() {
             if (upgrade === "Potency"){
                 var targetBreedTime = trimpzSettings["targetBreedTime"].value;
                 var targetBreedTimeHysteresis = trimpzSettings["targetBreedTimeHysteresis"].value;
-                if (!(getTotalTimeForBreeding(0) >= targetBreedTime - targetBreedTimeHysteresis))
+                if (!ShouldLowerBreedWithoutGeneticists())
                     continue;
             }
             for (aResource in game.upgrades[upgrade].cost.resources) {
@@ -821,13 +821,26 @@ function BuyBuilding(buildingName, ratio, max, checkQueue){
     return false;
 }
 
+/**
+ * @return {boolean}
+ */
+function ShouldLowerBreedWithoutGeneticists(){
+    var targetBreedTime = trimpzSettings["targetBreedTime"].value;
+    var targetBreedTimeHysteresis = trimpzSettings["targetBreedTimeHysteresis"].value;
+    if (getTotalTimeForBreeding(0) >= targetBreedTime - targetBreedTimeHysteresis ||
+        (game.jobs.Geneticist.locked === 1 && getRemainingTimeForBreeding() >= targetBreedTime + targetBreedTimeHysteresis * 2)){
+        return true;
+    }
+    return false;
+}
+
 function BuyBuildings() {
     "use strict";
     BuyBuilding("Gym", constants.getGymCostRatio(), constants.getMaxGyms());
 
     var targetBreedTime = trimpzSettings["targetBreedTime"].value;
     var targetBreedTimeHysteresis = trimpzSettings["targetBreedTimeHysteresis"].value;
-    if (getTotalTimeForBreeding(0) >= targetBreedTime - targetBreedTimeHysteresis){
+    if (ShouldLowerBreedWithoutGeneticists()){
             BuyBuilding("Nursery", constants.getNurseryCostRatio());
     }
     BuyBuilding("Tribute", constants.getTributeCostRatio());
@@ -1697,7 +1710,7 @@ function RespecPheremones() {
     } else if ((doRespec || respecAmount > 0) && game.portal.Pheromones.level < respecAmount){
         var targetBreedTime = trimpzSettings["targetBreedTime"].value;
         var targetBreedTimeHysteresis = trimpzSettings["targetBreedTimeHysteresis"].value;
-        if (getTotalTimeForBreeding(0) >= targetBreedTime - targetBreedTimeHysteresis) {
+        if (ShouldLowerBreedWithoutGeneticists()) {
             ClickButton("pastUpgradesBtn");
             ClickButton("Pheromones");
             ClickButton("activatePortalBtn");
