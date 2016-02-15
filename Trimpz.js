@@ -828,7 +828,7 @@ function ShouldLowerBreedWithoutGeneticists(){
     var targetBreedTime = trimpzSettings["targetBreedTime"].value;
     var targetBreedTimeHysteresis = trimpzSettings["targetBreedTimeHysteresis"].value;
     if (getTotalTimeForBreeding(0) >= targetBreedTime - targetBreedTimeHysteresis ||
-        (game.jobs.Geneticist.locked === 1 && getRemainingTimeForBreeding() >= targetBreedTime + targetBreedTimeHysteresis * 2)){
+        ((game.jobs.Geneticist.locked === 1 || game.jobs.Geneticist.owned === 0) && getRemainingTimeForBreeding() >= targetBreedTime + targetBreedTimeHysteresis * 2)){
         return true;
     }
     return false;
