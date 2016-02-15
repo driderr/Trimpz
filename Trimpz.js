@@ -1682,7 +1682,7 @@ function MaxToxicStacks() {
 
 function RespecPheremones() {
     var doRespec = trimpzSettings["respecPheromones"].value;
-    if (doRespec && respecDone === false && game.global.world >= 10 && game.portal.Pheromones.level > 1){
+    if (doRespec && respecDone === false && game.global.world >= 10 && game.portal.Pheromones.level > 1 && game.global.canRespecPerks){
         respecDone = true;
         respecAmount = game.portal.Pheromones.level;
         ClickButton("pastUpgradesBtn");
