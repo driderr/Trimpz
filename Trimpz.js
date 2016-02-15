@@ -1603,7 +1603,8 @@ function CheckPortal() {
             }
             ClickButton("activatePortalBtn");
         }
-
+        respecAmount = 0;
+        respecDone = 0;
         ClickButton("portalBtn");
 
         switch(trimpzSettings["challenge"].selected){
