@@ -722,7 +722,7 @@ function UpgradeNonEquipment() {
                     FocusWorkersOn("Miner");
                     return true;
                 }
-                if (aResource === "science" && needed > game.resources.science.owned) {
+                if (aResource === "science" && needed > game.resources.science.owned && document.getElementById('scienceCollectBtn').style.display == 'block') {
                     ClickButton("scienceCollectBtn");
                     FocusWorkersOn("Scientist");
                     return true;
@@ -800,7 +800,7 @@ function BeginPriorityAction() { //this is really just for the beginning (after 
         ClickButton("trimpsCollectBtn");
         return true;
     }
-    if (game.resources.science.owned < constants.getMinScienceOwned()) {//Collect science
+    if (game.resources.science.owned < constants.getMinScienceOwned() && document.getElementById('scienceCollectBtn').style.display == 'block') {//Collect science
         ClickButton("scienceCollectBtn");
         return true;
     }
