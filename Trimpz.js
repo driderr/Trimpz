@@ -416,7 +416,7 @@ function AssignFreeWorkers() {
     }
 
     if (free > 0){
-        document.getElementById("tab1").click();    //hire 1 at a time
+        ClickButton("tab1");    //hire 1 at a time
     } else
     {
         return;
@@ -581,7 +581,7 @@ function ClickAllNonEquipmentUpgrades() {
             continue;
         }
         if (typeof game.upgrades[upgrade].prestiges == 'undefined' && game.upgrades[upgrade].locked === 0) {
-            document.getElementById(upgrade).click();  //Upgrade!
+            ClickButton(upgrade);  //Upgrade!
         }
     }
     tooltip('hide');
@@ -632,7 +632,7 @@ function FocusWorkersOn(jobToFocusOn) {
         fromJobButton = document.getElementById(jobsToMoveFrom[job]);
         ClickButton(fromJobButton);
         game.global.firing = false;
-        document.getElementById(jobToFocusOn).click();
+        ClickButton(jobToFocusOn);
         game.global.buyAmt = 1;
         workersMoved.push([jobsToMoveFrom[job], workersToMove, jobToFocusOn]);
     }
@@ -661,9 +661,9 @@ function RestoreWorkerFocus() {
         }
         game.global.buyAmt = workersToMove;
         game.global.firing = true;
-        document.getElementById(workersMoved[jobMoved][2]).click();
+        ClickButton(workersMoved[jobMoved][2]);
         game.global.firing = false;
-        document.getElementById(job).click();
+        ClickButton(job);
         game.global.buyAmt = 1;
         workersMoved[jobMoved][1] = 0;
     }
@@ -723,7 +723,7 @@ function UpgradeNonEquipment() {
                     return true;
                 }
             }
-            document.getElementById(upgrade).click();  //Upgrade!
+            ClickButton(upgrade);  //Upgrade!
         }
     }
     RestoreWorkerFocus();
@@ -815,7 +815,7 @@ function BuyBuilding(buildingName, ratio, max, checkQueue){
     var theBuilding = game.buildings[buildingName];
     if (theBuilding.locked === 0 && theBuilding.owned < max &&
         CanBuyNonUpgrade(theBuilding, ratio) === true) {
-        document.getElementById(buildingName).click();
+        ClickButton(buildingName);
         return true;
     }
     return false;
@@ -949,13 +949,13 @@ function BuyEquipmentOrUpgrade(bestEquipGainPerMetal, bestUpgradeGainPerMetal, b
     var boughtSomething = false;
     if (bestEquipGainPerMetal > bestUpgradeGainPerMetal) {
         if (CanBuyNonUpgrade(game.equipment[bestEquipment], constants.getEquipmentCostRatio()) === true) {
-            document.getElementById(bestEquipment).click();
+            ClickButton(bestEquipment);
             console.debug("Best buy " + bestEquipment + timeStr);
             boughtSomething = true;
         }
     } else {
         if (CanAffordEquipmentUpgrade(bestUpgrade) === true && bestUpgradeCost < game.resources.metal.owned * constants.getEquipmentCostRatio()) {
-            document.getElementById(bestUpgrade).click();
+            ClickButton(bestUpgrade);
             console.debug("Best buy " + bestUpgrade + timeStr);
             boughtSomething = true;
         }
@@ -978,8 +978,7 @@ function BuyCheapEquipment(timeStr) {
             continue;
         }
         if (CanBuyNonUpgrade(game.equipment[anEquipment], trimpzSettings["CheapEquipmentRatio"].value) === true) {
-            document.getElementById(anEquipment).click();
-            console.debug("Low cost buy for " + anEquipment + timeStr);
+            ClickButton(anEquipment);
         }
     }
     return currentEquip;
@@ -999,7 +998,7 @@ function BuyCheapEquipmentUpgrades(timeStr) {
             }
             cost = Math.ceil(getNextPrestigeCost(upgrade) * (Math.pow(1 - game.portal.Artisanistry.modifier, game.portal.Artisanistry.level)));
             if (CanAffordEquipmentUpgrade(upgrade) === true && cost < game.resources.metal.owned * trimpzSettings["CheapEqUpgradeRatio"].value) {
-                document.getElementById(upgrade).click();
+                ClickButton(upgrade);
                 console.debug("Low cost buy for " + upgrade + timeStr);
             }
         }
@@ -1273,7 +1272,7 @@ function RunMap(map) {
     "use strict";
     GotoMapsScreen();
     lastFoughtInWorld = false;
-    document.getElementById(map.id).click();
+    ClickButton(map.id);
     ClickButton("selectMapBtn");
 }
 
@@ -1638,7 +1637,7 @@ function CheckFormation() {
     }
     if (document.getElementById("formation2").style.display === "block")
     {
-        document.getElementById("formation2").click();
+        ClickButton("formation2");
         formationDone = true;
     }
 }
