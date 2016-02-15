@@ -691,12 +691,8 @@ function UpgradeNonEquipment() {
             if (trimpzSettings["skipShieldBlock"].value === true && upgrade === "Shieldblock"){
                 continue;
             }
-            if (upgrade === "Potency"){
-                var targetBreedTime = trimpzSettings["targetBreedTime"].value;
-                var targetBreedTimeHysteresis = trimpzSettings["targetBreedTimeHysteresis"].value;
-                if (!ShouldLowerBreedWithoutGeneticists())
-                    continue;
-            }
+            if (upgrade === "Potency" && !ShouldLowerBreedWithoutGeneticists())
+                continue;
             for (aResource in game.upgrades[upgrade].cost.resources) {
                 needed = game.upgrades[upgrade].cost.resources[aResource];
                 if (typeof needed[1] != 'undefined') {
@@ -1668,12 +1664,12 @@ function FireGeneticists() {
     }
     var targetBreedTime = trimpzSettings["targetBreedTime"].value;
     var targetBreedTimeHysteresis = trimpzSettings["targetBreedTimeHysteresis"].value;
-    var jobButton = document.getElementById("Geneticist");
-    while(getTotalTimeForBreeding(0) >= targetBreedTime + targetBreedTimeHysteresis ||
-          getRemainingTimeForBreeding() >= targetBreedTime + targetBreedTimeHysteresis) {
+    while((getTotalTimeForBreeding(0) >= targetBreedTime + targetBreedTimeHysteresis ||
+            getRemainingTimeForBreeding() >= targetBreedTime + targetBreedTimeHysteresis)
+            && game.jobs.Geneticist.owned !== 0){
         game.global.firing = true;
         game.global.buyAmt = 1;
-        ClickButton(jobButton);
+        buyJob("Geneticist");
         game.global.firing = false;
     }
 }
@@ -1712,8 +1708,6 @@ function RespecPheremones() {
         ClickButton("Pheromones");
         ClickButton("activatePortalBtn");
     } else if ((doRespec || respecAmount > 0) && game.portal.Pheromones.level < respecAmount){
-        var targetBreedTime = trimpzSettings["targetBreedTime"].value;
-        var targetBreedTimeHysteresis = trimpzSettings["targetBreedTimeHysteresis"].value;
         if (ShouldLowerBreedWithoutGeneticists()) {
             ClickButton("pastUpgradesBtn");
             ClickButton("Pheromones");
