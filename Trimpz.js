@@ -231,6 +231,8 @@ var portalObtained = false;
 var pauseTrimpz = false;
 var bionicDone = false;
 var formationDone = false;
+var respecDone = false;
+var respecAmount = 0;
 var heliumLog = [];
 var lastFoughtInWorld = true;
 var trimpzSettings = {};
@@ -1592,6 +1594,16 @@ function CheckPortal() {
     }
     if (game.global.world >= trimpzSettings["portalAt"].value && game.global.challengeActive !== "Electricity") {
         heliumLog.push(heliumHistory);
+
+        if (respecAmount > 0 && game.portal.Pheromones.level < respecAmount){
+            ClickButton("pastUpgradesBtn");
+
+            while (game.portal.Pheromones.level + game.portal.Pheromones.levelTemp < respecAmount) {
+                ClickButton("Pheromones");
+            }
+            ClickButton("activatePortalBtn");
+        }
+
         ClickButton("portalBtn");
 
         switch(trimpzSettings["challenge"].selected){
@@ -1668,6 +1680,32 @@ function MaxToxicStacks() {
     }
 }
 
+function RespecPheremones() {
+    var doRespec = trimpzSettings["respecPheromones"].value;
+    if (doRespec && respecDone === false && game.global.world >= 10 && game.portal.Pheromones.level > 1){
+        respecDone = true;
+        respecAmount = game.portal.Pheromones.level;
+        ClickButton("pastUpgradesBtn");
+        ClickButton("respecPortalBtn");
+        ClickButton("ptabRemove");
+        while (game.portal.Pheromones.level + game.portal.Pheromones.levelTemp > 0) {
+            ClickButton("Pheromones");
+        }
+        ClickButton("ptabRemove");
+        ClickButton("Pheromones");
+        ClickButton("activatePortalBtn");
+    } else if ((doRespec || respecAmount > 0) && game.portal.Pheromones.level < respecAmount){
+        var targetBreedTime = trimpzSettings["targetBreedTime"].value;
+        var targetBreedTimeHysteresis = trimpzSettings["targetBreedTimeHysteresis"].value;
+        if (getTotalTimeForBreeding(0) >= targetBreedTime - targetBreedTimeHysteresis) {
+            ClickButton("pastUpgradesBtn");
+            ClickButton("Pheromones");
+            ClickButton("activatePortalBtn");
+        }
+    }
+}
+
+
 function TurnOffIncompatibleSettings() {
     if (game.global.repeatMap)
         repeatClicked();
@@ -1724,6 +1762,7 @@ function MainLoop(){
         return;
     }
     var collectingForUpgrade = UpgradeAndGather();
+    RespecPheremones();
     FireGeneticists();
     if (collectingForUpgrade === false) { //allow resources to accumulate for upgrades if true
         BuyBuildings();
