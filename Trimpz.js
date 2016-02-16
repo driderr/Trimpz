@@ -1089,12 +1089,12 @@ function getAverageOfPrettifiedString(attackString) {
     var min;
     var max;
     if (minArray === null){
-        min = splitArray[0];
+        min = parseFloat(splitArray[0]);
     } else{
         min = unprettify(minArray);
     }
     if (maxArray === null){
-        max = splitArray[0];
+        max = parseFloat(splitArray[0]);
     } else{
         max = unprettify(maxArray);
     }
