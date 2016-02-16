@@ -214,6 +214,11 @@ var constantsEndGame = (function () {
     };
 })();
 
+//replace this with UI setting
+var runMapsOnlyWhenNeeded = true;
+var maxAttacksToKill = 4;
+var minAttackstoDie = 30;
+
 //game variables, not for user setting
 var constantsSets = [constantsEarlyGame, constantsLateGame, constantsLateLateGame, constantsEndGame];
 var constantsIndex;
@@ -991,7 +996,7 @@ function BuyEquipmentOrUpgrade(bestEquipGainPerMetal, bestUpgradeGainPerMetal, b
         console.debug("****End of Best Buy****");
     }
 }
-function BuyCheapEquipment(timeStr) {
+function BuyCheapEquipment() {
     "use strict";
     var anEquipment;
     var currentEquip;
@@ -1046,7 +1051,7 @@ function BuyMetalEquipment() {
         return;
     }
     BuyEquipmentOrUpgrade(bestEquipGainPerMetal, bestUpgradeGainPerMetal, bestEquipment, timeStr, bestUpgrade, bestUpgradeCost, debugHpToAtkRatio);
-    BuyCheapEquipment(timeStr);
+    BuyCheapEquipment();
     BuyCheapEquipmentUpgrades(timeStr);
     tooltip('hide');
 }
@@ -1135,11 +1140,16 @@ function getSoldierAttack(){
     return getAverageOfPrettifiedString(attackString);
 }
 
-function canTakeOnBoss(){
+function canTakeOnBoss(returnNumAttacks){
     "use strict";
 
-    if (!document.getElementById("goodGuyAttack").innerHTML)
-        return true; //must have started script in map screen without playing game
+    if (!document.getElementById("goodGuyAttack").innerHTML){ //must have started script in map screen without playing game
+        if (returnNumAttacks){
+            return {attacksToKillBoss: 1, attacksToKillSoldiers:9999}
+        } else {
+            return true;
+        }
+    }
 
     var bossAttackBase = getBossAttack();
     var bossHealth = getBossHealth();
@@ -1165,6 +1175,13 @@ function canTakeOnBoss(){
     var attacksToKillBoss = bossHealth/soldierAttack;
     var attacksToKillSoldiers = soldierHealth/bossAttack;
     var numberOfDeaths = attacksToKillBoss/attacksToKillSoldiers;
+
+    if (returnNumAttacks) {
+        return {
+            attacksToKillBoss: attacksToKillBoss,
+            attacksToKillSoldiers: attacksToKillSoldiers
+        }
+    }
 
     if (attacksToKillSoldiers < 1)
         return false;
@@ -1199,7 +1216,6 @@ function canTakeOnBoss(){
         }
         return false;
     }
-
     return true;
 }
 
@@ -1334,7 +1350,7 @@ function getMaxEnemyHealthForMapLevel(mapLevel) {  //adapted from Trimps getEnem
     return Math.floor(amt * difficulty);
 }
 
-function getLevelOfOneShotMap() {
+function getLevelOfOneShotMap(){
     "use strict";
     var soldierAttack = getSoldierAttack();
     if (lastFoughtInWorld){
@@ -1351,6 +1367,51 @@ function getLevelOfOneShotMap() {
         }
     }
     return 6;
+}
+
+function getCurrentAvailableDrops(){
+    return addSpecials(true,true,{ id: "map999", name: "My Map", location: "Sea", clears: 0, level: game.global.world, difficulty: 1.11, size: 40, loot: 1.2, noRecycle: false });
+}
+
+function getMinLevelOfMapWithDrops(){
+    var mapLevelWithDrop;
+    var itemsAvailableInNewMap;
+    for (mapLevelWithDrop = 6; mapLevelWithDrop <= game.global.world; mapLevelWithDrop++){
+        itemsAvailableInNewMap = addSpecials(true,true,{ id: "map999", name: "My Map", location: "Sea", clears: 0, level: mapLevelWithDrop, difficulty: 1.11, size: 40, loot: 1.2, noRecycle: false });
+        if (itemsAvailableInNewMap > 0)
+        {
+            break;
+        }
+    }
+    if (mapLevelWithDrop > game.global.world)
+        mapLevelWithDrop = game.global.world;
+    return mapLevelWithDrop;
+}
+
+function FindAndRunSmallMap(mapLevel) {
+    var map;
+    var theMap;
+    for (map in game.global.mapsOwnedArray) {
+        theMap = game.global.mapsOwnedArray[map];
+        if (theMap.level === mapLevel && theMap.size <= 40){
+            RunMap(theMap);
+            return;
+        }
+    }
+    RunNewMap(mapLevel);
+}
+
+function FindAndRunLootMap(mapLevel) {
+    var map;
+    var theMap;
+    for (map in game.global.mapsOwnedArray) {
+        theMap = game.global.mapsOwnedArray[map];
+        if (theMap.level === mapLevel && theMap.loot >= 1.40){
+            RunMap(theMap);
+            return;
+        }
+    }
+    RunNewMapForLoot(mapLevel);
 }
 
 function RunMaps() {
@@ -1401,45 +1462,64 @@ function RunMaps() {
         }
     }
 
+    if (runMapsOnlyWhenNeeded && game.global.lastClearedCell < 98 && game.global.mapsUnlocked){
+        var returnNumAttacks = true;
+        var bossBattle = canTakeOnBoss(returnNumAttacks);
+        var needDamage = bossBattle.attacksToKillBoss > maxAttacksToKill;
+        var needHealth = bossBattle.attacksToKillSoldiers < minAttackstoDie;
+        var reallyNeedDamage = bossBattle.attacksToKillBoss > maxAttacksToKill * 3;
+        var reallyNeedHealth = bossBattle.attacksToKillSoldiers <= 1;
+        if (!needDamage && !needHealth){
+            if (game.global.preMapsActive === true){
+                RunWorld();
+            }
+            return;
+        }
+        if (game.options.menu.mapLoot.enabled != 1)
+            game.options.menu.mapLoot.enabled = 1;
+
+        var oneShotMapLevel = getLevelOfOneShotMap();
+        var mapLevelToRun;
+        if (game.global.mapBonus < 10) {
+            var siphonMapLevel = game.global.world - game.portal.Siphonology.level;
+            var minimumDropsLevel = getMinLevelOfMapWithDrops();
+            var availableDrops = getCurrentAvailableDrops();
+            if (availableDrops){
+                mapLevelToRun = Math.max(oneShotMapLevel,siphonMapLevel,minimumDropsLevel,6);
+            } else{
+                mapLevelToRun = Math.max(oneShotMapLevel,siphonMapLevel,6);
+            }
+            FindAndRunSmallMap(mapLevelToRun);
+            return;
+        } else if (reallyNeedDamage || reallyNeedHealth){
+            FindAndRunLootMap(oneShotMapLevel);
+            return;
+        }
+
+        if (game.global.preMapsActive === true){
+            RunWorld();
+        }
+        return;
+    }
+
     if (trimpzSettings["doRunMapsForBonus"].value && game.global.lastClearedCell < 98 && game.global.world > 10){
         if (!canTakeOnBoss()){
-            console.debug("Can't take on Boss!");
             var mapLevel;
             if (game.global.mapBonus < 10){
-                console.debug("Let's increase bonus.");
                 mapLevel = game.global.world - game.portal.Siphonology.level;
-                for (map in game.global.mapsOwnedArray) {
-                    theMap = game.global.mapsOwnedArray[map];
-                    if (theMap.level === mapLevel && theMap.size <= 40){
-                        console.debug("Found map to increase bonus on.");
-                        RunMap(theMap);
-                        return;
-                    }
-                }
-                console.debug("Need a new map to increase bonus.");
-                RunNewMap(mapLevel);
+                FindAndRunSmallMap(mapLevel);
                 return;
             }
             if (trimpzSettings["doRunMapsForEquipment"].value){
-                console.debug("Bonus maxed.  Let's level equipment.");
                 mapLevel = getLevelOfOneShotMap();
-                for (map in game.global.mapsOwnedArray) {
-                    theMap = game.global.mapsOwnedArray[map];
-                    if (theMap.level === mapLevel && theMap.loot >= 1.40){
-                        console.debug("Found a loot map to run for equipment.");
-                        RunMap(theMap);
-                        return;
-                    }
-                }
-                console.debug("Making a new loot map.");
-                RunNewMapForLoot(mapLevel);
+                FindAndRunLootMap(mapLevel);
                 return;
             }
         }
     }
 
 
-    var itemsAvailableInNewMap = addSpecials(true,true,{ id: "map999", name: "My Map", location: "Sea", clears: 0, level: game.global.world, difficulty: 1.11, size: 40, loot: 1.2, noRecycle: false });
+    var itemsAvailableInNewMap = getCurrentAvailableDrops();
     if (game.global.preMapsActive === true && itemsAvailableInNewMap === 0){
         RunWorld();
         return;
@@ -1473,27 +1553,19 @@ function RunMaps() {
 
     if (totalUpgrades < trimpzSettings["minimumUpgradesOnHand"].value){//=== 0){ //if not equipment upgrades, go get some! (can make this a "< constant" later if desired)
         //what's the lowest zone map I can create and get items?
-        var zoneToTry;
-        for (zoneToTry = 6; zoneToTry <= game.global.world; zoneToTry++){
-            itemsAvailableInNewMap = addSpecials(true,true,{ id: "map999", name: "My Map", location: "Sea", clears: 0, level: zoneToTry, difficulty: 1.11, size: 40, loot: 1.2, noRecycle: false });
-            if (itemsAvailableInNewMap > 0)
-            {
-                break;
-            }
-        }
-
+        var mapLevelWithDrop = getMinLevelOfMapWithDrops();
         for (map in game.global.mapsOwnedArray){ //look for an existing map first
             theMap = game.global.mapsOwnedArray[map];
             if (uniqueMaps.indexOf(theMap.name) > -1){
                 continue;
             }
             itemsAvailable = addSpecials(true,true,game.global.mapsOwnedArray[map]);
-            if (itemsAvailable > 0 && theMap.level === zoneToTry) {
+            if (itemsAvailable > 0 && theMap.level === mapLevelWithDrop) {
                 RunMap(game.global.mapsOwnedArray[map]);
                 return;
             }
         }
-        RunNewMap(zoneToTry);
+        RunNewMap(mapLevelWithDrop);
     }
     if (game.global.preMapsActive === true){
         RunWorld();
