@@ -1800,7 +1800,7 @@ function RespecPheremones() {
         ClickButton("ptabRemove");
         ClickButton("Pheromones");
         ClickButton("activatePortalBtn");
-    } else if ((doRespec || respecAmount > 0) && game.portal.Pheromones.level < respecAmount){
+    } else if ((doRespec || respecAmount > 0) && game.portal.Pheromones.level < respecAmount && game.global.heliumLeftover > getPortalUpgradePrice("Pheromones")){
         if (ShouldLowerBreedWithoutGeneticists()) {
             ClickButton("pastUpgradesBtn");
             ClickButton("Pheromones");
