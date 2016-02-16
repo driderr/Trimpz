@@ -1421,7 +1421,7 @@ function RunMaps() {
         }
     }
 
-    if (game.upgrades.Bounty.done === 0 && game.upgrades.Bounty.locked === 1) { //Look for Bounty upgrade
+    if (game.upgrades.Bounty.done === 0 && game.upgrades.Bounty.locked === 1) {
         for (map in game.global.mapsOwnedArray) {
             theMap = game.global.mapsOwnedArray[map];
             if (theMap.name === "The Wall" && addSpecials(true, true, theMap) > 0){
@@ -1431,7 +1431,7 @@ function RunMaps() {
         }
     }
 
-    if (game.global.challengeActive === "Electricity" && game.global.world >= 80) { //Do Prison to turn off elec challenge
+    if (game.global.challengeActive === "Electricity" && game.global.world >= 80) {
         for (map in game.global.mapsOwnedArray) {
             theMap = game.global.mapsOwnedArray[map];
             if (theMap.name === "The Prison"){
@@ -1441,11 +1441,21 @@ function RunMaps() {
         }
     }
 
-    if (trimpzSettings["runBionicWonderland"].value && bionicDone === false && game.global.world >= 125) { //For Bionic speed run achieve
+    if ((trimpzSettings["runBionicWonderland"].value || game.global.challengeActive == "Crushed") && bionicDone === false && game.global.world >= 125) {
         for (map in game.global.mapsOwnedArray) {
             theMap = game.global.mapsOwnedArray[map];
             if (theMap.name === "Bionic Wonderland"){
                 bionicDone = true;
+                RunMap(theMap);
+                return;
+            }
+        }
+    }
+
+    if (game.global.challengeActive === "Meditate" && game.global.world >= 33) {
+        for (map in game.global.mapsOwnedArray) {
+            theMap = game.global.mapsOwnedArray[map];
+            if (theMap.name === "Trimple of Doom"){
                 RunMap(theMap);
                 return;
             }
