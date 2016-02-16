@@ -1214,10 +1214,9 @@ function GotoMapsScreen() {
     if (game.global.preMapsActive === true) {
         return;
     }
-    var mapsButton = document.getElementById("mapsBtn");
-    ClickButton(mapsButton);  //mapsClicked();
-    if (mapsButton.innerHTML === "Abandon Soldiers"){
-        ClickButton(mapsButton);
+    mapsClicked();
+    if (game.global.fighting && !game.global.preMapsActive){
+        mapsClicked();
     }
 }
 
@@ -1256,7 +1255,7 @@ function RunNewMap(zoneToCreate) {
         adjustMap('difficulty', difficulty);
         cost = updateMapCost(true);
     }
-    ClickButton("mapCreateBtn");
+    buyMap();
     newMap = game.global.mapsOwnedArray[game.global.mapsOwnedArray.length - 1];
     RunMap(newMap);
 }
@@ -1296,7 +1295,7 @@ function RunNewMapForLoot(zoneToCreate) {
         adjustMap('difficulty', difficulty);
         cost = updateMapCost(true);
     }
-    ClickButton("mapCreateBtn");
+    buyMap();
     newMap = game.global.mapsOwnedArray[game.global.mapsOwnedArray.length - 1];
     RunMap(newMap);
 }
@@ -1305,14 +1304,14 @@ function RunMap(map) {
     "use strict";
     GotoMapsScreen();
     lastFoughtInWorld = false;
-    ClickButton(map.id);
-    ClickButton("selectMapBtn");
+    selectMap(map.id);
+    runMap();
 }
 
 function RunWorld() {
     "use strict";
     lastFoughtInWorld = true;
-    ClickButton("mapsBtn");  //mapsClicked();
+    mapsClicked();
 }
 
 function getMaxEnemyHealthForMapLevel(mapLevel) {  //adapted from Trimps getEnemyHealth()
