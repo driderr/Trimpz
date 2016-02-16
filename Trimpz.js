@@ -1169,7 +1169,9 @@ function canTakeOnBoss(returnNumAttacks){
     var bossAttack = attackAndBlock;
 
     if (game.global.challengeActive == "Toxicity" || game.global.challengeActive == "Nom") {
-        bossAttack += game.global.soldierHealthMax * 0.05;
+        if (!returnNumAttacks) {
+            bossAttack += game.global.soldierHealthMax * 0.05;
+        }
     }
 
     var attacksToKillBoss = bossHealth/soldierAttack;
@@ -1462,40 +1464,41 @@ function RunMaps() {
         }
     }
 
-    if (runMapsOnlyWhenNeeded && game.global.lastClearedCell < 98 && game.global.mapsUnlocked){
-        var returnNumAttacks = true;
-        var bossBattle = canTakeOnBoss(returnNumAttacks);
-        var needDamage = bossBattle.attacksToKillBoss > maxAttacksToKill;
-        var needHealth = bossBattle.attacksToKillSoldiers < minAttackstoDie;
-        var reallyNeedDamage = bossBattle.attacksToKillBoss > maxAttacksToKill * 3;
-        var reallyNeedHealth = bossBattle.attacksToKillSoldiers <= 1;
-        if (!needDamage && !needHealth){
-            if (game.global.preMapsActive === true){
-                RunWorld();
+    if (runMapsOnlyWhenNeeded){
+        if (game.global.lastClearedCell < 98 && game.global.mapsUnlocked) {
+            var returnNumAttacks = true;
+            var bossBattle = canTakeOnBoss(returnNumAttacks);
+            var needDamage = bossBattle.attacksToKillBoss > maxAttacksToKill;
+            var needHealth = bossBattle.attacksToKillSoldiers < minAttackstoDie;
+            var reallyNeedDamage = bossBattle.attacksToKillBoss > maxAttacksToKill * 3;
+            var reallyNeedHealth = bossBattle.attacksToKillSoldiers <= 1;
+            if (!needDamage && !needHealth) {
+                if (game.global.preMapsActive === true) {
+                    RunWorld();
+                }
+                return;
             }
-            return;
-        }
-        if (game.options.menu.mapLoot.enabled != 1)
-            game.options.menu.mapLoot.enabled = 1;
+            if (game.options.menu.mapLoot.enabled != 1)
+                game.options.menu.mapLoot.enabled = 1;
 
-        var oneShotMapLevel = getLevelOfOneShotMap();
-        var mapLevelToRun;
-        if (game.global.mapBonus < 10) {
-            var siphonMapLevel = game.global.world - game.portal.Siphonology.level;
-            var minimumDropsLevel = getMinLevelOfMapWithDrops();
-            var availableDrops = getCurrentAvailableDrops();
-            if (availableDrops){
-                mapLevelToRun = Math.max(oneShotMapLevel,siphonMapLevel,minimumDropsLevel,6);
-            } else{
-                mapLevelToRun = Math.max(oneShotMapLevel,siphonMapLevel,6);
+            var oneShotMapLevel = getLevelOfOneShotMap();
+            var mapLevelToRun;
+            if (game.global.mapBonus < 10) {
+                var siphonMapLevel = game.global.world - game.portal.Siphonology.level;
+                var minimumDropsLevel = getMinLevelOfMapWithDrops();
+                var availableDrops = getCurrentAvailableDrops();
+                if (availableDrops) {
+                    mapLevelToRun = Math.max(oneShotMapLevel, siphonMapLevel, minimumDropsLevel, 6);
+                } else {
+                    mapLevelToRun = Math.max(oneShotMapLevel, siphonMapLevel, 6);
+                }
+                FindAndRunSmallMap(mapLevelToRun);
+                return;
+            } else if (reallyNeedDamage || reallyNeedHealth) {
+                FindAndRunLootMap(oneShotMapLevel);
+                return;
             }
-            FindAndRunSmallMap(mapLevelToRun);
-            return;
-        } else if (reallyNeedDamage || reallyNeedHealth){
-            FindAndRunLootMap(oneShotMapLevel);
-            return;
         }
-
         if (game.global.preMapsActive === true){
             RunWorld();
         }
