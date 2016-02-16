@@ -972,28 +972,16 @@ function FindBestEquipmentUpgrade(debugHpToAtkRatio) {
         bestUpgradeCost: bestUpgradeCost
     };
 }
-function BuyEquipmentOrUpgrade(bestEquipGainPerMetal, bestUpgradeGainPerMetal, bestEquipment, timeStr, bestUpgrade, bestUpgradeCost, debugHpToAtkRatio) {
+function BuyEquipmentOrUpgrade(bestEquipGainPerMetal, bestUpgradeGainPerMetal, bestEquipment, bestUpgrade, bestUpgradeCost) {
     "use strict";
-    var boughtSomething = false;
     if (bestEquipGainPerMetal > bestUpgradeGainPerMetal) {
         if (CanBuyNonUpgrade(game.equipment[bestEquipment], constants.getEquipmentCostRatio()) === true) {
             ClickButton(bestEquipment);
-            console.debug("Best buy " + bestEquipment + timeStr);
-            boughtSomething = true;
         }
     } else {
         if (CanAffordEquipmentUpgrade(bestUpgrade) === true && bestUpgradeCost < game.resources.metal.owned * constants.getEquipmentCostRatio()) {
             ClickButton(bestUpgrade);
-            console.debug("Best buy " + bestUpgrade + timeStr);
-            boughtSomething = true;
         }
-    }
-    var entry;
-    if (boughtSomething === true) {
-        for (entry in debugHpToAtkRatio) {
-            console.debug(debugHpToAtkRatio[entry][0] + ":" + debugHpToAtkRatio[entry][1]);
-        }
-        console.debug("****End of Best Buy****");
     }
 }
 function BuyCheapEquipment() {
@@ -1050,7 +1038,7 @@ function BuyMetalEquipment() {
     if (bestEquipGainPerMetal === 0 && bestUpgradeGainPerMetal === 0) {   //nothing to buy
         return;
     }
-    BuyEquipmentOrUpgrade(bestEquipGainPerMetal, bestUpgradeGainPerMetal, bestEquipment, timeStr, bestUpgrade, bestUpgradeCost, debugHpToAtkRatio);
+    BuyEquipmentOrUpgrade(bestEquipGainPerMetal, bestUpgradeGainPerMetal, bestEquipment, bestUpgrade, bestUpgradeCost);
     BuyCheapEquipment();
     BuyCheapEquipmentUpgrades(timeStr);
     tooltip('hide');
@@ -1480,7 +1468,10 @@ function RunMaps() {
             }
             if (game.options.menu.mapLoot.enabled != 1)
                 game.options.menu.mapLoot.enabled = 1;
-
+            console.debug("Health low:" + needHealth + " " + bossBattle.attacksToKillSoldiers + "hits");
+            console.debug("Health  really low:" + reallyNeedHealth);
+            console.debug("Dmg  low:" + needDamage + " " + bossBattle.attacksToKillBoss + "hits");
+            console.debug("Dmg  really low:" + reallyNeedDamage);
             var oneShotMapLevel = getLevelOfOneShotMap();
             var mapLevelToRun;
             if (game.global.mapBonus < 10) {
