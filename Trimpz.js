@@ -886,8 +886,30 @@ function TurnOnAutoBuildTraps() {
 function BuyShield() {
     "use strict";
     var shieldUpgrade = game.upgrades.Supershield;
+    var shield = game.equipment.Shield;
+    var costOfNextLevel;
+
+    if (runMapsOnlyWhenNeeded){
+        var stat = shield.blockNow ? "block" : "health";
+        var upgradeStats = GetRatioForEquipmentUpgrade("Supershield","Shield");
+
+        if (shield[stat + "Calculated"]/GetNonUpgradePrice("Shield") > upgradeStats.gainPerMetal && //level up (don't feel like renaming gainPerMetal...)
+            (!limitEquipment || shield.level < constants.getMaxLevel())){
+            if (shield.locked === 0 && CanBuyNonUpgrade(shield, constants.getShieldCostRatio()) === true){
+                ClickButton("Shield");
+                tooltip('hide');
+            }
+        } else { //upgrade
+            if (shieldUpgrade.locked === 0 && canAffordTwoLevel(shieldUpgrade)){
+                ClickButton("Supershield");  //Upgrade!
+                tooltip('hide');
+            }
+        }
+        return;
+    }
+
     if (shieldUpgrade.locked === 0 && CanAffordEquipmentUpgrade("Supershield") === true) {
-        var costOfNextLevel = Math.ceil(getNextPrestigeCost("Supershield") * (Math.pow(1 - game.portal.Artisanistry.modifier, game.portal.Artisanistry.level)));
+        costOfNextLevel = Math.ceil(getNextPrestigeCost("Supershield") * (Math.pow(1 - game.portal.Artisanistry.modifier, game.portal.Artisanistry.level)));
         var costOfTwoLevels = costOfNextLevel * (1 + game.equipment.Shield.cost.wood[1]);
         if (game.resources.wood.owned * constants.getShieldCostRatio() > costOfTwoLevels) {
             ClickButton("Supershield");  //Upgrade!
@@ -896,14 +918,14 @@ function BuyShield() {
             tooltip('hide');
         }
     }
-    var shield = game.equipment.Shield;
+
     if (shield.locked === 0 && CanBuyNonUpgrade(shield, constants.getShieldCostRatio()) === true &&
         (!limitEquipment || shield.level < constants.getMaxLevel() )) {
         ClickButton("Shield");
         tooltip('hide');
     }
 }
-function FindBestEquipmentToLevel(debugHpToAtkRatio) {
+function FindBestEquipmentToLevel(debugHpToAtkRatio, filterOnStat) {
     "use strict";
     var anEquipment;
     var bestEquipGainPerMetal = 0;
@@ -920,6 +942,17 @@ function FindBestEquipmentToLevel(debugHpToAtkRatio) {
         if (limitEquipment && currentEquip.level >= constants.getMaxLevel()) {
             continue;
         }
+        if (filterOnStat){
+            if (filterOnStat === "Health"){
+                if (!currentEquip.healthCalculated){
+                    continue;
+                }
+            } else { //Attack
+                if (currentEquip.healthCalculated){
+                    continue;
+                }
+            }
+        }
         cost = GetNonUpgradePrice(currentEquip);
         multiplier = currentEquip.healthCalculated ? 1 / 8 : 1;
         gainPerMetal = (currentEquip.healthCalculated || currentEquip.attackCalculated) * multiplier / cost;
@@ -934,19 +967,33 @@ function FindBestEquipmentToLevel(debugHpToAtkRatio) {
         bestEquipment: bestEquipment
     };
 }
-function FindBestEquipmentUpgrade(debugHpToAtkRatio) {
+function GetRatioForEquipmentUpgrade(upgrade, currentEquip) {
+    var stat;
+
+    var cost = Math.ceil(getNextPrestigeCost(upgrade) * (Math.pow(1 - game.portal.Artisanistry.modifier, game.portal.Artisanistry.level)));
+    var multiplier = currentEquip.healthCalculated ? 1 / 8 : 1;
+    if (currentEquip.blockNow) stat = "block";
+    else stat = (typeof currentEquip.health != 'undefined') ? "health" : "attack";
+    var gain = Math.round(currentEquip[stat] * Math.pow(1.19, ((currentEquip.prestige) * game.global.prestige[stat]) + 1));
+    var gainPerMetal = gain * multiplier / cost;
+    return {
+        gainPerMetal: gainPerMetal,
+        cost: cost
+    };
+}
+
+function FindBestEquipmentUpgrade(debugHpToAtkRatio, filterOnStat) {
     "use strict";
     var gainPerMetal;
     var cost;
     var currentEquip;
-    var multiplier;
     var upgrade;
     var currentUpgrade;
     var bestUpgradeGainPerMetal = 0;
     var bestUpgrade;
     var bestUpgradeCost;
-    var stat;
-    var gain;
+    var upgradeStats;
+
     for (upgrade in game.upgrades) {
         currentUpgrade = game.upgrades[upgrade];
         currentEquip = game.equipment[game.upgrades[upgrade].prestiges];
@@ -954,11 +1001,20 @@ function FindBestEquipmentUpgrade(debugHpToAtkRatio) {
             if (constants.getShouldSkipHpEquipment() === true && typeof currentEquip.health != 'undefined') { //don't buy hp equips in late late game
                 continue;
             }
-            cost = Math.ceil(getNextPrestigeCost(upgrade) * (Math.pow(1 - game.portal.Artisanistry.modifier, game.portal.Artisanistry.level)));
-            multiplier = currentEquip.healthCalculated ? 1 / 8 : 1;
-            stat = (typeof currentEquip.health != 'undefined') ? "health" : "attack";
-            gain = Math.round(currentEquip[stat] * Math.pow(1.19, ((currentEquip.prestige) * game.global.prestige[stat]) + 1));
-            gainPerMetal = gain * multiplier / cost;
+            if (filterOnStat){
+                if (filterOnStat === "Health"){
+                    if (!currentEquip.healthCalculated){
+                        continue;
+                    }
+                } else { //Attack
+                    if (currentEquip.healthCalculated){
+                        continue;
+                    }
+                }
+            }
+            upgradeStats = GetRatioForEquipmentUpgrade(upgrade, currentEquip);
+            gainPerMetal = upgradeStats.gainPerMetal;
+            cost = upgradeStats.cost;
             debugHpToAtkRatio.push([upgrade, gainPerMetal * 1000000]);
             if (gainPerMetal > bestUpgradeGainPerMetal) {
                 bestUpgradeGainPerMetal = gainPerMetal;
@@ -975,11 +1031,18 @@ function FindBestEquipmentUpgrade(debugHpToAtkRatio) {
 }
 function BuyEquipmentOrUpgrade(bestEquipGainPerMetal, bestUpgradeGainPerMetal, bestEquipment, bestUpgrade, bestUpgradeCost) {
     "use strict";
-    if (bestEquipGainPerMetal > bestUpgradeGainPerMetal) {
+    if (bestEquipGainPerMetal > bestUpgradeGainPerMetal) { //better to level
         if (CanBuyNonUpgrade(game.equipment[bestEquipment], constants.getEquipmentCostRatio()) === true) {
-            ClickButton(bestEquipment);
+            if (runMapsOnlyWhenNeeded){ //only buy if ratio is better than its associated upgrade's ratio
+                var upgrade = Object.keys(game.upgrades).filter(function(a){return game.upgrades[a].prestiges === bestEquipment;})[0];
+                var upgradeStats = GetRatioForEquipmentUpgrade(upgrade, bestEquipment);
+                if (upgradeStats.gainPerMetal < bestEquipGainPerMetal)
+                    ClickButton(bestEquipment);
+            } else {
+                ClickButton(bestEquipment);
+            }
         }
-    } else {
+    } else { //better to upgrade
         if (CanAffordEquipmentUpgrade(bestUpgrade) === true && bestUpgradeCost < game.resources.metal.owned * constants.getEquipmentCostRatio()) {
             ClickButton(bestUpgrade);
         }
@@ -1020,15 +1083,13 @@ function BuyCheapEquipmentUpgrades() {
         }
     }
 }
-function BuyMetalEquipment() {
-    "use strict";
-    var debugHpToAtkRatio = [];
 
-    var retFBETL = FindBestEquipmentToLevel(debugHpToAtkRatio);
+function FindAndBuyEquipment(debugHpToAtkRatio, stat) {
+    var retFBETL = FindBestEquipmentToLevel(debugHpToAtkRatio, stat);
     var bestEquipGainPerMetal = retFBETL.bestEquipGainPerMetal;
     var bestEquipment = retFBETL.bestEquipment;
 
-    var retFBEU = FindBestEquipmentUpgrade(debugHpToAtkRatio);
+    var retFBEU = FindBestEquipmentUpgrade(debugHpToAtkRatio, stat);
     var bestUpgradeGainPerMetal = retFBEU.bestUpgradeGainPerMetal;
     var bestUpgrade = retFBEU.bestUpgrade;
     var bestUpgradeCost = retFBEU.bestUpgradeCost;
@@ -1037,6 +1098,27 @@ function BuyMetalEquipment() {
         return;
     }
     BuyEquipmentOrUpgrade(bestEquipGainPerMetal, bestUpgradeGainPerMetal, bestEquipment, bestUpgrade, bestUpgradeCost);
+}
+
+function BuyMetalEquipment() {
+    "use strict";
+    var debugHpToAtkRatio = [];
+
+    if (runMapsOnlyWhenNeeded){
+        var returnNumAttacks = true;
+        var bossBattle = canTakeOnBoss(returnNumAttacks);
+        var needDamage = bossBattle.attacksToKillBoss > maxAttacksToKill;
+        var needHealth = bossBattle.attacksToKillSoldiers < minAttackstoDie;
+
+        if (needDamage || !needHealth){
+            FindAndBuyEquipment(debugHpToAtkRatio, "Attack");
+        }
+        if (needHealth){
+            FindAndBuyEquipment(debugHpToAtkRatio, "Health");
+        }
+    } else { //probably get rid of this either way, comparison of hp to atk sucks (relationship is way too complex for a multiplier)
+        FindAndBuyEquipment(debugHpToAtkRatio);
+    }
     BuyCheapEquipment();
     BuyCheapEquipmentUpgrades();
     tooltip('hide');
