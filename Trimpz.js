@@ -1000,7 +1000,7 @@ function BuyCheapEquipment() {
     }
     return currentEquip;
 }
-function BuyCheapEquipmentUpgrades(timeStr) {
+function BuyCheapEquipmentUpgrades() {
     "use strict";
     var currentEquip;
     var upgrade;
@@ -1016,7 +1016,6 @@ function BuyCheapEquipmentUpgrades(timeStr) {
             cost = Math.ceil(getNextPrestigeCost(upgrade) * (Math.pow(1 - game.portal.Artisanistry.modifier, game.portal.Artisanistry.level)));
             if (CanAffordEquipmentUpgrade(upgrade) === true && cost < game.resources.metal.owned * trimpzSettings["CheapEqUpgradeRatio"].value) {
                 ClickButton(upgrade);
-                console.debug("Low cost buy for " + upgrade + timeStr);
             }
         }
     }
@@ -1024,8 +1023,6 @@ function BuyCheapEquipmentUpgrades(timeStr) {
 function BuyMetalEquipment() {
     "use strict";
     var debugHpToAtkRatio = [];
-    var time = new Date();
-    var timeStr = time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds();
 
     var retFBETL = FindBestEquipmentToLevel(debugHpToAtkRatio);
     var bestEquipGainPerMetal = retFBETL.bestEquipGainPerMetal;
@@ -1041,7 +1038,7 @@ function BuyMetalEquipment() {
     }
     BuyEquipmentOrUpgrade(bestEquipGainPerMetal, bestUpgradeGainPerMetal, bestEquipment, bestUpgrade, bestUpgradeCost);
     BuyCheapEquipment();
-    BuyCheapEquipmentUpgrades(timeStr);
+    BuyCheapEquipmentUpgrades();
     tooltip('hide');
 }
 
