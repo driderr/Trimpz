@@ -214,10 +214,11 @@ var constantsEndGame = (function () {
     };
 })();
 
-//replace this with UI setting
+//replace these  with UI settings
 var runMapsOnlyWhenNeeded = true;
 var maxAttacksToKill = 4;
 var minAttackstoDie = 30;
+var limitEquipment = false;
 
 //game variables, not for user setting
 var constantsSets = [constantsEarlyGame, constantsLateGame, constantsLateLateGame, constantsEndGame];
@@ -897,7 +898,7 @@ function BuyShield() {
     }
     var shield = game.equipment.Shield;
     if (shield.locked === 0 && CanBuyNonUpgrade(shield, constants.getShieldCostRatio()) === true &&
-        shield.level < constants.getMaxLevel()) {
+        (!limitEquipment || shield.level < constants.getMaxLevel() )) {
         ClickButton("Shield");
         tooltip('hide');
     }
@@ -916,7 +917,7 @@ function FindBestEquipmentToLevel(debugHpToAtkRatio) {
         if (currentEquip.locked === 1 || anEquipment === "Shield" || (constants.getShouldSkipHpEquipment() === true && typeof currentEquip.health != 'undefined')) {
             continue;
         }
-        if (currentEquip.level >= constants.getMaxLevel()) {
+        if (limitEquipment && currentEquip.level >= constants.getMaxLevel()) {
             continue;
         }
         cost = GetNonUpgradePrice(currentEquip);
