@@ -1624,7 +1624,8 @@ function CheckPortal() {
         if (respecAmount > 0 && game.portal.Pheromones.level < respecAmount){
             ClickButton("pastUpgradesBtn");
 
-            while (game.portal.Pheromones.level + game.portal.Pheromones.levelTemp < respecAmount) {
+            while (game.portal.Pheromones.level + game.portal.Pheromones.levelTemp < respecAmount &&
+                    getPortalUpgradePrice("Pheromones") + game.resources.helium.totalSpentTemp <= game.resources.helium.respecMax) {
                 ClickButton("Pheromones");
             }
             ClickButton("activatePortalBtn");
