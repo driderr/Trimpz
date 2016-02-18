@@ -1425,7 +1425,7 @@ function RunMaps() {
                 mapLevel = getLevelOfOneShotMap();
                 for (map in game.global.mapsOwnedArray) {
                     theMap = game.global.mapsOwnedArray[map];
-                    if (theMap.level === mapLevel && theMap.loot >= 1.40){
+                    if (theMap.level === mapLevel && theMap.loot >= 1.40 && (theMap.location === "Plentiful" || theMap.location === "Mountain")){
                         console.debug("Found a loot map to run for equipment.");
                         RunMap(theMap);
                         return;
