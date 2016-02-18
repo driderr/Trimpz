@@ -1478,7 +1478,7 @@ function FindAndRunLootMap(mapLevel) {
     var theMap;
     for (map in game.global.mapsOwnedArray) {
         theMap = game.global.mapsOwnedArray[map];
-        if (theMap.level === mapLevel && theMap.loot >= 1.40){
+        if (theMap.level === mapLevel && theMap.loot >= 1.40 && (theMap.location === "Plentiful" || theMap.location === "Mountain")){
             RunMap(theMap);
             return;
         }
