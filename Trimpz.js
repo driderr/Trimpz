@@ -1915,7 +1915,7 @@ function TurnOffIncompatibleSettings() {
 
 function MainLoopRunner(){
     "use strict";
-    if (trimpzSettings["limitEquipment"] != undefined)
+    if (typeof enteringValue != 'undefined')
         MainLoop();
     setTimeout(MainLoopRunner, constants.getRunInterval());
 }
