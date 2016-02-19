@@ -1037,7 +1037,7 @@ function BuyEquipmentOrUpgrade(bestEquipGainPerMetal, bestUpgradeGainPerMetal, b
                 var upgrade = Object.keys(game.upgrades).filter(function(a){return game.upgrades[a].prestiges === bestEquipment;})[0];
                 var upgradeStats = GetRatioForEquipmentUpgrade(upgrade, game.equipment[bestEquipment]);
                 if (upgradeStats.gainPerMetal < bestEquipGainPerMetal) {
-                    console.debug("Best buy " + bestEquipment);
+                    //console.debug("Best buy " + bestEquipment);
                     ClickButton(bestEquipment);
                 }
             } else {
@@ -1046,7 +1046,7 @@ function BuyEquipmentOrUpgrade(bestEquipGainPerMetal, bestUpgradeGainPerMetal, b
         }
     } else { //better to upgrade
         if (CanAffordEquipmentUpgrade(bestUpgrade) === true && bestUpgradeCost < game.resources.metal.owned * constants.getEquipmentCostRatio()) {
-            console.debug("Upgraded " + bestUpgrade);
+            //console.debug("Upgraded " + bestUpgrade);
             ClickButton(bestUpgrade);
         }
     }
@@ -1560,10 +1560,10 @@ function RunMaps() {
             }
             if (game.options.menu.mapLoot.enabled != 1)
                 game.options.menu.mapLoot.enabled = 1;
-            if (needHealth)console.debug("Health low: " + bossBattle.attacksToKillSoldiers + " hits");
-            if (reallyNeedHealth)console.debug("Health  really low");
-            if (needDamage)console.debug("Dmg  low: " + bossBattle.attacksToKillBoss + " hits");
-            if (reallyNeedDamage)console.debug("Dmg  really low");
+            //if (needHealth)console.debug("Health low: " + bossBattle.attacksToKillSoldiers + " hits");
+            //if (reallyNeedHealth)console.debug("Health  really low");
+            //if (needDamage)console.debug("Dmg  low: " + bossBattle.attacksToKillBoss + " hits");
+            //if (reallyNeedDamage)console.debug("Dmg  really low");
             var oneShotMapLevel = getLevelOfOneShotMap();
             var mapLevelToRun;
             if (game.global.mapBonus < 10) {
