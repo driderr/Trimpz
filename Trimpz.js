@@ -751,7 +751,7 @@ function UpgradeAndGather() {
     if (collectingForNonEquipment)
         return true;
     if (game.global.buildingsQueue.length > 0 && (document.getElementById("autoTrapBtn").innerHTML !== "Traps On" ||
-            game.global.buildingsQueue[0] !== "Trap.1")) {
+            game.global.buildingsQueue[0] !== "Trap.1") || game.global.buildingsQueue.length > 1) {
             ClickButton("buildingsCollectBtn");
     }
     else if (game.resources.trimps.owned < game.resources.trimps.realMax() &&
@@ -786,7 +786,7 @@ function BeginPriorityAction() { //this is really just for the beginning (after 
         ClickButton("woodCollectBtn");
         return true;
     }
-    if (game.buildings.Trap.owned < 1) {//Enqueue trap
+    if (game.buildings.Trap.owned < 1 && !queueContainsItem("Trap")) {//Enqueue trap
         ClickButton("Trap");
         ClickButton("buildingsCollectBtn");
         return true;
@@ -885,12 +885,18 @@ function BuyBuildings() {
 
 function TurnOnAutoBuildTraps() {
     "use strict";
-    if (document.getElementById("autoTrapBtn").getAttribute("style") !== "display: none" &&
-        document.getElementById("autoTrapBtn").innerHTML === "Traps Off") {
-        ClickButton("autoTrapBtn");
+    var trapsBtn = document.getElementById("autoTrapBtn");
+
+    if (game.buildings.Trap.owned < constants.getNumTrapsForAutoTrapping() &&
+        game.global.trapBuildAllowed &&
+        !game.global.trapBuildToggled &&
+        GetBreedSpeed() < trimpzSettings["minBreedingSpeed"].value) {
+        ClickButton(trapsBtn);
+    } else if (game.global.trapBuildToggled &&
+        (game.buildings.Trap.owned >= constants.getNumTrapsForAutoTrapping() || GetBreedSpeed() > trimpzSettings["minBreedingSpeed"].value)){
+        ClickButton(trapsBtn);
     }
 }
-
 
 function BuyShield() {
     "use strict";
