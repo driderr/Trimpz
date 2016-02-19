@@ -214,12 +214,6 @@ var constantsEndGame = (function () {
     };
 })();
 
-//replace these  with UI settings
-var runMapsOnlyWhenNeeded = true;
-var maxAttacksToKill = 4;
-var minAttackstoDie = 30;
-var limitEquipment = false;
-
 //game variables, not for user setting
 var constantsSets = [constantsEarlyGame, constantsLateGame, constantsLateLateGame, constantsEndGame];
 var constantsIndex;
@@ -888,8 +882,9 @@ function BuyShield() {
     var shieldUpgrade = game.upgrades.Supershield;
     var shield = game.equipment.Shield;
     var costOfNextLevel;
+    var limitEquipment = trimpzSettings["limitEquipment"].value;
 
-    if (runMapsOnlyWhenNeeded){
+    if (trimpzSettings["runMapsOnlyWhenNeeded"].value){
         var stat = shield.blockNow ? "block" : "health";
         var upgradeStats = GetRatioForEquipmentUpgrade("Supershield",shield);
 
@@ -939,7 +934,7 @@ function FindBestEquipmentToLevel(debugHpToAtkRatio, filterOnStat) {
         if (currentEquip.locked === 1 || anEquipment === "Shield" || (constants.getShouldSkipHpEquipment() === true && typeof currentEquip.health != 'undefined')) {
             continue;
         }
-        if (limitEquipment && currentEquip.level >= constants.getMaxLevel()) {
+        if (trimpzSettings["limitEquipment"].value && currentEquip.level >= constants.getMaxLevel()) {
             continue;
         }
         if (filterOnStat){
@@ -1033,7 +1028,7 @@ function BuyEquipmentOrUpgrade(bestEquipGainPerMetal, bestUpgradeGainPerMetal, b
     "use strict";
     if (bestEquipGainPerMetal > bestUpgradeGainPerMetal) { //better to level
         if (CanBuyNonUpgrade(game.equipment[bestEquipment], constants.getEquipmentCostRatio()) === true) {
-            if (runMapsOnlyWhenNeeded){ //only buy if ratio is better than its associated upgrade's ratio
+            if (trimpzSettings["runMapsOnlyWhenNeeded"].value){ //only buy if ratio is better than its associated upgrade's ratio
                 var upgrade = Object.keys(game.upgrades).filter(function(a){return game.upgrades[a].prestiges === bestEquipment;})[0];
                 var upgradeStats = GetRatioForEquipmentUpgrade(upgrade, game.equipment[bestEquipment]);
                 if (upgradeStats.gainPerMetal < bestEquipGainPerMetal) {
@@ -1107,11 +1102,11 @@ function BuyMetalEquipment() {
     "use strict";
     var debugHpToAtkRatio = [];
 
-    if (runMapsOnlyWhenNeeded){
+    if (trimpzSettings["runMapsOnlyWhenNeeded"].value){
         var returnNumAttacks = true;
         var bossBattle = canTakeOnBoss(returnNumAttacks);
-        var needDamage = bossBattle.attacksToKillBoss > maxAttacksToKill;
-        var needHealth = bossBattle.attacksToKillSoldiers < minAttackstoDie;
+        var needDamage = bossBattle.attacksToKillBoss > trimpzSettings["maxAttacksToKill"].value;
+        var needHealth = bossBattle.attacksToKillSoldiers < trimpzSettings["minAttackstoDie"].value;
 
         if (needDamage || !needHealth){
             FindAndBuyEquipment(debugHpToAtkRatio, "Attack");
@@ -1544,12 +1539,13 @@ function RunMaps() {
         }
     }
 
-    if (runMapsOnlyWhenNeeded){
+    if (trimpzSettings["runMapsOnlyWhenNeeded"].value){
         if (game.global.lastClearedCell < 98 && game.global.mapsUnlocked) {
             var returnNumAttacks = true;
+            var maxAttacksToKill = trimpzSettings["maxAttacksToKill"].value;
             var bossBattle = canTakeOnBoss(returnNumAttacks);
             var needDamage = bossBattle.attacksToKillBoss > maxAttacksToKill;
-            var needHealth = bossBattle.attacksToKillSoldiers < minAttackstoDie;
+            var needHealth = bossBattle.attacksToKillSoldiers < trimpzSettings["minAttackstoDie"].value;
             var reallyNeedDamage = bossBattle.attacksToKillBoss > maxAttacksToKill * 3;
             var reallyNeedHealth = bossBattle.attacksToKillSoldiers <= 1;
             if (!needDamage && !needHealth) {
