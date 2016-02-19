@@ -4,207 +4,101 @@
 //sets of constants to modify that will be switched out over the course of the game
 //generally speaking, and by default, it starts with constantsEarlyGame and then uses the next set at 45,55, and then 60
 //if you add an entirely new constant set, be sure to add it in order in the array "constantsSets" and set the set's "zoneToStartAt" appropriately
-var constantsEarlyGame = (function () {
-    "use strict";
-    var zoneToStartAt = 0,                  //where this set of constants begins being used
-        runInterval = 200,                 //how often Trimpz main loop is run
-        minerMultiplier = 2,                //how many more miners than farmers? (multiplied)
-        trainerCostRatio = 0.4,             //buy trainers with enough resources (0.2 = 20% of resources)
-        explorerCostRatio = 0.2,            //buy explorers with enough resources (0.2 = 20% of resources)
-        minFoodOwned = 15,                  //minimum food on hand, required for beginning of the game
-        minWoodOwned = 15,                  //minimum wood on hand, required for beginning of the game
-        minTrimpsOwned = 9,                //minimum trimps on hand, required for beginning of the game
-        minScienceOwned = 10,               //minimum science on hand, required for beginning of the game
-        housingCostRatio = 0.3,             //buy housing with enough resources (0.2 = 20% of resources)
-        gymCostRatio = 0.6,                 //buy gyms with enough resources (0.2 = 20% of resources)
-        maxGyms = 10000,                    //maximum number of gyms to buy
-        tributeCostRatio = 0.5,             //buy tributes with enough resources (0.2 = 20% of resources)
-        nurseryCostRatio = 0.5,             //buy nursery with enough resources (0.2 = 20% of resources)
-        maxLevel = 10,                      //maximum level of all equipment per tier unless it's really cheap(see constant above)
-        equipmentCostRatio = 0.5,           //buy equipment with enough resources (0.2 = 20% of resources)
-        otherWorkersFocusRatio = 0.5,       //what percent of trimps to take from each other job to focus on gaining resources for an upgrade, including science
-        numTrapsForAutoTrapping = 10000,    //maximum number of traps to build
-        shieldCostRatio = 1,                //buy shield with enough resources (1 = 100% of resources)
-        lumberjackMultiplier = 1,           //how many more lumberjacks than farmers? (multiplied)
-        shouldSkipHpEquipment = false,      //true to not buy or prestige/upgrade health equipment
-        minimumEquipmentLevel = 5;          //currently unused
-    return {
-        getZoneToStartAt: function () { return zoneToStartAt; },
-        getRunInterval: function () { return runInterval; },
-        getTrainerCostRatio: function () { return trainerCostRatio; },
-        getMinerMultiplier: function () { return minerMultiplier; },
-        getExplorerCostRatio: function () { return explorerCostRatio; },
-        getMinFoodOwned: function () { return minFoodOwned; },
-        getMinWoodOwned: function () { return minWoodOwned; },
-        getMinTrimpsOwned: function () { return minTrimpsOwned; },
-        getMinScienceOwned: function () { return minScienceOwned; },
-        getGymCostRatio: function () { return gymCostRatio; },
-        getMaxGyms : function () { return maxGyms; },
-        getHousingCostRatio: function () { return housingCostRatio; },
-        getTributeCostRatio: function () { return tributeCostRatio; },
-        getNurseryCostRatio: function () { return nurseryCostRatio; },
-        getMaxLevel: function () {return maxLevel;},
-        getEquipmentCostRatio: function () {return equipmentCostRatio;},
-        getOtherWorkersFocusRatio: function () {return otherWorkersFocusRatio;},
-        getNumTrapsForAutoTrapping: function () {return numTrapsForAutoTrapping;},
-        getShieldCostRatio: function () {return shieldCostRatio;},
-        getLumberjackMultiplier: function () {return lumberjackMultiplier;},
-        getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
-        getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;}
-    };
-})();
-var constantsLateGame = (function () {
-    "use strict";
-    var zoneToStartAt = 45,
-        runInterval = 200,
-        minerMultiplier = 0.5,
-        trainerCostRatio = 0.4,
-        explorerCostRatio = 0.2,
-        minFoodOwned = 15,
-        minWoodOwned = 15,
-        minTrimpsOwned = 10,
-        minScienceOwned = 10,
-        housingCostRatio = 0.1,
-        gymCostRatio = 0.95,
-        maxGyms = 10000,
-        tributeCostRatio = 0.8,
-        nurseryCostRatio = 0.15,
-        maxLevel = 5,
-        equipmentCostRatio = 0.8,
-        otherWorkersFocusRatio = 0.5,
-        numTrapsForAutoTrapping = 10000,
-        shieldCostRatio = 1,
-        lumberjackMultiplier = 0.5,
-        shouldSkipHpEquipment = false,
-        minimumEquipmentLevel = 5;
-    return {
-        getZoneToStartAt: function () { return zoneToStartAt; },
-        getRunInterval: function () { return runInterval; },
-        getTrainerCostRatio: function () { return trainerCostRatio; },
-        getMinerMultiplier: function () { return minerMultiplier; },
-        getExplorerCostRatio: function () { return explorerCostRatio; },
-        getMinFoodOwned: function () { return minFoodOwned; },
-        getMinWoodOwned: function () { return minWoodOwned; },
-        getMinTrimpsOwned: function () { return minTrimpsOwned; },
-        getMinScienceOwned: function () { return minScienceOwned; },
-        getGymCostRatio: function () { return gymCostRatio; },
-        getMaxGyms : function () { return maxGyms; },
-        getHousingCostRatio: function () { return housingCostRatio; },
-        getTributeCostRatio: function () { return tributeCostRatio; },
-        getNurseryCostRatio: function () { return nurseryCostRatio; },
-        getMaxLevel: function () {return maxLevel;},
-        getEquipmentCostRatio: function () {return equipmentCostRatio;},
-        getOtherWorkersFocusRatio: function () {return otherWorkersFocusRatio;},
-        getNumTrapsForAutoTrapping: function () {return numTrapsForAutoTrapping;},
-        getShieldCostRatio: function () {return shieldCostRatio;},
-        getLumberjackMultiplier: function () {return lumberjackMultiplier;},
-        getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
-        getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;}
-    };
-})();
-var constantsLateLateGame = (function () {
-    "use strict";
-    var zoneToStartAt = 55,
-        runInterval = 200,
-        minerMultiplier = 1,
-        trainerCostRatio = 0.4,
-        explorerCostRatio = 0.01,
-        minFoodOwned = 15,
-        minWoodOwned = 15,
-        minTrimpsOwned = 10,
-        minScienceOwned = 10,
-        housingCostRatio = 0.05,
-        gymCostRatio = 0.8,
-        maxGyms = 10000,
-        tributeCostRatio = 0.9,
-        nurseryCostRatio = 0.01,
-        maxLevel = 4,
-        equipmentCostRatio = 0.9,
-        otherWorkersFocusRatio = 0.5,
-        numTrapsForAutoTrapping = 10000,
-        shieldCostRatio = 1,
-        lumberjackMultiplier = 1,
-        shouldSkipHpEquipment = true,
-        minimumEquipmentLevel = 5;
-    return {
-        getZoneToStartAt: function () { //don't start until enough block since last constants should be getting gyms
+function ConstantSet(overrides){
+    if (overrides)
+        ChangeValues(this,overrides);
+}
+function ChangeValues(theObject, values){
+    for (var x in values) theObject[x] = values[x];
+}
+ConstantSet.prototype = {
+    zoneToStartAt : 0,                  //where this set of constants begins being used
+    runInterval : 200,                  //how often Trimpz main loop is run
+    minerMultiplier : 2,                //how many more miners than farmers? (multiplied)
+    lumberjackMultiplier : 1,           //how many more lumberjacks than farmers? (multiplied)
+    trainerCostRatio : 0.4,             //buy trainers with enough resources (0.2 = 20% of resources)
+    explorerCostRatio : 0.2,            //buy explorers with enough resources (0.2 = 20% of resources)
+    minFoodOwned : 15,                  //minimum food on hand, required for beginning of the game
+    minWoodOwned : 15,                  //minimum wood on hand, required for beginning of the game
+    minTrimpsOwned : 9,                 //minimum trimps on hand, required for beginning of the game
+    minScienceOwned : 10,               //minimum science on hand, required for beginning of the game
+    housingCostRatio : 0.3,             //buy housing with enough resources (0.2 = 20% of resources)
+    gymCostRatio : 0.6,                 //buy gyms with enough resources (0.2 = 20% of resources)
+    maxGyms : 10000,                    //maximum number of gyms to buy
+    tributeCostRatio : 0.5,             //buy tributes with enough resources (0.2 = 20% of resources)
+    nurseryCostRatio : 0.5,             //buy nursery with enough resources (0.2 = 20% of resources)
+    maxLevel : 10,                      //maximum level of all equipment per tier unless it's really cheap(see constant above)
+    equipmentCostRatio : 0.5,           //buy equipment with enough resources (0.2 = 20% of resources)
+    otherWorkersFocusRatio : 0.5,       //what percent of trimps to take from each other job to focus on gaining resources for an upgrade, including science
+    numTrapsForAutoTrapping : 10000,    //maximum number of traps to build
+    shieldCostRatio : 1,                //buy shield with enough resources (1 = 100% of resources)
+    shouldSkipHpEquipment : false,      //true to not buy or prestige/upgrade health equipment
+    getZoneToStartAt: function () { return this.zoneToStartAt; },
+    getRunInterval: function () { return this.runInterval; },
+    getTrainerCostRatio: function () { return this.trainerCostRatio; },
+    getMinerMultiplier: function () { return this.minerMultiplier; },
+    getExplorerCostRatio: function () { return this.explorerCostRatio; },
+    getMinFoodOwned: function () { return this.minFoodOwned; },
+    getMinWoodOwned: function () { return this.minWoodOwned; },
+    getMinTrimpsOwned: function () { return this.minTrimpsOwned; },
+    getMinScienceOwned: function () { return this.minScienceOwned; },
+    getGymCostRatio: function () { return this.gymCostRatio; },
+    getMaxGyms : function () { return this.maxGyms; },
+    getHousingCostRatio: function () { return this.housingCostRatio; },
+    getTributeCostRatio: function () { return this.tributeCostRatio; },
+    getNurseryCostRatio: function () { return this.nurseryCostRatio; },
+    getMaxLevel: function () {return this.maxLevel;},
+    getEquipmentCostRatio: function () {return this.equipmentCostRatio;},
+    getOtherWorkersFocusRatio: function () {return this.otherWorkersFocusRatio;},
+    getNumTrapsForAutoTrapping: function () {return this.numTrapsForAutoTrapping;},
+    getShieldCostRatio: function () {return this.shieldCostRatio;},
+    getLumberjackMultiplier: function () {return this.lumberjackMultiplier;},
+    getShouldSkipHpEquipment: function () {return this.shouldSkipHpEquipment;}
+}
+
+var constantsEarlyGame = new ConstantSet();
+var constantsLateGame = new ConstantSet({
+    zoneToStartAt : 45,
+    minerMultiplier : 0.5,
+    lumberjackMultiplier : 0.5,
+    housingCostRatio : 0.1,
+    gymCostRatio : 0.95,
+    tributeCostRatio : 0.8,
+    nurseryCostRatio : 0.15,
+    maxLevel : 5,
+    equipmentCostRatio : 0.8
+});
+var constantsLateLateGame = new ConstantSet({
+    zoneToStartAt : 55,
+    minerMultiplier : 1,
+    lumberjackMultiplier : 0.5,
+    explorerCostRatio : 0.01,
+    housingCostRatio : 0.5,
+    gymCostRatio : 0.8,
+    tributeCostRatio : 0.9,
+    nurseryCostRatio : 0.2,
+    maxLevel : 4,
+    equipmentCostRatio : 0.9,
+    getZoneToStartAt:
+        function () { //don't start until enough block since last constants should be getting gyms
             if (game.global.soldierCurrentBlock > 750 * 1000000000000000) { //need about 750Qa to beat 59 boss
-                return zoneToStartAt; //enough block, begin!
+                return this.zoneToStartAt; //enough block, begin!
             }
             return constantsEndGame.getZoneToStartAt(); //not enough block, but need to start next constants if too late
-        },
-        getRunInterval: function () { return runInterval; },
-        getTrainerCostRatio: function () { return trainerCostRatio; },
-        getMinerMultiplier: function () { return minerMultiplier; },
-        getExplorerCostRatio: function () { return explorerCostRatio; },
-        getMinFoodOwned: function () { return minFoodOwned; },
-        getMinWoodOwned: function () { return minWoodOwned; },
-        getMinTrimpsOwned: function () { return minTrimpsOwned; },
-        getMinScienceOwned: function () { return minScienceOwned; },
-        getGymCostRatio: function () { return gymCostRatio; },
-        getMaxGyms : function () { return maxGyms; },
-        getHousingCostRatio: function () { return housingCostRatio; },
-        getTributeCostRatio: function () { return tributeCostRatio; },
-        getNurseryCostRatio: function () { return nurseryCostRatio; },
-        getMaxLevel: function () {return maxLevel;},
-        getEquipmentCostRatio: function () {return equipmentCostRatio;},
-        getOtherWorkersFocusRatio: function () {return otherWorkersFocusRatio;},
-        getNumTrapsForAutoTrapping: function () {return numTrapsForAutoTrapping;},
-        getShieldCostRatio: function () {return shieldCostRatio;},
-        getLumberjackMultiplier: function () {return lumberjackMultiplier;},
-        getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
-        getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;}
-    };
-})();
-var constantsEndGame = (function () {
-    "use strict";
-    var zoneToStartAt = 60,
-        runInterval = 200,
-        minerMultiplier = 4,
-        trainerCostRatio = 0.4,
-        explorerCostRatio = 0,
-        minFoodOwned = 15,
-        minWoodOwned = 15,
-        minTrimpsOwned = 10,
-        minScienceOwned = 10,
-        housingCostRatio = 0,
-        gymCostRatio = 0.5,
-        maxGyms = 10000,
-        tributeCostRatio = 0.7,
-        nurseryCostRatio = 0.20,
-        maxLevel = 4,
-        equipmentCostRatio = 0.9,
-        otherWorkersFocusRatio = 0.5,
-        numTrapsForAutoTrapping = 10000,
-        shieldCostRatio = 1,
-        lumberjackMultiplier = 0.33,
-        shouldSkipHpEquipment = false,
-        minimumEquipmentLevel = 5;
-    return {
-        getZoneToStartAt: function () { return zoneToStartAt; },
-        getRunInterval: function () { return runInterval; },
-        getTrainerCostRatio: function () { return trainerCostRatio; },
-        getMinerMultiplier: function () { return minerMultiplier; },
-        getExplorerCostRatio: function () { return explorerCostRatio; },
-        getMinFoodOwned: function () { return minFoodOwned; },
-        getMinWoodOwned: function () { return minWoodOwned; },
-        getMinTrimpsOwned: function () { return minTrimpsOwned; },
-        getMinScienceOwned: function () { return minScienceOwned; },
-        getGymCostRatio: function () { return gymCostRatio; },
-        getMaxGyms : function () { return maxGyms; },
-        getHousingCostRatio: function () { return housingCostRatio; },
-        getTributeCostRatio: function () { return tributeCostRatio; },
-        getNurseryCostRatio: function () { return nurseryCostRatio; },
-        getMaxLevel: function () {return maxLevel;},
-        getEquipmentCostRatio: function () {return equipmentCostRatio;},
-        getOtherWorkersFocusRatio: function () {return otherWorkersFocusRatio;},
-        getNumTrapsForAutoTrapping: function () {return numTrapsForAutoTrapping;},
-        getShieldCostRatio: function () {return shieldCostRatio;},
-        getLumberjackMultiplier: function () {return lumberjackMultiplier;},
-        getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
-        getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;}
-    };
-})();
+        }
+});
+var constantsEndGame = new ConstantSet({
+    zoneToStartAt : 60,
+    minerMultiplier : 4,
+    lumberjackMultiplier : 0.33,
+    explorerCostRatio: 0,
+    housingCostRatio : 0,
+    gymCostRatio : 0.5,
+    tributeCostRatio : 0.7,
+    nurseryCostRatio : 0.2,
+    maxLevel : 4,
+    equipmentCostRatio : 0.9
+});
 
 //game variables, not for user setting
 var constantsSets = [constantsEarlyGame, constantsLateGame, constantsLateLateGame, constantsEndGame];
