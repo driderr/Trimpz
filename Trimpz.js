@@ -26,7 +26,6 @@ var constantsEarlyGame = (function () {
         numTrapsForAutoTrapping = 10000,    //maximum number of traps to build
         shieldCostRatio = 1,                //buy shield with enough resources (1 = 100% of resources)
         lumberjackMultiplier = 1,           //how many more lumberjacks than farmers? (multiplied)
-        maxWormholes = 0,                   //maximum number of wormholes to buy
         shouldSkipHpEquipment = false,      //true to not buy or prestige/upgrade health equipment
         minimumEquipmentLevel = 5;          //currently unused
     return {
@@ -50,7 +49,6 @@ var constantsEarlyGame = (function () {
         getNumTrapsForAutoTrapping: function () {return numTrapsForAutoTrapping;},
         getShieldCostRatio: function () {return shieldCostRatio;},
         getLumberjackMultiplier: function () {return lumberjackMultiplier;},
-        getMaxWormholes: function () {return maxWormholes;},
         getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
         getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;}
     };
@@ -77,7 +75,6 @@ var constantsLateGame = (function () {
         numTrapsForAutoTrapping = 10000,
         shieldCostRatio = 1,
         lumberjackMultiplier = 0.5,
-        maxWormholes = 0,
         shouldSkipHpEquipment = false,
         minimumEquipmentLevel = 5;
     return {
@@ -101,7 +98,6 @@ var constantsLateGame = (function () {
         getNumTrapsForAutoTrapping: function () {return numTrapsForAutoTrapping;},
         getShieldCostRatio: function () {return shieldCostRatio;},
         getLumberjackMultiplier: function () {return lumberjackMultiplier;},
-        getMaxWormholes: function () {return maxWormholes;},
         getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
         getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;}
     };
@@ -128,7 +124,6 @@ var constantsLateLateGame = (function () {
         numTrapsForAutoTrapping = 10000,
         shieldCostRatio = 1,
         lumberjackMultiplier = 1,
-        maxWormholes = 0,
         shouldSkipHpEquipment = true,
         minimumEquipmentLevel = 5;
     return {
@@ -157,7 +152,6 @@ var constantsLateLateGame = (function () {
         getNumTrapsForAutoTrapping: function () {return numTrapsForAutoTrapping;},
         getShieldCostRatio: function () {return shieldCostRatio;},
         getLumberjackMultiplier: function () {return lumberjackMultiplier;},
-        getMaxWormholes: function () {return maxWormholes;},
         getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
         getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;}
     };
@@ -184,7 +178,6 @@ var constantsEndGame = (function () {
         numTrapsForAutoTrapping = 10000,
         shieldCostRatio = 1,
         lumberjackMultiplier = 0.33,
-        maxWormholes = 0,
         shouldSkipHpEquipment = false,
         minimumEquipmentLevel = 5;
     return {
@@ -208,7 +201,6 @@ var constantsEndGame = (function () {
         getNumTrapsForAutoTrapping: function () {return numTrapsForAutoTrapping;},
         getShieldCostRatio: function () {return shieldCostRatio;},
         getLumberjackMultiplier: function () {return lumberjackMultiplier;},
-        getMaxWormholes: function () {return maxWormholes;},
         getShouldSkipHpEquipment: function () {return shouldSkipHpEquipment;},
         getMinimumEquipmentLevel: function () {return minimumEquipmentLevel;}
     };
@@ -871,7 +863,7 @@ function BuyBuildings() {
     BuyBuilding("Hotel", constants.getHousingCostRatio());
     BuyBuilding("Resort", constants.getHousingCostRatio());
     BuyBuilding("Gateway", constants.getHousingCostRatio());
-    BuyBuilding("Wormhole", 1, constants.getMaxWormholes());
+    BuyBuilding("Wormhole", 1, trimpzSettings["maxWormholes"].value);
 
     if (trimpzSettings["runMapsOnlyWhenNeeded"].value){
         var returnNumAttacks = true;
