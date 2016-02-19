@@ -854,6 +854,12 @@ function BuyBuildings() {
             BuyBuilding("Nursery", constants.getNurseryCostRatio());
     }
     BuyBuilding("Tribute", constants.getTributeCostRatio());
+
+    if (game.resources.trimps.soldiers === 0 && game.global.world > 10 &&
+        game.global.lastBreedTime / 1000 > targetBreedTime - getRemainingTimeForBreeding() + trimpzSettings["targetBreedTimeHysteresis"].value)    {
+        return;
+    }
+
     BuyBuilding("Hut", constants.getHousingCostRatio());
     BuyBuilding("House", constants.getHousingCostRatio());
     BuyBuilding("Mansion", constants.getHousingCostRatio());
