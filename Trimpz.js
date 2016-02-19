@@ -1316,9 +1316,9 @@ function GotoMapsScreen() {
         return;
     }
     mapsClicked();
-    if (game.global.fighting && !game.global.preMapsActive){
-        mapsClicked();
-    }
+//    if (game.global.fighting && !game.global.preMapsActive){
+//        mapsClicked();
+//    }
 }
 
 function RunNewMap(zoneToCreate) {
