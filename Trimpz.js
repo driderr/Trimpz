@@ -294,7 +294,7 @@ function CanBuyNonUpgrade(nonUpgradeItem, ratio) {
     return true;
 }
 
-function GetNonUpgradePrice(nonUpgradeItem) {
+function GetNonUpgradePrice(nonUpgradeItem, resource) {
     "use strict";
     var aResource;
     var needed;
@@ -305,8 +305,12 @@ function GetNonUpgradePrice(nonUpgradeItem) {
         }
         if (typeof nonUpgradeItem.prestige != 'undefined') {//Discount equipment
             needed = Math.ceil(needed * (Math.pow(1 - game.portal.Artisanistry.modifier, game.portal.Artisanistry.level)));
+        } else if (game.portal.Resourceful.level)
+        {
+            needed = Math.ceil(needed * (Math.pow(1 - game.portal.Resourceful.modifier, game.portal.Resourceful.level)));
         }
-        if (aResource === "gems" && nonUpgradeItem === game.buildings.Warpstation)
+
+        if (resource && aResource === resource)
         {
             return needed;
         }
@@ -857,6 +861,7 @@ function BuyBuildings() {
 
     if (game.resources.trimps.soldiers === 0 && game.global.world > 10 &&
         game.global.lastBreedTime / 1000 > targetBreedTime - getRemainingTimeForBreeding() + trimpzSettings["targetBreedTimeHysteresis"].value)    {
+        tooltip('hide');
         return;
     }
 
@@ -867,7 +872,19 @@ function BuyBuildings() {
     BuyBuilding("Resort", constants.getHousingCostRatio());
     BuyBuilding("Gateway", constants.getHousingCostRatio());
     BuyBuilding("Wormhole", 1, constants.getMaxWormholes());
-    if (game.buildings.Warpstation.locked === 1 || GetNonUpgradePrice(game.buildings.Warpstation) > GetNonUpgradePrice(game.buildings.Collector) * game.buildings.Warpstation.increase.by / game.buildings.Collector.increase.by) {
+
+    if (trimpzSettings["runMapsOnlyWhenNeeded"].value){
+        var returnNumAttacks = true;
+        var maxAttacksToKill = trimpzSettings["maxAttacksToKill"].value;
+        var bossBattle = canTakeOnBoss(returnNumAttacks);
+        var reallyNeedDamage = bossBattle.attacksToKillBoss > maxAttacksToKill * 3;
+        var reallyNeedHealth = bossBattle.attacksToKillSoldiers <= 1;
+        if ((reallyNeedDamage || reallyNeedHealth) && GetNonUpgradePrice(game.buildings.Warpstation, "metal") > game.resources.metal.owned * 0.1) {
+            tooltip('hide');
+            return;
+        }
+    }
+    if (game.buildings.Warpstation.locked === 1 || GetNonUpgradePrice(game.buildings.Warpstation, "gems") > GetNonUpgradePrice(game.buildings.Collector) * game.buildings.Warpstation.increase.by / game.buildings.Collector.increase.by) {
         BuyBuilding("Collector", 1);
     }
     while (BuyBuilding("Warpstation", 1,undefined,false)){}
