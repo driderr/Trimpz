@@ -1915,7 +1915,7 @@ function TurnOffIncompatibleSettings() {
 
 function MainLoopRunner(){
     "use strict";
-    if (trimpzSettings["respecPheromones"] != undefined)
+    if (trimpzSettings["limitEquipment"] != undefined)
         MainLoop();
     setTimeout(MainLoopRunner, constants.getRunInterval());
 }
