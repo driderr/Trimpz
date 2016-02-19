@@ -1531,6 +1531,16 @@ function RunMaps() {
         }
     }
 
+    if (game.upgrades.Shieldblock.done === 0 && game.upgrades.Shieldblock.locked === 1 && trimpzSettings["skipShieldBlock"].value === false) {
+        for (map in game.global.mapsOwnedArray) {
+            theMap = game.global.mapsOwnedArray[map];
+            if (theMap.name === "The Block" && addSpecials(true, true, theMap) > 0){
+                RunMap(theMap);
+                return;
+            }
+        }
+    }
+
     if (game.global.challengeActive === "Electricity" && game.global.world >= 80) {
         for (map in game.global.mapsOwnedArray) {
             theMap = game.global.mapsOwnedArray[map];
@@ -1814,6 +1824,9 @@ function CheckPortal() {
         ClickButton("portalBtn");
 
         switch(trimpzSettings["challenge"].selected){
+            case "Balance":
+                ClickButton("challengeBalance");
+                break;
             case "Electricity":
                 ClickButton("challengeElectricity");
                 break;
