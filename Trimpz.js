@@ -1297,8 +1297,10 @@ function RunMap(map) {
     "use strict";
     GotoMapsScreen();
     lastFoughtInWorld = false;
-    selectMap(map.id);
-    runMap();
+    if (game.global.preMapsActive) {
+        selectMap(map.id);
+        runMap();
+    }
 }
 
 function RunWorld() {
