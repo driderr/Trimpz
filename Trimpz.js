@@ -1718,8 +1718,8 @@ function CheckHelium() {
         oldHelium = helium;
         helium = game.resources.helium.owned;
         rate = (helium - oldHelium)/((date - heliumHistory[heliumHistory.length - 1].date)/(1000*60*60));
-        totalTime = (date - heliumHistory[0].date)/(1000*60*60);
-        totalHelium = helium - heliumHistory[0].totalHelium;
+        totalTime = (date - game.global.portalTime)/(1000*60*60);
+        totalHelium = helium;
         cumulativeRate = totalHelium / totalTime;
         heliumHistory.push({
             totalHelium: helium,
