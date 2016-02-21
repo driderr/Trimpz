@@ -1396,6 +1396,35 @@ function FindAndRunLootMap(mapLevel) {
     RunNewMapForLoot(mapLevel);
 }
 
+function isPrestigeFull(filterOnStat) {
+    "use strict";
+    var currentEquip;
+    var upgrade;
+    var currentUpgrade;
+
+    for (upgrade in game.upgrades) {
+        currentUpgrade = game.upgrades[upgrade];
+        currentEquip = game.equipment[game.upgrades[upgrade].prestiges];
+        if (typeof currentUpgrade.prestiges != 'undefined' && !currentEquip.locked && upgrade !== "Supershield") {
+            if (filterOnStat){
+                if (filterOnStat === "Health"){
+                    if (!currentEquip.healthCalculated){
+                        continue;
+                    }
+                } else { //Attack
+                    if (currentEquip.healthCalculated){
+                        continue;
+                    }
+                }
+            }
+            if (currentUpgrade.locked){
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 function RunMaps() {
     "use strict";
     var map;
@@ -1491,7 +1520,8 @@ function RunMaps() {
                 var siphonMapLevel = game.global.world - game.portal.Siphonology.level;
                 var minimumDropsLevel = getMinLevelOfMapWithDrops();
                 var availableDrops = getCurrentAvailableDrops();
-                if (availableDrops) {
+                var prestigeFull = isPrestigeFull(needDamage ? "Attack" : "Health");
+                if (availableDrops && !prestigeFull) {
                     mapLevelToRun = Math.max(oneShotMapLevel, siphonMapLevel, minimumDropsLevel, 6);
                 } else {
                     mapLevelToRun = Math.max(oneShotMapLevel, siphonMapLevel, 6);
