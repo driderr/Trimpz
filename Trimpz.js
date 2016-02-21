@@ -1397,7 +1397,7 @@ function FindAndRunLootMap(mapLevel) {
     RunNewMapForLoot(mapLevel);
 }
 
-function isPrestigeFull(filterOnStat) {
+function isPrestigeFull(filterOnStat, highestUpgrade) {
     "use strict";
     var currentEquip;
     var upgrade;
@@ -1420,6 +1420,9 @@ function isPrestigeFull(filterOnStat) {
             }
             if (currentUpgrade.locked){
                 return false;
+            }
+            if (highestUpgrade && upgrade === highestUpgrade){
+                return true;
             }
         }
     }
@@ -1493,6 +1496,32 @@ function RunMaps() {
             }
         }
     }
+    var mapLevelWithDrop;
+    var siphonMapLevel;
+    var oneShotMapLevel;
+    var mapLevelToRun;
+    var prestige = trimpzSettings["prestige"].value;
+    if (prestige !== "Off" && game.mapUnlocks[prestige].last <= game.global.world - 5 && !isPrestigeFull(null,prestige)){
+        if (game.options.menu.mapLoot.enabled != 1)
+            game.options.menu.mapLoot.enabled = 1;
+        mapLevelWithDrop = game.mapUnlocks[prestige].last + 5;
+        siphonMapLevel = game.global.world - game.portal.Siphonology.level;
+        oneShotMapLevel = getLevelOfOneShotMap(trimpzSettings["oneShotRatio"].value);
+        mapLevelToRun = Math.max(oneShotMapLevel, siphonMapLevel, mapLevelWithDrop);
+        for (map in game.global.mapsOwnedArray){ //look for an existing map first
+            theMap = game.global.mapsOwnedArray[map];
+            if (uniqueMaps.indexOf(theMap.name) > -1){
+                continue;
+            }
+            if (theMap.level === mapLevelToRun) {
+                RunMap(game.global.mapsOwnedArray[map]);
+                return;
+            }
+        }
+        RunNewMap(mapLevelToRun);
+        return;
+    }
+
     var oneShotRatio = trimpzSettings["oneShotRatio"].value;
     if (trimpzSettings["runMapsOnlyWhenNeeded"].value){
         if (game.global.lastClearedCell < 98 && game.global.mapsUnlocked) {
@@ -1515,10 +1544,9 @@ function RunMaps() {
             //if (reallyNeedHealth)console.debug("Health  really low");
             //if (needDamage)console.debug("Dmg  low: " + bossBattle.attacksToKillBoss + " hits");
             //if (reallyNeedDamage)console.debug("Dmg  really low");
-            var oneShotMapLevel = getLevelOfOneShotMap(oneShotRatio);
-            var mapLevelToRun;
+            oneShotMapLevel = getLevelOfOneShotMap(oneShotRatio);
             if (game.global.mapBonus < 10) {
-                var siphonMapLevel = game.global.world - game.portal.Siphonology.level;
+                siphonMapLevel = game.global.world - game.portal.Siphonology.level;
                 var minimumDropsLevel = getMinLevelOfMapWithDrops();
                 var availableDrops = getCurrentAvailableDrops();
                 var prestigeFull = isPrestigeFull(needDamage ? "Attack" : "Health");
@@ -1591,7 +1619,7 @@ function RunMaps() {
 
     if (totalUpgrades < trimpzSettings["minimumUpgradesOnHand"].value){//=== 0){ //if not equipment upgrades, go get some! (can make this a "< constant" later if desired)
         //what's the lowest zone map I can create and get items?
-        var mapLevelWithDrop = getMinLevelOfMapWithDrops();
+        mapLevelWithDrop = getMinLevelOfMapWithDrops();
         for (map in game.global.mapsOwnedArray){ //look for an existing map first
             theMap = game.global.mapsOwnedArray[map];
             if (uniqueMaps.indexOf(theMap.name) > -1){
@@ -1745,7 +1773,7 @@ function CheckPortal() {
         respecDone = false;
         ClickButton("portalBtn");
 
-        switch(trimpzSettings["challenge"].selected){
+        switch(trimpzSettings["challenge"].value){
             case "Balance":
                 ClickButton("challengeBalance");
                 break;
