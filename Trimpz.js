@@ -1332,7 +1332,7 @@ function getMaxEnemyHealthForMapLevel(mapLevel) {  //adapted from Trimps getEnem
     return Math.floor(amt * difficulty);
 }
 
-function getLevelOfOneShotMap(){
+function getLevelOfOneShotMap(ratio){
     "use strict";
     var soldierAttack = getSoldierAttack();
     if (lastFoughtInWorld){
@@ -1344,7 +1344,7 @@ function getLevelOfOneShotMap(){
         if (game.global.challengeActive == "Toxicity"){
             maxEnemyHealth *= 2;
         }
-        if (soldierAttack >= maxEnemyHealth){
+        if (soldierAttack >= maxEnemyHealth * ratio){
             return mapLevel;
         }
     }
@@ -1492,7 +1492,7 @@ function RunMaps() {
             }
         }
     }
-
+    var oneShotRatio = trimpzSettings["oneShotRatio"].value;
     if (trimpzSettings["runMapsOnlyWhenNeeded"].value){
         if (game.global.lastClearedCell < 98 && game.global.mapsUnlocked) {
             var returnNumAttacks = true;
@@ -1514,7 +1514,7 @@ function RunMaps() {
             //if (reallyNeedHealth)console.debug("Health  really low");
             //if (needDamage)console.debug("Dmg  low: " + bossBattle.attacksToKillBoss + " hits");
             //if (reallyNeedDamage)console.debug("Dmg  really low");
-            var oneShotMapLevel = getLevelOfOneShotMap();
+            var oneShotMapLevel = getLevelOfOneShotMap(oneShotRatio);
             var mapLevelToRun;
             if (game.global.mapBonus < 10) {
                 var siphonMapLevel = game.global.world - game.portal.Siphonology.level;
@@ -1548,7 +1548,7 @@ function RunMaps() {
                 return;
             }
             if (trimpzSettings["doRunMapsForEquipment"].value){
-                mapLevel = getLevelOfOneShotMap();
+                mapLevel = getLevelOfOneShotMap(oneShotRatio);
                 FindAndRunLootMap(mapLevel);
                 return;
             }
@@ -1809,7 +1809,7 @@ function MaxToxicStacks() {
         return;
     }
     if(trimpzSettings["shouldMaxOutToxicityHelium"].value && game.global.challengeActive === 'Toxicity' && game.global.lastClearedCell > 95 && game.challenges.Toxicity.stacks < 1500 && game.global.world >= trimpzSettings["zoneToStartMaxingAt"].value) {
-        var mapLevel = getLevelOfOneShotMap();
+        var mapLevel = getLevelOfOneShotMap(trimpzSettings["oneShotRatio"].value);
         var theMap;
         for (var map in game.global.mapsOwnedArray) {
             theMap = game.global.mapsOwnedArray[map];
