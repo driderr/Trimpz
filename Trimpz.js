@@ -113,7 +113,6 @@ var mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50,80,125];
 var uniqueMaps = ["The Block", "The Wall",  "Dimension of Anger", "Trimple Of Doom", "The Prison", "Bionic Wonderland", "Bionic Wonderland II", "Bionic Wonderland III", "Bionic Wonderland IV", "Bionic Wonderland V", "Bionic Wonderland VI"];
 var helium = -1;
 var heliumHistory = [];
-var portalObtained = false;
 var pauseTrimpz = false;
 var bionicDone = false;
 var formationDone = false;
@@ -1650,7 +1649,6 @@ function CheckLateGame() {
         formationDone = false;
         autoFighting = false;
         helium = -1;
-        portalObtained = false;
         bionicDone = false;
         return;
     }
@@ -1715,8 +1713,10 @@ function CheckPortal() {
     var map;
     var theMap;
     var itemsAvailable;
-    if (game.global.world >= trimpzSettings["portalAt"].value - 2 && portalObtained === false)
+    if (game.global.world >= trimpzSettings["portalAt"].value - 2 && !game.global.portalActive)
     {
+        if (game.global.mapsActive)
+            return false;
         for (map in game.global.mapsOwnedArray){
             theMap = game.global.mapsOwnedArray[map];
             if (theMap.name !== "Dimension of Anger"){
@@ -1724,12 +1724,10 @@ function CheckPortal() {
             }
             itemsAvailable = addSpecials(true,true,theMap);
             if (itemsAvailable > 0) {
-                portalObtained = true;
                 RunMap(theMap);
             }
         }
-    }
-    if (game.global.world >= trimpzSettings["portalAt"].value && game.global.challengeActive !== "Electricity") {
+    } else if (game.global.world >= trimpzSettings["portalAt"].value && game.global.challengeActive !== "Electricity") {
         heliumLog.push(heliumHistory);
 
         if (respecAmount > 0 && game.portal.Pheromones.level < respecAmount){
