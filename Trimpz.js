@@ -1296,8 +1296,8 @@ function RunNewMapForLoot(zoneToCreate) {
 function RunMap(map) {
     "use strict";
     GotoMapsScreen();
-    lastFoughtInWorld = false;
     if (game.global.preMapsActive) {
+        lastFoughtInWorld = false;
         selectMap(map.id);
         runMap();
     }
