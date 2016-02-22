@@ -238,6 +238,9 @@ function getTotalTimeForBreeding(almostOwnedGeneticists) {
     if (game.global.challengeActive == "Toxicity" && game.challenges.Toxicity.stacks > 0){
         potencyMod *= Math.pow(game.challenges.Toxicity.stackMult, game.challenges.Toxicity.stacks);
     }
+    if (game.global.voidBuff == "slowBreed"){
+        potencyMod *= 0.2;
+    }
     potencyMod = (1 + (potencyMod / 10));
     var adjustedMax = (game.portal.Coordinated.level) ? game.portal.Coordinated.currentSend : trimps.maxSoldiers;
     var totalTime;
@@ -266,6 +269,9 @@ function getRemainingTimeForBreeding() {
     if (game.unlocks.quickTrimps) potencyMod *= 2;
     if (game.global.challengeActive == "Toxicity" && game.challenges.Toxicity.stacks > 0){
         potencyMod *= Math.pow(game.challenges.Toxicity.stackMult, game.challenges.Toxicity.stacks);
+    }
+    if (game.global.voidBuff == "slowBreed"){
+        potencyMod *= 0.2;
     }
     potencyMod = (1 + (potencyMod / 10));
     var timeRemaining = log10((trimpsMax - trimps.employed) / (trimps.owned - trimps.employed)) / log10(potencyMod);
@@ -1838,7 +1844,7 @@ function MaxToxicStacks() {
     if (game.global.mapsActive === true && game.global.preMapsActive === false){ //no map ability(wait one) or already running a map(repeat should be off)
         return;
     }
-    if(trimpzSettings["shouldMaxOutToxicityHelium"].value && game.global.challengeActive === 'Toxicity' && game.global.lastClearedCell > 95 && game.challenges.Toxicity.stacks < 1500 && game.global.world >= trimpzSettings["zoneToStartMaxingAt"].value) {
+    if(trimpzSettings["shouldMaxOutToxicityHelium"].value && game.global.challengeActive === 'Toxicity' && game.global.lastClearedCell > 93 && game.challenges.Toxicity.stacks < 1500 && game.global.world >= trimpzSettings["zoneToStartMaxingAt"].value) {
         var mapLevel = getLevelOfOneShotMap(trimpzSettings["oneShotRatio"].value);
         var theMap;
         for (var map in game.global.mapsOwnedArray) {
@@ -1849,6 +1855,23 @@ function MaxToxicStacks() {
             }
         }
         RunNewMapForLoot(mapLevel);
+    }
+}
+
+function RunVoidMaps() {
+    "use strict";
+    if (game.global.mapsActive === true && game.global.preMapsActive === false){ //no map ability(wait one) or already running a map(repeat should be off)
+        return;
+    }
+    if(trimpzSettings["voidLevel"].value && game.global.lastClearedCell > 93 && game.global.world >= trimpzSettings["voidLevel"].value) {
+        var theMap;
+        for (var map in game.global.mapsOwnedArray) {
+            theMap = game.global.mapsOwnedArray[map];
+            if (theMap.location == 'Void'){
+                RunMap(theMap);
+                return;
+            }
+        }
     }
 }
 
@@ -1926,6 +1949,7 @@ function MainLoop(){
     Fight();
     UpgradeStorage();
     MaxToxicStacks();
+    RunVoidMaps();
     ClickAllNonEquipmentUpgrades();
     var shouldReturn = BeginPriorityAction();
     if (shouldReturn === true) {
