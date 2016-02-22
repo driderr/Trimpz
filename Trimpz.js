@@ -653,8 +653,10 @@ function UpgradeAndGather() {
         ClickButton("trimpsCollectBtn");
 //        } else if (game.global.buildingsQueue.length > 0) {
 //            ClickButton("buildingsCollectBtn");
-    } else { //nothing to build
+    } else if (game.global.turkimpTimer > 0) {
         ClickButton("metalCollectBtn");
+    } else {
+        ClickButton("scienceCollectBtn");
     }
     tooltip('hide');
     return false;
