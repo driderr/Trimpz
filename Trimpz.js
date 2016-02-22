@@ -54,7 +54,7 @@ ConstantSet.prototype = {
     getShieldCostRatio: function () {return this.shieldCostRatio;},
     getLumberjackMultiplier: function () {return this.lumberjackMultiplier;},
     getShouldSkipHpEquipment: function () {return this.shouldSkipHpEquipment;}
-}
+};
 
 var constantsEarlyGame = new ConstantSet();
 var constantsLateGame = new ConstantSet({
@@ -1849,7 +1849,7 @@ function MaxToxicStacks() {
         var theMap;
         for (var map in game.global.mapsOwnedArray) {
             theMap = game.global.mapsOwnedArray[map];
-            if (theMap.level === mapLevel && theMap.loot >= 1.40){
+            if (theMap.level === mapLevel && theMap.loot >= 1.40 && (theMap.location === "Plentiful" || theMap.location === "Mountain")){
                 RunMap(theMap);
                 return;
             }
