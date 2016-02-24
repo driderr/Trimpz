@@ -752,7 +752,7 @@ function BuyBuildings() {
     }
     BuyBuilding("Tribute", constants.getTributeCostRatio());
 
-    if (game.resources.trimps.soldiers === 0 && game.global.world > 10 &&
+    if (game.global.world > 10 &&
         game.global.lastBreedTime / 1000 > targetBreedTime - getRemainingTimeForBreeding() + trimpzSettings["targetBreedTimeHysteresis"].value)    {
         tooltip('hide');
         return;
