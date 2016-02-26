@@ -649,8 +649,8 @@ function UpgradeAndGather() {
     var collectingForNonEquipment = UpgradeNonEquipment();
     if (collectingForNonEquipment)
         return true;
-    if (game.global.buildingsQueue.length > 0 && (document.getElementById("autoTrapBtn").innerHTML !== "Traps On" ||
-            game.global.buildingsQueue[0] !== "Trap.1") || game.global.buildingsQueue.length > 1) {
+    if (game.global.buildingsQueue.length > 0 &&
+        (game.global.buildingsQueue[0] !== "Trap.1") || game.global.buildingsQueue.length > 1) {
             ClickButton("buildingsCollectBtn");
     }
     else if (game.resources.trimps.owned < game.resources.trimps.realMax() &&
