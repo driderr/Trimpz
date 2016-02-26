@@ -455,24 +455,33 @@ function queueContainsItem(item){
 
 function UpgradeStorage() {
     "use strict";
+    var storageBuildings = {
+        'Barn': 'food',
+        'Shed': 'wood',
+        'Forge': 'metal'
+    };
 
-    if (game.resources.food.owned > game.buildings.Barn.cost.food() &&
-        game.resources.food.owned > 0.9 * getMaxResource("food")) {
-        if (game.buildings.Barn.locked === 0 && !queueContainsItem("Barn")) {
-            ClickButton("Barn");
-        }
-    }
-    if (game.resources.wood.owned > game.buildings.Shed.cost.wood() &&
-        game.resources.wood.owned > 0.9 * getMaxResource("wood")) {
-        if (game.buildings.Shed.locked === 0 && !queueContainsItem("Shed")) {
-            ClickButton("Shed");
-        }
-    }
-    if (game.resources.metal.owned > game.buildings.Forge.cost.metal() &&
-        game.resources.metal.owned > 0.9 * getMaxResource("metal")) {
-        if (game.buildings.Forge.locked === 0 && !queueContainsItem("Forge")) {
-            ClickButton("Forge");
-        }
+    var jestImpLoot;
+    var resource;
+    var owned;
+    var maxResource;
+    var storageBuilding;
+    for (var storage in storageBuildings) {
+        resource = storageBuildings[storage];
+        owned = game.resources[resource].owned;
+        maxResource = getMaxResource(resource);
+        storageBuilding = game.buildings[storage];
+        if (owned > storageBuilding.cost[resource]() &&
+            storageBuilding.locked === 0 && !queueContainsItem(storage))
+            if (owned > 0.9 * maxResource) {
+                ClickButton(storage);
+            } else if ((game.global.mapsActive && game.unlocks.imps.Jestimp)) {
+                jestImpLoot = simpleSeconds(resource, 45);
+                jestImpLoot = scaleToCurrentMap(jestImpLoot);
+                if (jestImpLoot + owned > 0.9 * maxResource) {
+                    ClickButton(storage);
+                }
+            }
     }
 }
 
