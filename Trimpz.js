@@ -1237,7 +1237,6 @@ function RunNewMap(zoneToCreate) {
     var loot = 0; //0-9
     var biome = "Random";
 
-    GotoMapsScreen();
     document.getElementById("difficultyAdvMapsRange").value = difficulty;
     adjustMap('difficulty', difficulty);
     document.getElementById("sizeAdvMapsRange").value = size;
@@ -1253,6 +1252,9 @@ function RunNewMap(zoneToCreate) {
         if (size === 1){
             difficulty--;
             if (difficulty === 1) {
+                if (game.global.preMapsActive){
+                    RunWorld();
+                }
                 return;         //need more fragments!
             }
         } else {
@@ -1264,6 +1266,7 @@ function RunNewMap(zoneToCreate) {
         adjustMap('difficulty', difficulty);
         cost = updateMapCost(true);
     }
+    GotoMapsScreen();
     buyMap();
     newMap = game.global.mapsOwnedArray[game.global.mapsOwnedArray.length - 1];
     RunMap(newMap);
@@ -1277,7 +1280,6 @@ function RunNewMapForLoot(zoneToCreate) {
     var loot = 9; //0-9
     var biome = "Mountain";
 
-    GotoMapsScreen();
     document.getElementById("difficultyAdvMapsRange").value = difficulty;
     adjustMap('difficulty', difficulty);
     document.getElementById("sizeAdvMapsRange").value = size;
@@ -1293,6 +1295,9 @@ function RunNewMapForLoot(zoneToCreate) {
         if (loot === 1){
             difficulty--;
             if (difficulty === 1) {
+                if (game.global.preMapsActive){
+                    RunWorld();
+                }
                 return;         //need more fragments!
             }
         } else {
@@ -1304,6 +1309,7 @@ function RunNewMapForLoot(zoneToCreate) {
         adjustMap('difficulty', difficulty);
         cost = updateMapCost(true);
     }
+    GotoMapsScreen();
     buyMap();
     newMap = game.global.mapsOwnedArray[game.global.mapsOwnedArray.length - 1];
     RunMap(newMap);
@@ -1321,7 +1327,7 @@ function RunMap(map) {
 
 function RunWorld() {
     "use strict";
-    lastFoughtInWorld = true;
+    lastFoughtInWorld = true
     mapsClicked();
 }
 
