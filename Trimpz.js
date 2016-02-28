@@ -499,10 +499,9 @@ function ClickAllNonEquipmentUpgrades() {
             continue;
         }
         if (typeof game.upgrades[upgrade].prestiges == 'undefined' && game.upgrades[upgrade].locked === 0) {
-            ClickButton(upgrade);  //Upgrade!
+            buyUpgrade(upgrade,true,true);  //Upgrade!
         }
     }
-    tooltip('hide');
 }
 
 function ClickButton(button){
@@ -637,7 +636,7 @@ function UpgradeNonEquipment() {
                     return true;
                 }
             }
-            ClickButton(upgrade);  //Upgrade!
+            buyUpgrade(upgrade,true,true);  //Upgrade!
         }
     }
     RestoreWorkerFocus();
@@ -673,7 +672,6 @@ function UpgradeAndGather() {
     } else {
         ClickButton("scienceCollectBtn");
     }
-    tooltip('hide');
     return false;
 }
 /**
@@ -731,7 +729,7 @@ function BuyBuilding(buildingName, ratio, max, checkQueue){
     var theBuilding = game.buildings[buildingName];
     if (theBuilding.locked === 0 && theBuilding.owned < max &&
         CanBuyNonUpgrade(theBuilding, ratio) === true) {
-        ClickButton(buildingName);
+        buyBuilding(buildingName,true,true);
         return true;
     }
     return false;
@@ -763,7 +761,6 @@ function BuyBuildings() {
 
     if (game.global.world > 10 &&
         game.global.lastBreedTime / 1000 > targetBreedTime - getRemainingTimeForBreeding() + trimpzSettings["targetBreedTimeHysteresis"].value)    {
-        tooltip('hide');
         return;
     }
 
@@ -782,7 +779,6 @@ function BuyBuildings() {
         var reallyNeedDamage = bossBattle.attacksToKillBoss > maxAttacksToKill * 3;
         var reallyNeedHealth = bossBattle.attacksToKillSoldiers <= 1;
         if ((reallyNeedDamage || reallyNeedHealth) && GetNonUpgradePrice(game.buildings.Warpstation, "metal") > game.resources.metal.owned * 0.1) {
-            tooltip('hide');
             return;
         }
     }
@@ -790,7 +786,6 @@ function BuyBuildings() {
         BuyBuilding("Collector", 1);
     }
     while (BuyBuilding("Warpstation", 1,undefined,false)){}
-    tooltip('hide');
 }
 
 function TurnOnAutoBuildTraps() {
