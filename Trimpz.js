@@ -1534,6 +1534,24 @@ function isPrestigeFull(filterOnStat, highestUpgrade) {
     return true;
 }
 
+function getNumberOfUpgradesOnHand() {
+    var upgrade;
+    var currentUpgrade;
+    var currentEquip;
+    var totalUpgrades = 0;
+    for (upgrade in game.upgrades) {
+        currentUpgrade = game.upgrades[upgrade];
+        currentEquip = game.equipment[game.upgrades[upgrade].prestiges];
+        if (typeof currentUpgrade.prestiges != 'undefined' && currentUpgrade.locked === 0 && upgrade !== "Supershield") {
+            if (constants.getShouldSkipHpEquipment() === true && typeof currentEquip.health != 'undefined') { //don't buy hp equips in late late game
+                continue;
+            }
+            totalUpgrades++;
+        }
+    }
+    return totalUpgrades;
+}
+
 function RunMaps() {
     "use strict";
     var map;
@@ -1545,10 +1563,10 @@ function RunMaps() {
     var needHealth;
     var reallyNeedDamage;
     var reallyNeedHealth;
-    if (game.global.world < 7){ //no map ability(wait one) or already running a map(repeat should be off)
+
+    if (game.global.world < 7){
         return;
     }
-
     if (game.global.mapsActive === true && game.global.preMapsActive === false){
         var shouldRepeat = false;
         if (mapRunStatus){
@@ -1576,7 +1594,26 @@ function RunMaps() {
                     shouldRepeat = true;
                 }
             }
+            else if (mapRunStatus === "OldBonus"){
+                if (!canTakeOnBoss() && game.global.mapBonus < 9){
+                    shouldRepeat = true;
+                }
+            }
+            else if (mapRunStatus === "OldLoot") {
+                if (!canTakeOnBoss()){
+                    shouldRepeat = true;
+                }
+            }
+            else if (mapRunStatus === "OldEqOnHand"){
+                var upgradesOnHand = getNumberOfUpgradesOnHand();
+                if (upgradesOnHand < trimpzSettings["minimumUpgradesOnHand"].value - 1){
+                    mapLevelWithDrop = getMinLevelOfMapWithDrops();
+                    if (mapLevelWithDrop === getCurrentMapObject().level){
+                        shouldRepeat = true;}
+                }
+            }
         }
+
         if (game.global.repeatMap !== shouldRepeat){
             repeatClicked();
         }
@@ -1725,11 +1762,13 @@ function RunMaps() {
             var mapLevel;
             if (game.global.mapBonus < 10){
                 mapLevel = game.global.world - game.portal.Siphonology.level;
+                mapRunStatus = "OldBonus";
                 FindAndRunSmallMap(mapLevel);
                 return;
             }
             if (trimpzSettings["doRunMapsForEquipment"].value){
                 mapLevel = getLevelOfOneShotMap(oneShotRatio);
+                mapRunStatus = "OldLoot";
                 FindAndRunLootMap(mapLevel);
                 return;
             }
@@ -1753,25 +1792,10 @@ function RunMaps() {
         return;
     }
 
-    //Any equipment upgrades available?
-    var upgrade;
-    var currentUpgrade;
-    var currentEquip;
-    var totalUpgrades = 0;
-    for (upgrade in game.upgrades) {
-        currentUpgrade = game.upgrades[upgrade];
-        currentEquip = game.equipment[game.upgrades[upgrade].prestiges];
-        if (typeof currentUpgrade.prestiges != 'undefined' && currentUpgrade.locked === 0 && upgrade !== "Supershield") {
-            if (constants.getShouldSkipHpEquipment() === true && typeof currentEquip.health != 'undefined') { //don't buy hp equips in late late game
-                continue;
-            }
-            totalUpgrades++;
-        }
-    }
-
-    if (totalUpgrades < trimpzSettings["minimumUpgradesOnHand"].value){//=== 0){ //if not equipment upgrades, go get some! (can make this a "< constant" later if desired)
-        //what's the lowest zone map I can create and get items?
+    var totalUpgrades = getNumberOfUpgradesOnHand();
+    if (totalUpgrades < trimpzSettings["minimumUpgradesOnHand"].value){
         mapLevelWithDrop = getMinLevelOfMapWithDrops();
+        mapRunStatus = "OldEqOnHand";
         for (map in game.global.mapsOwnedArray){ //look for an existing map first
             theMap = game.global.mapsOwnedArray[map];
             if (uniqueMaps.indexOf(theMap.name) > -1){
