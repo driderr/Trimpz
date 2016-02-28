@@ -120,6 +120,7 @@ var respecDone = false;
 var respecAmount = 0;
 var heliumLog = [];
 var trimpzSettings = {};
+var mapRunStatus = "";
 
 //Loads the automation settings from browser cache
 function loadPageVariables() {
@@ -1538,9 +1539,53 @@ function RunMaps() {
     var map;
     var theMap;
     var itemsAvailable;
-
-    if (game.global.world < 7 || (game.global.mapsActive === true && game.global.preMapsActive === false)){ //no map ability(wait one) or already running a map(repeat should be off)
+    var prestige;
+    var bossBattle;
+    var needDamage;
+    var needHealth;
+    var reallyNeedDamage;
+    var reallyNeedHealth;
+    if (game.global.world < 7){ //no map ability(wait one) or already running a map(repeat should be off)
         return;
+    }
+
+    if (game.global.mapsActive === true && game.global.preMapsActive === false){
+        var shouldRepeat = false;
+        if (mapRunStatus){
+            if (mapRunStatus === "Prestige"){
+                prestige = trimpzSettings["prestige"].value;
+                if (!(isPrestigeFull(null, prestige) || (game.global.mapGridArray[game.global.mapGridArray.length - 1].special === prestige && game.mapUnlocks[prestige].last >= game.global.world - 9 ))) {
+                    shouldRepeat = true;
+                }
+            }
+            else if (mapRunStatus === "Bonus"){
+                if (game.global.mapBonus < 9) {
+                    bossBattle = canTakeOnBoss(true);
+                    needDamage = bossBattle.attacksToKillBoss > trimpzSettings["maxAttacksToKill"].value;
+                    needHealth = bossBattle.attacksToKillSoldiers < trimpzSettings["minAttackstoDie"].value;
+                    if (needDamage || needHealth) {
+                        shouldRepeat = true;
+                    }
+                }
+            }
+            else if (mapRunStatus === "Loot"){
+                bossBattle = canTakeOnBoss(true);
+                reallyNeedDamage = bossBattle.attacksToKillBoss > trimpzSettings["maxAttacksToKill"].value * 3;
+                reallyNeedHealth = bossBattle.attacksToKillSoldiers <= 1;
+                if (reallyNeedDamage || reallyNeedHealth) {
+                    shouldRepeat = true;
+                }
+            }
+        }
+        if (game.global.repeatMap !== shouldRepeat){
+            repeatClicked();
+        }
+        return;
+    }
+
+    mapRunStatus = "";
+    if (game.global.repeatMap){
+        repeatClicked();
     }
 
     if (game.global.preMapsActive === false)
@@ -1604,7 +1649,7 @@ function RunMaps() {
     var siphonMapLevel;
     var oneShotMapLevel;
     var mapLevelToRun;
-    var prestige = trimpzSettings["prestige"].value;
+    prestige = trimpzSettings["prestige"].value;
     if (prestige !== "Off" && game.mapUnlocks[prestige].last <= game.global.world - 5 && !isPrestigeFull(null,prestige)){
         if (game.options.menu.mapLoot.enabled != 1)
             game.options.menu.mapLoot.enabled = 1;
@@ -1612,6 +1657,7 @@ function RunMaps() {
         siphonMapLevel = game.global.world - game.portal.Siphonology.level;
         oneShotMapLevel = getLevelOfOneShotMap(trimpzSettings["oneShotRatio"].value);
         mapLevelToRun = Math.max(oneShotMapLevel, siphonMapLevel, mapLevelWithDrop);
+        mapRunStatus = "Prestige";
         for (map in game.global.mapsOwnedArray){ //look for an existing map first
             theMap = game.global.mapsOwnedArray[map];
             if (uniqueMaps.indexOf(theMap.name) > -1){
@@ -1631,11 +1677,11 @@ function RunMaps() {
         if (game.global.lastClearedCell < 98 && game.global.mapsUnlocked) {
             var returnNumAttacks = true;
             var maxAttacksToKill = trimpzSettings["maxAttacksToKill"].value;
-            var bossBattle = canTakeOnBoss(returnNumAttacks);
-            var needDamage = bossBattle.attacksToKillBoss > maxAttacksToKill;
-            var needHealth = bossBattle.attacksToKillSoldiers < trimpzSettings["minAttackstoDie"].value;
-            var reallyNeedDamage = bossBattle.attacksToKillBoss > maxAttacksToKill * 3;
-            var reallyNeedHealth = bossBattle.attacksToKillSoldiers <= 1;
+            bossBattle = canTakeOnBoss(returnNumAttacks);
+            needDamage = bossBattle.attacksToKillBoss > maxAttacksToKill;
+            needHealth = bossBattle.attacksToKillSoldiers < trimpzSettings["minAttackstoDie"].value;
+            reallyNeedDamage = bossBattle.attacksToKillBoss > maxAttacksToKill * 3;
+            reallyNeedHealth = bossBattle.attacksToKillSoldiers <= 1;
             if (!needDamage && !needHealth) {
                 if (game.global.preMapsActive === true) {
                     RunWorld();
@@ -1659,9 +1705,11 @@ function RunMaps() {
                 } else {
                     mapLevelToRun = Math.max(oneShotMapLevel, siphonMapLevel, 6);
                 }
+                mapRunStatus = "Bonus";
                 FindAndRunSmallMap(mapLevelToRun);
                 return;
             } else if (reallyNeedDamage || reallyNeedHealth) {
+                mapRunStatus = "Loot";
                 FindAndRunLootMap(oneShotMapLevel);
                 return;
             }
@@ -1997,8 +2045,8 @@ function RespecPheremones() {
 }
 
 function TurnOffIncompatibleSettings() {
-    if (game.global.repeatMap)
-        repeatClicked();
+    //if (game.global.repeatMap)
+    //    repeatClicked();
     if (game.options.menu.confirmhole.enabled)
         toggleSetting("confirmhole");
     if (game.global.autoUpgrades)
