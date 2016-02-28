@@ -1567,16 +1567,18 @@ function RunMaps() {
     if (game.global.world < 7){
         return;
     }
-    if (game.global.mapsActive === true && game.global.preMapsActive === false){
+    if (game.global.mapsActive === true && game.global.preMapsActive === false) {
         var shouldRepeat = false;
-        if (mapRunStatus){
-            if (mapRunStatus === "Prestige"){
+        if (mapRunStatus) {
+            if (mapRunStatus === "Prestige") {
                 prestige = trimpzSettings["prestige"].value;
-                if (!(isPrestigeFull(null, prestige) || (game.global.mapGridArray[game.global.mapGridArray.length - 1].special === prestige && game.mapUnlocks[prestige].last >= game.global.world - 9 ))) {
-                    shouldRepeat = true;
+                var mapDrop = game.global.mapGridArray[game.global.mapGridArray.length - 1].special;
+                var lastDrop = game.mapUnlocks[prestige].last;
+                if (!isPrestigeFull(null, prestige) && mapDrop && lastDrop <= game.global.world - 5) {
+                    shouldRepeat = !(mapDrop === prestige && lastDrop >= game.global.world - 9);
                 }
             }
-            else if (mapRunStatus === "Bonus"){
+            else if (mapRunStatus === "Bonus") {
                 if (game.global.mapBonus < 9) {
                     bossBattle = canTakeOnBoss(true);
                     needDamage = bossBattle.attacksToKillBoss > trimpzSettings["maxAttacksToKill"].value;
@@ -1586,7 +1588,7 @@ function RunMaps() {
                     }
                 }
             }
-            else if (mapRunStatus === "Loot"){
+            else if (mapRunStatus === "Loot") {
                 bossBattle = canTakeOnBoss(true);
                 reallyNeedDamage = bossBattle.attacksToKillBoss > trimpzSettings["maxAttacksToKill"].value * 3;
                 reallyNeedHealth = bossBattle.attacksToKillSoldiers <= 1;
@@ -1594,27 +1596,28 @@ function RunMaps() {
                     shouldRepeat = true;
                 }
             }
-            else if (mapRunStatus === "OldBonus"){
-                if (!canTakeOnBoss() && game.global.mapBonus < 9){
+            else if (mapRunStatus === "OldBonus") {
+                if (!canTakeOnBoss() && game.global.mapBonus < 9) {
                     shouldRepeat = true;
                 }
             }
             else if (mapRunStatus === "OldLoot") {
-                if (!canTakeOnBoss()){
+                if (!canTakeOnBoss()) {
                     shouldRepeat = true;
                 }
             }
-            else if (mapRunStatus === "OldEqOnHand"){
+            else if (mapRunStatus === "OldEqOnHand") {
                 var upgradesOnHand = getNumberOfUpgradesOnHand();
-                if (upgradesOnHand < trimpzSettings["minimumUpgradesOnHand"].value - 1){
+                if (upgradesOnHand < trimpzSettings["minimumUpgradesOnHand"].value - 1) {
                     mapLevelWithDrop = getMinLevelOfMapWithDrops();
-                    if (mapLevelWithDrop === getCurrentMapObject().level){
-                        shouldRepeat = true;}
+                    if (mapLevelWithDrop === getCurrentMapObject().level) {
+                        shouldRepeat = true;
+                    }
                 }
             }
         }
 
-        if (game.global.repeatMap !== shouldRepeat){
+        if (game.global.repeatMap !== shouldRepeat) {
             repeatClicked();
         }
         return;
