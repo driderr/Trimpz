@@ -119,7 +119,6 @@ var formationDone = false;
 var respecDone = false;
 var respecAmount = 0;
 var heliumLog = [];
-var lastFoughtInWorld = true;
 var trimpzSettings = {};
 
 //Loads the automation settings from browser cache
@@ -1113,28 +1112,20 @@ function getAverageOfPrettifiedString(attackString) {
 function getBossAttack() {
     "use strict";
     var cell = game.global.gridArray[99];
-    var baseAttack = game.global.getEnemyAttack(cell.level, cell.name);
-    if (game.global.challengeActive === "Toxicity"){
-        baseAttack *= 5;
-    }
-    var attackString = calculateDamage(baseAttack, true);
-    return getAverageOfPrettifiedString(attackString);
+    var baseAttack = getEnemyAttackForLevel(game.global.world, false, cell.name);
+    return calculateDamageLocal(baseAttack, false, game.global.world, false);
 }
 
 function getBossHealth() {
     "use strict";
     var cell = game.global.gridArray[99];
-    var health = game.global.getEnemyHealth(cell.level, cell.name);
-    if (game.global.challengeActive === "Toxicity"){
-        health *= 2;
-    }
-    return health;
+    return getMaxEnemyHealthForLevel(game.global.world, false, cell.name);
 }
 
-function getSoldierAttack(){
+function getSoldierAttack(world, calcForMap){
     "use strict";
-    var attackString = document.getElementById("goodGuyAttack").innerHTML;
-    return getAverageOfPrettifiedString(attackString);
+    var baseAttack = game.global.soldierCurrentAttack;
+    return calculateDamageLocal(baseAttack, true, world, calcForMap);
 }
 
 function canTakeOnBoss(returnNumAttacks){
@@ -1150,11 +1141,7 @@ function canTakeOnBoss(returnNumAttacks){
 
     var bossAttackBase = getBossAttack();
     var bossHealth = getBossHealth();
-    var soldierAttack = getSoldierAttack();
-    if (!lastFoughtInWorld)
-    {
-        soldierAttack *= 1 + (0.2 * game.global.mapBonus);
-    }
+    var soldierAttack = getSoldierAttack(game.global.world, false);
     var soldierHealth = game.global.soldierHealthMax;
 
     var attackAndBlock = bossAttackBase - game.global.soldierCurrentBlock;
@@ -1319,7 +1306,6 @@ function RunMap(map) {
     "use strict";
     GotoMapsScreen();
     if (game.global.preMapsActive) {
-        lastFoughtInWorld = false;
         selectMap(map.id);
         runMap();
     }
@@ -1327,15 +1313,108 @@ function RunMap(map) {
 
 function RunWorld() {
     "use strict";
-    lastFoughtInWorld = true
     mapsClicked();
 }
 
-function getMaxEnemyHealthForMapLevel(mapLevel) {  //adapted from Trimps getEnemyHealth()
+function getBadCoordLevelLocal(worldLevel){
+    //For Coordinate challenge
+    var amt = 1;
+    for (var x = 0; x < worldLevel - 1; x++){
+        amt = Math.ceil(amt * 1.25);
+    }
+    return amt;
+}
+
+function calculateDamageLocal(number, isTrimp, world, calcForMap) { //number = base attack
+    var fluctuation = .2; //%fluctuation
+    var maxFluct = -1;
+    var minFluct = -1;
+    //if (game.global.titimpLeft >= 1 && isTrimp && game.global.mapsActive){
+    //    number *= 2;
+    //}
+    if (game.global.achievementBonus > 0 && isTrimp){
+        number *= (1 + (game.global.achievementBonus / 100));
+    }
+    if (game.global.challengeActive == "Discipline" && isTrimp){
+        fluctuation = .995;
+    }
+    else if (game.portal.Range.level > 0 && isTrimp){
+        minFluct = fluctuation - (.02 * game.portal.Range.level);
+    }
+    if (game.global.challengeActive == "Coordinate" && !isTrimp){
+        number *= getBadCoordLevelLocal(world);
+    }
+    if (!isTrimp && game.global.challengeActive == "Meditate"){
+        number *= 1.5;
+    }
+    if (isTrimp && game.global.roboTrimpLevel > 0){
+        number *= ((0.2 * game.global.roboTrimpLevel) + 1);
+    }
+    //if (!isTrimp && game.global.challengeActive == "Nom" && typeof cell.nomStacks !== 'undefined'){
+    //    number *= Math.pow(1.25, cell.nomStacks);
+    //}
+    //if (!isTrimp && game.global.usingShriek) {
+    //    number *= game.mapUnlocks.roboTrimp.getShriekValue();
+    //}
+    if (maxFluct == -1) maxFluct = fluctuation;
+    if (minFluct == -1) minFluct = fluctuation;
+    var min = Math.floor(number * (1 - minFluct));
+    var max = Math.ceil(number + (number * maxFluct));
+    if (!calcForMap && isTrimp && game.global.mapBonus > 0){
+        var mapBonusMult = 1 + (0.2 * game.global.mapBonus);
+        min *= mapBonusMult;
+        max *= mapBonusMult;
+    }
+    if (game.global.antiStacks > 0 && isTrimp){
+        var antiMult = (game.global.antiStacks * game.portal.Anticipation.level * game.portal.Anticipation.modifier) + 1;
+        min *= antiMult;
+        max *= antiMult;
+    }
+    number = (max + min)/2;
+    return number;
+}
+
+function getEnemyAttackForLevel(worldLevel, calcForMap, enemyName) { //adapted from Trimps getEnemyAttack() & startFight()
+
+    var world = worldLevel;
+    var level = calcForMap ? 75 : 100; //loot map can go up to 75, 100 for world boss
+    var name = enemyName;
+    var difficulty = 0.84;
+
+    var amt = 0;
+    amt += 50 * Math.sqrt(world * Math.pow(3.27, world));
+    amt -= 10;
+    if (world == 1){
+        amt *= 0.35;
+        amt = (amt * 0.20) + ((amt * 0.75) * (level / 100));
+    }
+    else if (world == 2){
+        amt *= 0.5;
+        amt = (amt * 0.32) + ((amt * 0.68) * (level / 100));
+    }
+    else if (world < 60)
+        amt = (amt * 0.375) + ((amt * 0.7) * (level / 100));
+    else{
+        amt = (amt * 0.4) + ((amt * 0.9) * (level / 100));
+        amt *= Math.pow(1.15, world - 59);
+    }
+
+    if (world > 6 && calcForMap) amt *= 1.1;
+    amt *= game.badGuys[name].attack;
+    amt = Math.floor(amt);
+
+    if (calcForMap) amt *= difficulty;
+    if (game.global.challengeActive == "Toxicity") amt *= 5;
+    else if (game.global.challengeActive == "Balance" && calcForMap) amt *= 2;
+    return amt;
+}
+
+
+function getMaxEnemyHealthForLevel(worldLevel, calcForMap, enemyName) {  //adapted from Trimps getEnemyHealth() & startFight()
     "use strict";
-    var world = mapLevel;
-    var level = 75;
-    var name = "Mountimp";
+    var world = worldLevel;
+    var level = calcForMap ? 75 : 100; //loot map can go up to 75, 100 for world boss
+    var name = enemyName;
     var difficulty = 0.84;
 
     var amt = 0;
@@ -1351,23 +1430,25 @@ function getMaxEnemyHealthForMapLevel(mapLevel) {  //adapted from Trimps getEnem
         amt = (amt * 0.5) + ((amt * 0.8) * (level / 100));
         amt *= Math.pow(1.1, world - 59);
     }
-    if (world > 5) amt *= 1.1;
+    if (world > 5 && calcForMap) amt *= 1.1;
     amt *= game.badGuys[name].health;
-    return Math.floor(amt * difficulty);
+    amt = Math.floor(amt);
+
+    if (game.global.challengeActive == "Coordinate") amt *= getBadCoordLevelLocal(worldLevel);
+    if (calcForMap) amt *= difficulty;
+    if (game.global.challengeActive == "Meditate") amt *= 2;
+    else if (game.global.challengeActive == "Toxicity") amt *= 2;
+    else if (game.global.challengeActive == "Balance") amt *= 1.5;
+
+    return amt;
 }
 
 function getLevelOfOneShotMap(ratio){
     "use strict";
-    var soldierAttack = getSoldierAttack();
-    if (lastFoughtInWorld){
-        soldierAttack /= 1 + (0.2 * game.global.mapBonus);
-    }
+    var soldierAttack = getSoldierAttack(game.global.world, true);
 
     for (var mapLevel = game.global.world; mapLevel > 6; mapLevel--) {
-        var maxEnemyHealth = getMaxEnemyHealthForMapLevel(mapLevel);
-        if (game.global.challengeActive == "Toxicity"){
-            maxEnemyHealth *= 2;
-        }
+        var maxEnemyHealth = getMaxEnemyHealthForLevel(mapLevel, true, "Mountimp");
         if (soldierAttack >= maxEnemyHealth * ratio){
             return mapLevel;
         }
