@@ -1558,8 +1558,10 @@ function ManageRepeatMaps() {
             }
         }
         else if (mapRunStatus === "Bonus") {
-            if (game.global.mapBonus < 9) {
+            var mapBonus = game.global.mapBonus;
+            if (mapBonus < 9) {
                 bossBattle = canTakeOnBoss(true);
+                bossBattle.attacksToKillBoss *= (mapBonus + 5)/(mapBonus + 6);
                 needDamage = bossBattle.attacksToKillBoss > trimpzSettings["maxAttacksToKill"].value;
                 needHealth = bossBattle.attacksToKillSoldiers < trimpzSettings["minAttackstoDie"].value;
                 if (needDamage || needHealth) {
