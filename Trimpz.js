@@ -1118,14 +1118,6 @@ function getSoldierAttack(world, calcForMap){
 function canTakeOnBoss(returnNumAttacks){
     "use strict";
 
-    if (!document.getElementById("goodGuyAttack").innerHTML){ //must have started script in map screen without playing game
-        if (returnNumAttacks){
-            return {attacksToKillBoss: 1, attacksToKillSoldiers:9999}
-        } else {
-            return true;
-        }
-    }
-
     var bossAttackBase = getBossAttack();
     var bossHealth = getBossHealth();
     var soldierAttack = getSoldierAttack(game.global.world, false);
