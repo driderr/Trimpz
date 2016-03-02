@@ -2073,6 +2073,8 @@ function RunVoidMaps() {
         return;
     }
     if(trimpzSettings["voidLevel"].value && game.global.lastClearedCell > 93 && game.global.world >= trimpzSettings["voidLevel"].value) {
+        if (trimpzSettings["onlyVoidLevel"].value && game.global.world > trimpzSettings["voidLevel"].value)
+            return;
         var theMap;
         for (var map in game.global.mapsOwnedArray) {
             theMap = game.global.mapsOwnedArray[map];
