@@ -1096,17 +1096,26 @@ function unprettify(splitArray) {
     return splitArray[1] * Math.pow(1000, base);
 }
 
-function getBossAttack() {
+function getBossAttack(isVoidBoss) {
     "use strict";
-    var cell = game.global.gridArray[99];
-    var baseAttack = getEnemyAttackForLevel(game.global.world, false, cell.name);
-    return calculateDamageLocal(baseAttack, false, game.global.world, false);
+    if (isVoidBoss){
+        var baseAttack = getEnemyAttackForLevel(game.global.world, false, "Cthulimp") * 5.4;
+        return calculateDamageLocal(baseAttack, false, game.global.world, true);
+    } else {
+        var cell = game.global.gridArray[99];
+        var baseAttack = getEnemyAttackForLevel(game.global.world, false, cell.name);
+        return calculateDamageLocal(baseAttack, false, game.global.world, false);
+    }
 }
 
-function getBossHealth() {
+function getBossHealth(isVoidBoss) {
     "use strict";
-    var cell = game.global.gridArray[99];
-    return getMaxEnemyHealthForLevel(game.global.world, false, cell.name);
+    if (isVoidBoss){
+        return getMaxEnemyHealthForLevel(game.global.world, true, "Cthulimp") * 5.4;
+    } else {
+        var cell = game.global.gridArray[99];
+        return getMaxEnemyHealthForLevel(game.global.world, false, cell.name);
+    }
 }
 
 function getSoldierAttack(world, calcForMap){
@@ -1118,8 +1127,10 @@ function getSoldierAttack(world, calcForMap){
 function canTakeOnBoss(returnNumAttacks){
     "use strict";
 
-    var bossAttackBase = getBossAttack();
-    var bossHealth = getBossHealth();
+    var isVoidBoss = trimpzSettings["farmForVoid"].value && trimpzSettings["voidLevel"].value === game.global.world && game.global.lastClearedCell > 70;
+
+    var bossAttackBase = getBossAttack(isVoidBoss);
+    var bossHealth = getBossHealth(isVoidBoss);
     var soldierAttack = getSoldierAttack(game.global.world, false);
     var soldierHealth = game.global.soldierHealthMax;
 
