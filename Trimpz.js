@@ -1127,6 +1127,17 @@ function getSoldierAttack(world, calcForMap){
 function canTakeOnBoss(returnNumAttacks){
     "use strict";
 
+    if (game.global.lastClearedCell === -1) {
+        if (returnNumAttacks){
+            return {
+                attacksToKillBoss: 1,
+                attacksToKillSoldiers: 9999
+            }
+        }
+        else {
+            return true;
+        }
+    }
     var isVoidBoss = trimpzSettings["farmForVoid"].value && trimpzSettings["voidLevel"].value === game.global.world && game.global.lastClearedCell > 70;
 
     var bossAttackBase = getBossAttack(isVoidBoss);
