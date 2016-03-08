@@ -450,7 +450,9 @@ function getMaxResource(resource)
 {
     "use strict";
     var theResource = game.resources[resource];
-    return theResource.max + (theResource.max * game.portal.Packrat.modifier * game.portal.Packrat.level);
+    var newMax = theResource.max + (theResource.max * game.portal.Packrat.modifier * game.portal.Packrat.level);
+    newMax = calcHeirloomBonus("Shield", "storageSize", newMax);
+    return newMax;
 }
 
 function queueContainsItem(item){
@@ -1098,12 +1100,13 @@ function unprettify(splitArray) {
 
 function getBossAttack(isVoidBoss) {
     "use strict";
+    var baseAttack;
     if (isVoidBoss){
-        var baseAttack = getEnemyAttackForLevel(game.global.world, false, "Cthulimp") * 5.4;
+        baseAttack = getEnemyAttackForLevel(game.global.world, false, "Cthulimp") * 5.4;
         return calculateDamageLocal(baseAttack, false, game.global.world, true);
     } else {
         var cell = game.global.gridArray[99];
-        var baseAttack = getEnemyAttackForLevel(game.global.world, false, cell.name);
+        baseAttack = getEnemyAttackForLevel(game.global.world, false, cell.name);
         return calculateDamageLocal(baseAttack, false, game.global.world, false);
     }
 }
