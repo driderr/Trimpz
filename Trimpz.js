@@ -2194,6 +2194,7 @@ function MainLoop(){
         BuyShield();
         BuyMetalEquipment();
     }
+    autoHeirlooms(); //directly from AT
     RunMaps();
 }
 
@@ -2218,4 +2219,301 @@ function CreateButtonForPausing() {
     };
     newDiv.appendChild(newSpan);
     return newSpan;
+}
+
+//Thank you to Autotrimps/spindrjr for all your hard work on this.
+//I've copied this to keep users of Trimpz, including myself, from losing precious lootz since I had no idea this update was coming.
+//I may or may not keep any of this code in here once I have a chance to look over everything and think about how I'd like it implemented,
+//but until then big thanks again to AT/spindrjr.
+var worth = {'Shield': {}, 'Staff': {}};
+function sortHeirlooms(){
+    worth = {'Shield': {}, 'Staff': {}};
+    for (var loom in game.global.heirloomsExtra) {
+        var theLoom = game.global.heirloomsExtra[loom];
+        worth[theLoom.type][loom] = theLoom.rarity;
+    }
+
+    //sort high to low value, priority on rarity, followed by mod evaluation
+    for (var x in worth){
+        worth[x] = Object.keys(worth[x]).sort(function(a, b) {
+            if(worth[x][b] == worth[x][a]) {
+                return evaluateMods(b, 'heirloomsExtra') - evaluateMods(a, 'heirloomsExtra');
+            }
+            else
+                return worth[x][b] - worth[x][a];
+        });
+    }
+    // console.log(worth);
+    //console.log('hat: ' + worth['Shield']);
+    //console.log('staff: ' + worth['Staff']);
+}
+
+//polyfill for includes function
+if (!String.prototype.includes) {
+    String.prototype.includes = function(search, start) {
+        'use strict';
+        if (typeof start !== 'number') {
+            start = 0;
+        }
+
+        if (start + search.length > this.length) {
+            return false;
+        } else {
+            return this.indexOf(search, start) !== -1;
+        }
+    };
+}
+
+function autoHeirlooms() {
+    var bestUpgrade;
+    if (!trimpzSettings["AutoHeirlooms"].value){
+        return;
+    }
+    if(!heirloomsShown && game.global.heirloomsExtra.length > 0){
+        sortHeirlooms();
+        for(var carried in game.global.heirloomsCarried) {
+            var theLoom = game.global.heirloomsCarried[carried];
+            if(worth[theLoom.type].length == 0) continue;
+            var index = worth[theLoom.type][0];
+            if(theLoom.rarity < game.global.heirloomsExtra[index].rarity || (theLoom.rarity == game.global.heirloomsExtra[index].rarity && evaluateMods(carried, 'heirloomsCarried') < evaluateMods(index, 'heirloomsExtra'))) {
+                selectHeirloom(carried, 'heirloomsCarried');
+                stopCarryHeirloom();
+                selectHeirloom(index, 'heirloomsExtra');
+                carryHeirloom();
+                sortHeirlooms();
+            }
+        }
+        if(game.global.heirloomsCarried.length < game.global.maxCarriedHeirlooms) {
+            if(worth.Shield.length > 0)
+                selectHeirloom(worth.Shield[0], 'heirloomsExtra');
+            else if(worth.Staff.length > 0)
+                selectHeirloom(worth.Staff[0], 'heirloomsExtra');
+            carryHeirloom();
+        }
+    }
+    else if(heirloomsShown && game.global.selectedHeirloom.length > 0){
+        if(game.global.selectedHeirloom[1].includes('Equipped')) {
+            var loom = game.global[game.global.selectedHeirloom[1]];
+            bestUpgrade = evaluateMods(0, game.global.selectedHeirloom[1], true);
+            if(bestUpgrade.index) {
+                bestUpgrade.effect *= getModUpgradeCost(loom, bestUpgrade.index);
+                bestUpgrade.effect = bestUpgrade.effect.toFixed(6);
+                var styleIndex = 4 + (bestUpgrade.index * 3);
+                //enclose in backtic ` for template string $ stuff
+                document.getElementById('selectedHeirloom').childNodes[0].childNodes[styleIndex].style.backgroundColor = "lightblue";
+                document.getElementById('selectedHeirloom').childNodes[0].childNodes[styleIndex].setAttribute("onmouseover", `tooltip(\'Heirloom\', \"customText\", event, \'<div class=\"selectedHeirloomItem heirloomRare${loom.rarity}\"> AutoTrimps recommended upgrade for this item. </div>\'         )`);
+                document.getElementById('selectedHeirloom').childNodes[0].childNodes[styleIndex].setAttribute("onmouseout", 'tooltip(\'hide\')');
+                //lightblue = greyish
+                //swapClass("tooltipExtra", "tooltipExtraHeirloom", document.getElementById("tooltipDiv"));
+                //document.getElementById("tooltipDiv");
+            }
+        }
+    }
+    //heirloomsShown
+    //getModReplaceCost(heirloomObj, modIndex)
+    //getModUpgradeCost(heirloomObj, modIndex)
+    //document.getElementById('extraHeirloomsHere').childNodes[INDEX].childNodes[1].style.border = "1px solid #00CC00"
+    //document.getElementById('selectedHeirloom').childNodes[0].childNodes[4/7/10/13].style.backgroundColor
+    //advBtn.setAttribute("onmouseover", 'tooltip(\"Advanced Settings\", \"customText\", event, \"Leave off unless you know what you\'re doing with them.\")');
+}
+
+function evaluateMods(loom, location, upgrade) {
+    var index = loom;
+    var bestUpgrade = {
+        'index': null,
+        'name': '',
+        'effect': 0
+    };
+    var tempEff;
+    var steps;
+    if(location.includes('Equipped'))
+        loom = game.global[location];
+    else
+        loom = game.global[location][loom];
+//	return loom.rarity;
+    var eff = 0;
+    for(var m in loom.mods) {
+        switch(loom.mods[m][0]) {
+            case 'critChance':
+                tempEff = ((loom.mods[m][1]/100) * (getPlayerCritDamageMult() - game.heirlooms.Shield.critDamage.currentBonus/100))/((getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus/100) * (getPlayerCritDamageMult() - game.heirlooms.Shield.critDamage.currentBonus/100) + 1 - (getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus/100));
+                eff += tempEff;
+                if(upgrade){
+                    if(loom.mods[m][1] >= 30) break;
+                    steps = game.heirlooms.Shield.critChance.steps[loom.rarity];
+                    tempEff = (steps[2]/100 * getPlayerCritDamageMult())/((getPlayerCritChance() * getPlayerCritDamageMult()) + 1 - getPlayerCritChance());
+                    tempEff = tempEff / getModUpgradeCost(loom, m);
+                    if(tempEff > bestUpgrade.effect) {
+                        bestUpgrade.effect = tempEff;
+                        bestUpgrade.name = 'critChance';
+                        bestUpgrade.index = m;
+                    }
+                }
+                break;
+            case 'critDamage':
+                tempEff = ((loom.mods[m][1]/100) * (getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus/100))/((getPlayerCritDamageMult() - game.heirlooms.Shield.critDamage.currentBonus/100) * (getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus/100) + 1 - (getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus/100));
+                eff += tempEff;
+                if(upgrade){
+                    steps = game.heirlooms.Shield.critDamage.steps[loom.rarity];
+                    tempEff = (getPlayerCritChance() * (steps[2]/100))/((getPlayerCritDamageMult() * getPlayerCritChance()) + 1 - getPlayerCritChance());
+                    tempEff = tempEff / getModUpgradeCost(loom, m);
+                    if(tempEff > bestUpgrade.effect) {
+                        bestUpgrade.effect = tempEff;
+                        bestUpgrade.name = 'critDamage';
+                        bestUpgrade.index = m;
+                    }
+                }
+                break;
+            case 'trimpAttack':
+                tempEff = loom.mods[m][1]/100;
+                eff += tempEff;
+                if(upgrade){
+                    steps = game.heirlooms.Shield.trimpAttack.steps[loom.rarity];
+                    tempEff = (steps[2]/100)/((game.heirlooms.Shield.trimpAttack.currentBonus/100) + 1);
+                    tempEff = tempEff / getModUpgradeCost(loom, m);
+                    if(tempEff > bestUpgrade.effect) {
+                        bestUpgrade.effect = tempEff;
+                        bestUpgrade.name = 'trimpAttack';
+                        bestUpgrade.index = m;
+                    }
+                }
+                break;
+            case 'voidMaps':
+                tempEff = loom.mods[m][1]/100;
+                eff += tempEff;
+                if(upgrade){
+                    steps = game.heirlooms.Shield.voidMaps.steps[loom.rarity];
+                    tempEff = (steps[2]/100)/((game.heirlooms.Shield.voidMaps.currentBonus/100) + 1);
+                    tempEff = tempEff / getModUpgradeCost(loom, m);
+                    if(tempEff > bestUpgrade.effect) {
+                        bestUpgrade.effect = tempEff;
+                        bestUpgrade.name = 'voidMaps';
+                        bestUpgrade.index = m;
+                    }
+                }
+                break;
+            case 'MinerSpeed':
+                tempEff = 0.75*loom.mods[m][1]/100;
+                eff += tempEff;
+                if(upgrade) {
+                    steps = game.heirlooms.defaultSteps[loom.rarity];
+                    tempEff = (0.75*steps[2]/100)/((game.heirlooms.Staff.MinerSpeed.currentBonus/100) + 1);
+                    tempEff = tempEff / getModUpgradeCost(loom, m);
+                    if(tempEff > bestUpgrade.effect) {
+                        bestUpgrade.effect = tempEff;
+                        bestUpgrade.name = 'MinerSpeed';
+                        bestUpgrade.index = m;
+                    }
+                }
+                break;
+            case 'metalDrop':
+                tempEff = 0.75*loom.mods[m][1]/100;
+                eff += tempEff;
+                if(upgrade) {
+                    steps = game.heirlooms.defaultSteps[loom.rarity];
+                    tempEff = (0.75*steps[2]/100)/((game.heirlooms.Staff.metalDrop.currentBonus/100) + 1);
+                    tempEff = tempEff / getModUpgradeCost(loom, m);
+                    if(tempEff > bestUpgrade.effect) {
+                        bestUpgrade.effect = tempEff;
+                        bestUpgrade.name = 'metalDrop';
+                        bestUpgrade.index = m;
+                    }
+                }
+                break;
+            case 'FarmerSpeed':
+                tempEff = 0.5*loom.mods[m][1]/100;
+                eff += tempEff;
+                if(upgrade) {
+                    steps = game.heirlooms.defaultSteps[loom.rarity];
+                    tempEff = (0.5*steps[2]/100)/((game.heirlooms.Staff.FarmerSpeed.currentBonus/100) + 1);
+                    tempEff = tempEff / getModUpgradeCost(loom, m);
+                    if(tempEff > bestUpgrade.effect) {
+                        bestUpgrade.effect = tempEff;
+                        bestUpgrade.name = 'FarmerSpeed';
+                        bestUpgrade.index = m;
+                    }
+                }
+                break;
+            case 'LumberjackSpeed':
+                tempEff = 0.5*loom.mods[m][1]/100;
+                eff += tempEff;
+                if(upgrade) {
+                    steps = game.heirlooms.defaultSteps[loom.rarity];
+                    tempEff = (0.5*steps[2]/100)/((game.heirlooms.Staff.LumberjackSpeed.currentBonus/100) + 1);
+                    tempEff = tempEff / getModUpgradeCost(loom, m);
+                    if(tempEff > bestUpgrade.effect) {
+                        bestUpgrade.effect = tempEff;
+                        bestUpgrade.name = 'LumberjackSpeed';
+                        bestUpgrade.index = m;
+                    }
+                }
+                break;
+            case 'DragimpSpeed':
+                tempEff = 0.5*loom.mods[m][1]/100;
+                eff += tempEff;
+                if(upgrade) {
+                    steps = game.heirlooms.defaultSteps[loom.rarity];
+                    tempEff = (0.5*steps[2]/100)/((game.heirlooms.Staff.DragimpSpeed.currentBonus/100) + 1);
+                    tempEff = tempEff / getModUpgradeCost(loom, m);
+                    if(tempEff > bestUpgrade.effect) {
+                        bestUpgrade.effect = tempEff;
+                        bestUpgrade.name = 'DragimpSpeed';
+                        bestUpgrade.index = m;
+                    }
+                }
+                break;
+            case 'empty':
+                var av;
+                //some other function?
+                if(upgrade) break;
+                //value empty mod as the average of the best mod it doesn't have. If it has all good mods, empty slot has no value
+                if(loom.type == 'Shield') {
+                    if(!checkForMod('trimpAttack', index, location)){
+                        steps = game.heirlooms.Shield.trimpAttack.steps[loom.rarity];
+                        av = steps[0] + ((steps[1] - steps[0])/2);
+                        tempEff = av/100;
+                        eff += tempEff;
+                    }
+                    else if(!checkForMod('voidMaps', index, location)){
+                        steps = game.heirlooms.Shield.voidMaps.steps[loom.rarity];
+                        av = steps[0] + ((steps[1] - steps[0])/2);
+                        tempEff = (steps[2]/100);
+                        eff += tempEff;
+                    }
+                    else if(!checkForMod('critChance', index, location)){
+                        steps = game.heirlooms.Shield.critChance.steps[loom.rarity];
+                        av = steps[0] + ((steps[1] - steps[0])/2);
+                        tempEff = (av * (getPlayerCritDamageMult() - game.heirlooms.Shield.critDamage.currentBonus/100))/((getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus/100) * (getPlayerCritDamageMult() - game.heirlooms.Shield.critDamage.currentBonus/100) + 1 - (getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus/100));
+                        eff += tempEff;
+                    }
+                    else if(!checkForMod('critDamage', index, location)){
+                        steps = game.heirlooms.Shield.critDamage.steps[loom.rarity];
+                        av = steps[0] + ((steps[1] - steps[0])/2);
+                        tempEff = (av * (getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus/100))/((getPlayerCritDamageMult() - game.heirlooms.Shield.critDamage.currentBonus/100) * (getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus/100) + 1 - (getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus/100));
+                        eff += tempEff;
+                    }
+                }
+                if(loom.type == 'Staff') {
+                    steps = game.heirlooms.defaultSteps[loom.rarity];
+                    av = steps[0] + ((steps[1] - steps[0])/2);
+                    if(!checkForMod('MinerSpeed', index, location)){
+                        eff += 0.75*av/100;
+                    }
+                    else if(!checkForMod('LumberjackSpeed', index, location) || !checkForMod('FarmerSpeed', index, location) || !checkForMod('DragimpSpeed', index, location)){
+                        eff += 0.5*av/100;
+                    }
+                }
+                break;
+            //metalDrop? trimpHealth?
+        }
+    }
+    if(upgrade) return bestUpgrade;
+    return eff;
+}
+
+function checkForMod(what, loom, location){
+    var heirloom = game.global[location][loom];
+    for (var mod in heirloom.mods){
+        if (heirloom.mods[mod][0] == what) return true;
+    }
+    return false;
 }
