@@ -1903,8 +1903,8 @@ function ReallocateWorkers() {
 
 function CheckLateGame() {
     "use strict";
-    if (game.global.world == 60 && document.getElementById('extraGridInfo').style.display == 'block')
-        restoreGrid();
+    if (game.global.world === 60 && document.getElementById("tipTitle").innerHTML === "The Improbability")
+        cancelTooltip();
     if (game.global.world === 1 && helium !== -1) {
         constants = constantsSets[0];
         constantsIndex = 0;
