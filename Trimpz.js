@@ -249,6 +249,7 @@ function getTotalTimeForBreeding(almostOwnedGeneticists) {
     if (game.global.voidBuff == "slowBreed"){
         potencyMod *= 0.2;
     }
+    potencyMod = calcHeirloomBonus("Shield", "breedSpeed", potencyMod);
     potencyMod = (1 + (potencyMod / 10));
     var adjustedMax = (game.portal.Coordinated.level) ? game.portal.Coordinated.currentSend : trimps.maxSoldiers;
     var totalTime;
@@ -281,6 +282,7 @@ function getRemainingTimeForBreeding() {
     if (game.global.voidBuff == "slowBreed"){
         potencyMod *= 0.2;
     }
+    potencyMod = calcHeirloomBonus("Shield", "breedSpeed", potencyMod);
     potencyMod = (1 + (potencyMod / 10));
     var timeRemaining = log10((trimpsMax - trimps.employed) / (trimps.owned - trimps.employed)) / log10(potencyMod);
     timeRemaining /= 10;
