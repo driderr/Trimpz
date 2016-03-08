@@ -2171,6 +2171,7 @@ function MainLoop(){
     CheckLateGame();
     CheckHelium();
     CheckFormation();
+    autoHeirlooms(); //directly from AT
     if (CheckPortal() === true){
         return;
     }
@@ -2194,7 +2195,6 @@ function MainLoop(){
         BuyShield();
         BuyMetalEquipment();
     }
-    autoHeirlooms(); //directly from AT
     RunMaps();
 }
 
