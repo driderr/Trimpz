@@ -1,4 +1,4 @@
-/*global game,tooltip,resolvePow,getNextPrestigeCost,adjustMap,updateMapCost,addSpecials*/
+/*global game,tooltip,resolvePow,getNextPrestigeCost,adjustMap,updateMapCost,addSpecials,enteringValue*/
 /*jslint plusplus: true */
 
 //sets of constants to modify that will be switched out over the course of the game
@@ -160,6 +160,19 @@ function initializeUiAndSettings() {
     "use strict";
     loadPageVariables();
     document.head.appendChild(document.createElement('script')).src = 'https://rawgit.com/driderr/AutoTrimps/TrimpzUI/NewUI.js';
+}
+
+function setMapRunStatus(status){
+    "use strict";
+    mapRunStatus = status;
+    var element = document.getElementById("pauseTrimpzBtn");
+    if (element){
+        if (pauseTrimpz === true){
+            element.innerHTML = "Paused " + status;
+        } else{
+            element.innerHTML = "Running " + status;
+        }
+    }
 }
 
 /**
@@ -1701,7 +1714,7 @@ function RunPrestigeMaps(){
         siphonMapLevel = game.global.world - game.portal.Siphonology.level;
         oneShotMapLevel = getLevelOfOneShotMap(trimpzSettings["oneShotRatio"].value);
         mapLevelToRun = Math.max(oneShotMapLevel, siphonMapLevel, mapLevelWithDrop);
-        mapRunStatus = "Prestige";
+        setMapRunStatus("Prestige");
         for (map in game.global.mapsOwnedArray){ //look for an existing map first
             theMap = game.global.mapsOwnedArray[map];
             if (uniqueMaps.indexOf(theMap.name) > -1){
@@ -1763,11 +1776,11 @@ function RunBetterMaps(){
                 } else {
                     mapLevelToRun = Math.max(oneShotMapLevel, siphonMapLevel, 6);
                 }
-                mapRunStatus = "Bonus";
+                setMapRunStatus("Bonus");
                 FindAndRunSmallMap(mapLevelToRun);
                 return true;
             } else if (reallyNeedDamage || reallyNeedHealth) {
-                mapRunStatus = "Loot";
+                setMapRunStatus("Loot");
                 FindAndRunLootMap(oneShotMapLevel);
                 return true;
             }
@@ -1789,14 +1802,14 @@ function RunOldMaps(){
             var mapLevel;
             if (game.global.mapBonus < 10){
                 mapLevel = game.global.world - game.portal.Siphonology.level;
-                mapRunStatus = "OldBonus";
+                setMapRunStatus("OldBonus");
                 FindAndRunSmallMap(mapLevel);
                 return true;
             }
             if (trimpzSettings["doRunMapsForEquipment"].value){
                 var oneShotRatio = trimpzSettings["oneShotRatio"].value;
                 mapLevel = getLevelOfOneShotMap(oneShotRatio);
-                mapRunStatus = "OldLoot";
+                setMapRunStatus("OldLoot");
                 FindAndRunLootMap(mapLevel);
                 return true;
             }
@@ -1829,7 +1842,7 @@ function RunAllUniqueAndEqOnHandMaps(){
     var totalUpgrades = getNumberOfUpgradesOnHand();
     if (totalUpgrades < trimpzSettings["minimumUpgradesOnHand"].value){
         mapLevelWithDrop = getMinLevelOfMapWithDrops();
-        mapRunStatus = "OldEqOnHand";
+        setMapRunStatus("OldEqOnHand");
         for (map in game.global.mapsOwnedArray){ //look for an existing map first
             theMap = game.global.mapsOwnedArray[map];
             if (uniqueMaps.indexOf(theMap.name) > -1){
@@ -1859,7 +1872,7 @@ function RunMaps() {
         return;
     }
 
-    mapRunStatus = "";
+    setMapRunStatus("");
     if (game.global.repeatMap){
         repeatClicked();
     }
@@ -2206,7 +2219,9 @@ function CreateButtonForPausing() {
     addElementsHere.appendChild(newDiv);
 
     var newSpan = document.createElement("SPAN");
+    newSpan.id = "pauseTrimpzBtn";
     newSpan.className = "btn btn-primary fightBtn";
+    newSpan.setAttribute("style", "white-space:normal");
     pauseTrimpz = false;
     newSpan.innerHTML = "Running";
     newSpan.onclick = function () {
