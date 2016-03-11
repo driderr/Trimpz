@@ -2146,6 +2146,7 @@ function RespecPheremones() {
 function TurnOffIncompatibleSettings() {
     //if (game.global.repeatMap)
     //    repeatClicked();
+    game.global.addonUser = true;
     if (game.options.menu.confirmhole.enabled)
         toggleSetting("confirmhole");
     if (game.global.autoUpgrades)
@@ -2510,7 +2511,7 @@ function evaluateMods(loom, location, upgrade) {
                 if(loom.type == 'Staff') {
                     steps = game.heirlooms.defaultSteps[loom.rarity];
                     av = steps[0] + ((steps[1] - steps[0])/2);
-                    if(!checkForMod('MinerSpeed', index, location)){
+                    if(!checkForMod('MinerSpeed', index, location) || !checkForMod('metalDrop', index, location)){
                         eff += 0.75*av/100;
                     }
                     else if(!checkForMod('LumberjackSpeed', index, location) || !checkForMod('FarmerSpeed', index, location) || !checkForMod('DragimpSpeed', index, location)){
