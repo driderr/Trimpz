@@ -344,7 +344,7 @@ function AssignFreeWorkers() {
     if (free === 0 && ShouldBuyGeneticist(food,0).shouldBuy){
         game.global.firing = true;
         game.global.buyAmt = 1;
-        ClickButton("Farmer");
+        buyJob("Farmer", null, true);
         game.global.firing = false;
     }
 
@@ -424,18 +424,14 @@ function AssignFreeWorkers() {
     }
     var jobName;
     var numberToBuy;
-    var element;
     for (jobName in buy){
         numberToBuy = buy[jobName];
         if (numberToBuy > 0){
             game.global.buyAmt = numberToBuy;
-            element = document.getElementById(jobName);
-            if (element)
-                ClickButton(element);
+            buyJob(jobName, null, true);
         }
     }
     game.global.buyAmt = 1;
-    tooltip('hide');
 }
 function Fight() {
     "use strict";
@@ -548,7 +544,6 @@ function FocusWorkersOn(jobToFocusOn) {
     var jobObj;
     var workersToMove;
     var jobsToMoveFrom = ["Farmer", "Lumberjack", "Miner"];
-    var fromJobButton;
     var job;
 
     if (game.jobs[jobToFocusOn].locked) {
@@ -575,10 +570,9 @@ function FocusWorkersOn(jobToFocusOn) {
         }
         game.global.buyAmt = workersToMove;
         game.global.firing = true;
-        fromJobButton = document.getElementById(jobsToMoveFrom[job]);
-        ClickButton(fromJobButton);
+        buyJob(jobsToMoveFrom[job], null, true);
         game.global.firing = false;
-        ClickButton(jobToFocusOn);
+        buyJob(jobToFocusOn, null, true);
         game.global.buyAmt = 1;
         workersMoved.push([jobsToMoveFrom[job], workersToMove, jobToFocusOn]);
     }
@@ -607,9 +601,9 @@ function RestoreWorkerFocus() {
         }
         game.global.buyAmt = workersToMove;
         game.global.firing = true;
-        ClickButton(workersMoved[jobMoved][2]);
+        buyJob(workersMoved[jobMoved][2], null, true);
         game.global.firing = false;
-        ClickButton(job);
+        buyJob(job, null, true);
         game.global.buyAmt = 1;
         workersMoved[jobMoved][1] = 0;
     }
@@ -1896,21 +1890,21 @@ function ReallocateWorkers() {
     var jobObj;
     var workersToFire;
     var jobsToFire = ["Farmer", "Lumberjack", "Miner"];
-    var jobButton;
     var job;
+    var jobName;
 
     workersFocused = false;
     workersFocusedOn = "";
     game.global.firing = true;
     for (job in jobsToFire) {
-        jobObj = game.jobs[jobsToFire[job]];
+        jobName = jobsToFire[job];
+        jobObj = game.jobs[jobName];
         if (jobObj.locked === true) {
             continue;
         }
         workersToFire = Math.floor(jobObj.owned);
         game.global.buyAmt = workersToFire;
-        jobButton = document.getElementById(jobsToFire[job]);
-        ClickButton(jobButton);
+        buyJob(jobName, null, true);
     }
     game.global.buyAmt = 1;
     game.global.firing = false;
@@ -2078,7 +2072,7 @@ function FireGeneticists() {
             && game.jobs.Geneticist.owned !== 0){
         game.global.firing = true;
         game.global.buyAmt = 1;
-        buyJob("Geneticist");
+        buyJob("Geneticist", null, true);
         game.global.firing = false;
     }
 }
