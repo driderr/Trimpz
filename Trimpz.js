@@ -365,6 +365,9 @@ function AssignFreeWorkers() {
             return;
         }
     }
+    if (game.global.world > 10 && (game.resources.trimps.soldiers === 0 || getRemainingTimeForBreeding() > trimpzSettings["targetBreedTime"].value)) {
+        return;
+    }
     var cost;
     var maxFreeForAssignOneAtATime = 1000;
     var totalMultipliers;
@@ -2153,6 +2156,15 @@ function TurnOffIncompatibleSettings() {
         toggleAutoUpgrades();
 }
 
+function FocusOnBreeding(){
+    if (ShouldLowerBreedWithoutGeneticists()){
+        clearQueue("Warpstation");
+    }
+    if (game.global.world > 10 && game.resources.trimps.soldiers === 0 && getRemainingTimeForBreeding() > 1){
+        ReallocateWorkers();
+    }
+}
+
 //Start
 (function () {
     "use strict";
@@ -2209,6 +2221,7 @@ function MainLoop(){
         BuyShield();
         BuyMetalEquipment();
     }
+    FocusOnBreeding();
     RunMaps();
 }
 
