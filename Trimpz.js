@@ -343,9 +343,10 @@ function AssignFreeWorkers() {
     //make room for a Geneticist
     if (free === 0 && ShouldBuyGeneticist(food,0).shouldBuy){
         game.global.firing = true;
-        game.global.buyAmt = 1;
+        game.global.buyAmt = 20;
         buyJob("Farmer", null, true);
         game.global.firing = false;
+        game.global.buyAmt = 1;
     }
 
     if (free > 0){
@@ -366,7 +367,7 @@ function AssignFreeWorkers() {
         }
     }
     if (game.global.world > 10 && (game.resources.trimps.soldiers === 0 || getRemainingTimeForBreeding() > trimpzSettings["targetBreedTime"].value)) {
-        return;
+            return;
     }
     var cost;
     var maxFreeForAssignOneAtATime = 1000;
@@ -785,7 +786,9 @@ function BuyBuildings() {
     BuyBuilding("Tribute", constants.getTributeCostRatio());
 
     if (game.global.world > 10 &&
-        game.global.lastBreedTime / 1000 > targetBreedTime - getRemainingTimeForBreeding() + trimpzSettings["targetBreedTimeHysteresis"].value)    {
+        (game.global.lastBreedTime / 1000 > targetBreedTime - getRemainingTimeForBreeding() + trimpzSettings["targetBreedTimeHysteresis"].value &&
+        game.jobs.Geneticist.owned < 10 ||
+        game.resources.trimps.soldiers === 0)){
         return;
     }
 
@@ -2067,9 +2070,12 @@ function FireGeneticists() {
     }
     var targetBreedTime = trimpzSettings["targetBreedTime"].value;
     var targetBreedTimeHysteresis = trimpzSettings["targetBreedTimeHysteresis"].value;
-    while((getTotalTimeForBreeding(0) >= targetBreedTime + targetBreedTimeHysteresis ||
-            getRemainingTimeForBreeding() >= targetBreedTime + targetBreedTimeHysteresis)
-            && game.jobs.Geneticist.owned !== 0){
+    while (game.jobs.Geneticist.owned !== 0 &&
+        (getTotalTimeForBreeding(0) >= targetBreedTime + targetBreedTimeHysteresis ||
+        getRemainingTimeForBreeding() >= targetBreedTime + targetBreedTimeHysteresis ||
+        (game.resources.trimps.owned !== game.resources.trimps.realMax() &&
+        game.global.lastBreedTime / 1000 > targetBreedTime - getRemainingTimeForBreeding() + trimpzSettings["targetBreedTimeHysteresis"].value * 1.3))) {
+
         game.global.firing = true;
         game.global.buyAmt = 1;
         buyJob("Geneticist", null, true);
@@ -2151,7 +2157,11 @@ function TurnOffIncompatibleSettings() {
 }
 
 function FocusOnBreeding(){
-    if (ShouldLowerBreedWithoutGeneticists()){
+    var targetBreedTime = trimpzSettings["targetBreedTime"].value;
+    var hysteresis = trimpzSettings["targetBreedTimeHysteresis"].value;
+    if(game.global.lastBreedTime / 1000 > targetBreedTime - getRemainingTimeForBreeding() + hysteresis &&
+        game.jobs.Geneticist.owned < 10 ||
+        game.resources.trimps.soldiers === 0){
         clearQueue("Warpstation");
     }
     if (game.global.world > 10 && game.resources.trimps.soldiers === 0 && getRemainingTimeForBreeding() > 1){
