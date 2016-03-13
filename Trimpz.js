@@ -349,12 +349,7 @@ function AssignFreeWorkers() {
         game.global.buyAmt = 1;
     }
 
-    if (free > 0){
-        ClickButton("tab1");    //hire 1 at a time
-    } else
-    {
-        return;
-    }
+    if (free <= 0) return;
     var breedCount = (trimps.owned - trimps.employed > 2) ? Math.floor(trimps.owned - trimps.employed) : 0;
     if (free > trimps.owned){
         free = Math.floor(trimps.owned / 3);
@@ -444,11 +439,11 @@ function Fight() {
     var pauseFightButton = document.getElementById("pauseFight");
     if (pauseFightButton.offsetHeight > 0 && game.resources.trimps.owned === game.resources.trimps.realMax() || game.resources.trimps.owned > 5000000) {
         if (pauseFightButton.innerHTML !== "AutoFight On") {
-            ClickButton(pauseFightButton);
+            pauseFight();
         }
         autoFighting = true;
     } else if (document.getElementById("battleContainer").style.visibility !== "hidden" && game.resources.trimps.owned >= 10) {
-        ClickButton("fightBtn");
+        fightManual();
     }
 }
 function ShowRunningIndicator() {
@@ -500,12 +495,12 @@ function UpgradeStorage() {
         if (owned > storageBuilding.cost[resource]() &&
             storageBuilding.locked === 0 && !queueContainsItem(storage))
             if (owned > 0.9 * maxResource) {
-                ClickButton(storage);
+                buyBuilding(storage, true, true);
             } else if ((game.global.mapsActive && game.unlocks.imps.Jestimp)) {
                 jestImpLoot = simpleSeconds(resource, 45);
                 jestImpLoot = scaleToCurrentMap(jestImpLoot);
                 if (jestImpLoot + owned > 0.9 * maxResource) {
-                    ClickButton(storage);
+                    buyBuilding(storage, true, true);
                 }
             }
     }
@@ -640,22 +635,22 @@ function UpgradeNonEquipment() {
                     needed = resolvePow(needed, game.upgrades[upgrade]);
                 }
                 if (aResource === "food" && needed > game.resources.food.owned) {
-                    ClickButton("foodCollectBtn");
+                    setGather("food");
                     FocusWorkersOn("Farmer");
                     return true;
                 }
                 if (aResource === "metal" && needed > game.resources.metal.owned) {
-                    ClickButton("metalCollectBtn");
+                    setGather("metal");
                     FocusWorkersOn("Miner");
                     return true;
                 }
                 if (aResource === "science" && needed > game.resources.science.owned && document.getElementById('scienceCollectBtn').style.display == 'block') {
-                    ClickButton("scienceCollectBtn");
+                    setGather("science");
                     FocusWorkersOn("Scientist");
                     return true;
                 }
                 if (aResource === "wood" && needed > game.resources.wood.owned) {
-                    ClickButton("woodCollectBtn");
+                    setGather("wood");
                     FocusWorkersOn("Lumberjack");
                     return true;
                 }
@@ -683,18 +678,18 @@ function UpgradeAndGather() {
         return true;
     if (game.global.buildingsQueue.length > 0 &&
         (game.global.buildingsQueue[0] !== "Trap.1") || game.global.buildingsQueue.length > 1) {
-            ClickButton("buildingsCollectBtn");
+            setGather("buildings");
     }
     else if (game.resources.trimps.owned < game.resources.trimps.realMax() &&
         game.buildings.Trap.owned > 0 &&
         GetBreedSpeed() < trimpzSettings["minBreedingSpeed"].value){
-        ClickButton("trimpsCollectBtn");
+        setGather("trimps");
 //        } else if (game.global.buildingsQueue.length > 0) {
 //            ClickButton("buildingsCollectBtn");
     } else if (game.global.turkimpTimer > 0) {
-        ClickButton("metalCollectBtn");
+        setGather("metal");
     } else {
-        ClickButton("scienceCollectBtn");
+        setGather("science");
     }
     return false;
 }
@@ -704,32 +699,32 @@ function UpgradeAndGather() {
 function BeginPriorityAction() { //this is really just for the beginning (after a portal)
     "use strict";
     if (game.global.buildingsQueue.length > 0) {//Build queue
-        if (document.getElementById("autoTrapBtn").innerHTML !== "Traps On" ||
+        if ( !game.global.trapBuildToggled||
             game.global.buildingsQueue[0] !== "Trap.1") {
-            ClickButton("buildingsCollectBtn");
+            setGather("buildings");
             return false;
         }
     }
     if (game.resources.food.owned < constants.getMinFoodOwned()) {//Collect food
-        ClickButton("foodCollectBtn");
+        setGather("food");
         return true;
     }
     if (game.resources.wood.owned < constants.getMinWoodOwned()) {//Collect wood
-        ClickButton("woodCollectBtn");
+        setGather("wood");
         return true;
     }
     if (game.buildings.Trap.owned < 1 && !queueContainsItem("Trap")) {//Enqueue trap
-        ClickButton("Trap");
-        ClickButton("buildingsCollectBtn");
+        buyBuilding("Trap", true, true);
+        setGather("buildings");
         return true;
     }
     if (game.resources.trimps.owned < constants.getMinTrimpsOwned() &&
         game.resources.trimps.owned < game.resources.trimps.realMax()/2) {//Open trap
-        ClickButton("trimpsCollectBtn");
+        setGather("trimps");
         return true;
     }
     if (game.resources.science.owned < constants.getMinScienceOwned() && document.getElementById('scienceCollectBtn').style.display == 'block') {//Collect science
-        ClickButton("scienceCollectBtn");
+        setGather("science");
         return true;
     }
     return false;
@@ -824,10 +819,10 @@ function TurnOnAutoBuildTraps() {
         game.global.trapBuildAllowed &&
         !game.global.trapBuildToggled &&
         GetBreedSpeed() < trimpzSettings["minBreedingSpeed"].value) {
-        ClickButton(trapsBtn);
+        toggleAutoTrap();
     } else if (game.global.trapBuildToggled &&
         (game.buildings.Trap.owned >= constants.getNumTrapsForAutoTrapping() || GetBreedSpeed() > trimpzSettings["minBreedingSpeed"].value)){
-        ClickButton(trapsBtn);
+        toggleAutoTrap();
     }
 }
 
@@ -845,13 +840,11 @@ function BuyShield() {
         if (shield[stat + "Calculated"]/GetNonUpgradePrice(shield) > upgradeStats.gainPerMetal && //level up (don't feel like renaming gainPerMetal...)
             (!limitEquipment || shield.level < constants.getMaxLevel())){
             if (shield.locked === 0 && CanBuyNonUpgrade(shield, constants.getShieldCostRatio()) === true){
-                ClickButton("Shield");
-                tooltip('hide');
+                buyEquipment("Shield", true, true);
             }
         } else { //upgrade
             if (shieldUpgrade.locked === 0 && canAffordTwoLevel(shieldUpgrade)){
-                ClickButton("Supershield");  //Upgrade!
-                tooltip('hide');
+                buyUpgrade("Supershield", true, true);  //Upgrade!
             }
         }
         return;
@@ -861,17 +854,14 @@ function BuyShield() {
         costOfNextLevel = Math.ceil(getNextPrestigeCost("Supershield") * (Math.pow(1 - game.portal.Artisanistry.modifier, game.portal.Artisanistry.level)));
         var costOfTwoLevels = costOfNextLevel * (1 + game.equipment.Shield.cost.wood[1]);
         if (game.resources.wood.owned * constants.getShieldCostRatio() > costOfTwoLevels) {
-            ClickButton("Supershield");  //Upgrade!
-            ClickButton("Shield");  //Buy a level!
-            ClickButton("Shield");  //Buy another!
-            tooltip('hide');
+            buyUpgrade("Supershield", true, true);  //Upgrade!
+            buyEquipment("Shield", true, true);  //Buy a level!
         }
     }
 
     if (shield.locked === 0 && CanBuyNonUpgrade(shield, constants.getShieldCostRatio()) === true &&
         (!limitEquipment || shield.level < constants.getMaxLevel() )) {
-        ClickButton("Shield");
-        tooltip('hide');
+        buyEquipment("Shield", true, true);
     }
 }
 function FindBestEquipmentToLevel(debugHpToAtkRatio, filterOnStat) {
@@ -987,16 +977,16 @@ function BuyEquipmentOrUpgrade(bestEquipGainPerMetal, bestUpgradeGainPerMetal, b
                 var upgradeStats = GetRatioForEquipmentUpgrade(upgrade, game.equipment[bestEquipment]);
                 if (upgradeStats.gainPerMetal < bestEquipGainPerMetal) {
                     //console.debug("Best buy " + bestEquipment);
-                    ClickButton(bestEquipment);
+                    buyEquipment(bestEquipment, true, true);
                 }
             } else {
-                ClickButton(bestEquipment);
+                buyEquipment(bestEquipment, true, true);
             }
         }
     } else { //better to upgrade
         if (CanAffordEquipmentUpgrade(bestUpgrade) === true && bestUpgradeCost < game.resources.metal.owned * constants.getEquipmentCostRatio()) {
             //console.debug("Upgraded " + bestUpgrade);
-            ClickButton(bestUpgrade);
+            buyUpgrade(bestUpgrade, true, true);
         }
     }
 }
@@ -1010,7 +1000,7 @@ function BuyCheapEquipment() {
             continue;
         }
         if (CanBuyNonUpgrade(game.equipment[anEquipment], trimpzSettings["CheapEquipmentRatio"].value) === true) {
-            ClickButton(anEquipment);
+            buyEquipment(anEquipment, true, true);
         }
     }
     return currentEquip;
@@ -1030,7 +1020,7 @@ function BuyCheapEquipmentUpgrades() {
             }
             cost = Math.ceil(getNextPrestigeCost(upgrade) * (Math.pow(1 - game.portal.Artisanistry.modifier, game.portal.Artisanistry.level)));
             if (CanAffordEquipmentUpgrade(upgrade) === true && cost < game.resources.metal.owned * trimpzSettings["CheapEqUpgradeRatio"].value) {
-                ClickButton(upgrade);
+                buyUpgrade(upgrade, true, true);
             }
         }
     }
@@ -1074,7 +1064,6 @@ function BuyMetalEquipment() {
     }
     BuyCheapEquipment();
     BuyCheapEquipmentUpgrades();
-    tooltip('hide');
 }
 
 /**
@@ -2056,7 +2045,7 @@ function CheckFormation() {
     }
     if (document.getElementById("formation2").style.display === "block")
     {
-        ClickButton("formation2");
+        setFormation("2");
         formationDone = true;
     }
 }
@@ -2216,7 +2205,6 @@ function MainLoop(){
     ClickAllNonEquipmentUpgrades();
     var shouldReturn = BeginPriorityAction();
     if (shouldReturn === true) {
-        tooltip('hide');
         return;
     }
     var collectingForUpgrade = UpgradeAndGather();
