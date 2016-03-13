@@ -2063,23 +2063,25 @@ function CheckFormation() {
 
 function FireGeneticists() {
     "use strict";
+    var global = game.global;
     if (game.jobs.Geneticist.locked !== 0 ||
-        game.global.challengeActive === "Electricity" ||
+        global.challengeActive === "Electricity" ||
         game.jobs.Geneticist.owned === 0) {
         return;
     }
     var targetBreedTime = trimpzSettings["targetBreedTime"].value;
     var targetBreedTimeHysteresis = trimpzSettings["targetBreedTimeHysteresis"].value;
+    var trimps = game.resources.trimps;
     while (game.jobs.Geneticist.owned !== 0 &&
         (getTotalTimeForBreeding(0) >= targetBreedTime + targetBreedTimeHysteresis ||
         getRemainingTimeForBreeding() >= targetBreedTime + targetBreedTimeHysteresis ||
-        (game.resources.trimps.owned !== game.resources.trimps.realMax() &&
-        game.global.lastBreedTime / 1000 > targetBreedTime - getRemainingTimeForBreeding() + trimpzSettings["targetBreedTimeHysteresis"].value * 1.3))) {
+        (trimps.owned !== trimps.realMax() &&
+        global.lastBreedTime / 1000 > targetBreedTime - getRemainingTimeForBreeding() + targetBreedTimeHysteresis * 1.3))) {
 
-        game.global.firing = true;
-        game.global.buyAmt = 1;
+        global.firing = true;
+        global.buyAmt = 1;
         buyJob("Geneticist", null, true);
-        game.global.firing = false;
+        global.firing = false;
     }
 }
 
