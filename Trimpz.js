@@ -2004,6 +2004,7 @@ function CheckPortal() {
                 ClickButton("Pheromones");
             }
             ClickButton("activatePortalBtn");
+            tooltip("hide");
         }
         respecAmount = 0;
         trimpzSettings["respecAmount"].value = respecAmount;
@@ -2128,11 +2129,13 @@ function RespecPheremones() {
         ClickButton("ptabRemove");
         ClickButton("Pheromones");
         ClickButton("activatePortalBtn");
+        tooltip("hide");
     } else if ((doRespec || respecAmount > 0) && game.portal.Pheromones.level < respecAmount && game.global.heliumLeftover > getPortalUpgradePrice("Pheromones")){
         if (ShouldLowerBreedWithoutGeneticists()) {
             ClickButton("pastUpgradesBtn");
             ClickButton("Pheromones");
             ClickButton("activatePortalBtn");
+            tooltip("hide");
         }
     }
 }
