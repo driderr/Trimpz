@@ -1733,8 +1733,12 @@ function RunBetterMaps(){
 
     if (trimpzSettings["runMapsOnlyWhenNeeded"].value){
         if (game.global.lastClearedCell < 98 && game.global.mapsUnlocked) {
-            if (game.global.lastLowGen === 0 && game.jobs.Geneticist.locked === 0 && trimpzSettings["targetBreedTime"].value > 0)
+            if (game.global.lastLowGen === 0 && game.jobs.Geneticist.locked === 0 && trimpzSettings["targetBreedTime"].value > 0) {
+                if (game.global.preMapsActive === true) {
+                    RunWorld();
+                }
                 return true;
+            }
             var returnNumAttacks = true;
             var maxAttacksToKill = trimpzSettings["maxAttacksToKill"].value;
             bossBattle = canTakeOnBoss(returnNumAttacks);
