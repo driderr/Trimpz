@@ -813,8 +813,6 @@ function BuyBuildings() {
 
 function TurnOnAutoBuildTraps() {
     "use strict";
-    var trapsBtn = document.getElementById("autoTrapBtn");
-
     if (game.buildings.Trap.owned < constants.getNumTrapsForAutoTrapping() &&
         game.global.trapBuildAllowed &&
         !game.global.trapBuildToggled &&
@@ -1735,6 +1733,8 @@ function RunBetterMaps(){
 
     if (trimpzSettings["runMapsOnlyWhenNeeded"].value){
         if (game.global.lastClearedCell < 98 && game.global.mapsUnlocked) {
+            if (game.global.lastLowGen === 0 && game.jobs.Geneticist.locked === 0 && trimpzSettings["targetBreedTime"].value > 0)
+                return true;
             var returnNumAttacks = true;
             var maxAttacksToKill = trimpzSettings["maxAttacksToKill"].value;
             bossBattle = canTakeOnBoss(returnNumAttacks);
@@ -1766,6 +1766,7 @@ function RunBetterMaps(){
                     mapLevelToRun = Math.max(oneShotMapLevel, siphonMapLevel, 6);
                 }
                 setMapRunStatus("Bonus");
+                //console.debug("Bonus run @" + game.global.world + " atk:" + bossBattle.attacksToKillBoss + " hlth:" + bossBattle.attacksToKillSoldiers + " gen:" + game.global.lastLowGen);
                 FindAndRunSmallMap(mapLevelToRun);
                 return true;
             } else if (reallyNeedDamage || reallyNeedHealth) {
