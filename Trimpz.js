@@ -1699,7 +1699,7 @@ function RunPrestigeMaps(){
     prestige = trimpzSettings["prestige"].value;
     if (prestige !== "Off" && game.mapUnlocks[prestige].last <= game.global.world - 5 && !isPrestigeFull(null,prestige)){
         if (game.options.menu.mapLoot.enabled != 1)
-            game.options.menu.mapLoot.enabled = 1;
+            toggleSetting("mapLoot");
         mapLevelWithDrop = game.mapUnlocks[prestige].last + 5;
         siphonMapLevel = game.global.world - game.portal.Siphonology.level;
         oneShotMapLevel = getLevelOfOneShotMap(trimpzSettings["oneShotRatio"].value);
@@ -1756,7 +1756,7 @@ function RunBetterMaps(){
                 return true;
             }
             if (game.options.menu.mapLoot.enabled != 1)
-                game.options.menu.mapLoot.enabled = 1;
+                toggleSetting("mapLoot");
             //if (needHealth)console.debug("Health low: " + bossBattle.attacksToKillSoldiers + " hits");
             //if (reallyNeedHealth)console.debug("Health  really low");
             //if (needDamage)console.debug("Dmg  low: " + bossBattle.attacksToKillBoss + " hits");
