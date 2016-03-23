@@ -1104,7 +1104,7 @@ function getBossAttack(isVoidBoss) {
     "use strict";
     var baseAttack;
     if (isVoidBoss){
-        baseAttack = getEnemyAttackForLevel(game.global.world, false, "Cthulimp") * 5.4;
+        baseAttack = getEnemyAttackForLevel(game.global.world, false, "Cthulimp") * (game.global.world <= 59 ? 3 : 5.4);
         return calculateDamageLocal(baseAttack, false, game.global.world, true);
     } else {
         var cell = game.global.gridArray[99];
@@ -1116,7 +1116,7 @@ function getBossAttack(isVoidBoss) {
 function getBossHealth(isVoidBoss) {
     "use strict";
     if (isVoidBoss){
-        return getMaxEnemyHealthForLevel(game.global.world, true, "Cthulimp") * 5.4;
+        return getMaxEnemyHealthForLevel(game.global.world, true, "Cthulimp") * (game.global.world <= 59 ? 3 : 5.4);
     } else {
         var cell = game.global.gridArray[99];
         return getMaxEnemyHealthForLevel(game.global.world, false, cell.name);
