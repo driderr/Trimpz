@@ -1362,6 +1362,9 @@ function calculateDamageLocal(number, isTrimp, world, calcForMap) { //number = b
     //if (!isTrimp && game.global.usingShriek) {
     //    number *= game.mapUnlocks.roboTrimp.getShriekValue();
     //}
+    if (!isTrimp && game.global.challengeActive == "Watch") {
+        number *= 1.25;
+    }
     if (maxFluct == -1) maxFluct = fluctuation;
     if (minFluct == -1) minFluct = fluctuation;
     var min = Math.floor(number * (1 - minFluct));
@@ -1773,7 +1776,7 @@ function RunBetterMaps(){
                 //console.debug("Bonus run @" + game.global.world + " atk:" + bossBattle.attacksToKillBoss + " hlth:" + bossBattle.attacksToKillSoldiers + " gen:" + game.global.lastLowGen);
                 FindAndRunSmallMap(mapLevelToRun);
                 return true;
-            } else if (reallyNeedDamage || reallyNeedHealth) {
+            } else if ((reallyNeedDamage || reallyNeedHealth) && (game.global.challengeActive !== "Lead" || game.global.world % 2 === 1)) {
                 setMapRunStatus("Loot");
                 FindAndRunLootMap(oneShotMapLevel);
                 return true;
@@ -2032,6 +2035,12 @@ function CheckPortal() {
                 break;
             case "Toxicity":
                 ClickButton("challengeToxicity");
+                break;
+            case "Watch":
+                ClickButton("challengeWatch");
+                break;
+            case "Lead":
+                ClickButton("challengeLead");
                 break;
             default:
                 break;
