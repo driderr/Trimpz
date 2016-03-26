@@ -2076,16 +2076,18 @@ function FireGeneticists() {
     var targetBreedTime = trimpzSettings["targetBreedTime"].value;
     var targetBreedTimeHysteresis = trimpzSettings["targetBreedTimeHysteresis"].value;
     var trimps = game.resources.trimps;
+    var remainingTimeForBreeding = getRemainingTimeForBreeding();
     while (game.jobs.Geneticist.owned !== 0 &&
         (getTotalTimeForBreeding(0) >= targetBreedTime + targetBreedTimeHysteresis ||
-        getRemainingTimeForBreeding() >= targetBreedTime + targetBreedTimeHysteresis ||
-        (trimps.owned !== trimps.realMax() &&
-        global.lastBreedTime / 1000 > targetBreedTime - getRemainingTimeForBreeding() + targetBreedTimeHysteresis * 1.3))) {
+        remainingTimeForBreeding >= targetBreedTime + targetBreedTimeHysteresis ||
+        (trimps.owned !== trimps.realMax() && remainingTimeForBreeding > 1 && game.global.soldierHealth <= game.global.soldierHealthMax * 0.5 &&
+        global.lastBreedTime / 1000 > targetBreedTime - remainingTimeForBreeding + targetBreedTimeHysteresis * 1.3))) {
 
         global.firing = true;
         global.buyAmt = 1;
         buyJob("Geneticist", null, true);
         global.firing = false;
+        remainingTimeForBreeding = getRemainingTimeForBreeding();
     }
 }
 
