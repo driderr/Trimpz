@@ -1889,7 +1889,7 @@ function ReallocateWorkers() {
     "use strict";
     var jobObj;
     var workersToFire;
-    var jobsToFire = ["Farmer", "Lumberjack", "Miner"];
+    var jobsToFire = ["Farmer", "Lumberjack", "Miner", "Scientist"];
     var job;
     var jobName;
 
