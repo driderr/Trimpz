@@ -1241,6 +1241,10 @@ function RunNewMap(zoneToCreate) {
         document.getElementById("mapLevelInput").value = zoneToCreate;
     }
     var cost = updateMapCost(true);
+    if (cost * 4 < game.resources.fragments.owned){
+        document.getElementById("biomeAdvMapsSelect").value = "Mountain";
+    }
+    cost = updateMapCost(true);
     while (cost > game.resources.fragments.owned){
         if (size === 1){
             difficulty--;
