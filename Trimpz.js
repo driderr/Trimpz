@@ -794,6 +794,9 @@ function BuyBuildings() {
     BuyBuilding("Resort", constants.getHousingCostRatio());
     BuyBuilding("Gateway", constants.getHousingCostRatio());
     BuyBuilding("Wormhole", 1, trimpzSettings["maxWormholes"].value);
+    if (game.buildings.Warpstation.locked === 1 || GetNonUpgradePrice(game.buildings.Warpstation, "gems") > GetNonUpgradePrice(game.buildings.Collector) * game.buildings.Warpstation.increase.by / game.buildings.Collector.increase.by) {
+        BuyBuilding("Collector", 1);
+    }
 
     if (trimpzSettings["runMapsOnlyWhenNeeded"].value){
         var returnNumAttacks = true;
@@ -804,9 +807,6 @@ function BuyBuildings() {
         if ((reallyNeedDamage || reallyNeedHealth) && GetNonUpgradePrice(game.buildings.Warpstation, "metal") > game.resources.metal.owned * 0.1) {
             return;
         }
-    }
-    if (game.buildings.Warpstation.locked === 1 || GetNonUpgradePrice(game.buildings.Warpstation, "gems") > GetNonUpgradePrice(game.buildings.Collector) * game.buildings.Warpstation.increase.by / game.buildings.Collector.increase.by) {
-        BuyBuilding("Collector", 1);
     }
     while (BuyBuilding("Warpstation", 1,undefined,false)){}
 }
