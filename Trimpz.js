@@ -122,6 +122,7 @@ var pauseTrimpz = false;
 var bionicDone = false;
 var formationDone = false;
 var respecDone = false;
+var newCoord = false;
 var respecAmount = 0;
 var heliumLog = [];
 var trimpzSettings = {};
@@ -520,7 +521,8 @@ function ClickAllNonEquipmentUpgrades() {
             continue;
         }
         if (typeof game.upgrades[upgrade].prestiges == 'undefined' && game.upgrades[upgrade].locked === 0) {
-            buyUpgrade(upgrade,true,true);  //Upgrade!
+            if (buyUpgrade(upgrade,true,true) && upgrade === "Coordination")  //Upgrade!
+                newCoord = true;
         }
     }
 }
@@ -655,7 +657,8 @@ function UpgradeNonEquipment() {
                     return true;
                 }
             }
-            buyUpgrade(upgrade,true,true);  //Upgrade!
+            if (buyUpgrade(upgrade,true,true) && upgrade === "Coordination")  //Upgrade!
+                newCoord = true;
         }
     }
     RestoreWorkerFocus();
@@ -1864,6 +1867,13 @@ function RunAllUniqueAndEqOnHandMaps(){
 
 function RunMaps() {
     "use strict";
+    if(game.options.menu.alwaysAbandon.enabled == 1) toggleSetting('alwaysAbandon');
+    if(trimpzSettings["CoordinationAbandon"] && newCoord && game.global.mapsUnlocked && game.resources.trimps.realMax() <= game.resources.trimps.owned + 1) {
+        mapsClicked();
+        mapsClicked();
+        newCoord = false;
+    }
+
     if (game.global.world < 7){
         return;
     }
