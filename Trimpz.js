@@ -2110,7 +2110,7 @@ function MaxToxicStacks() {
     if (game.global.mapsActive === true && game.global.preMapsActive === false){ //no map ability(wait one) or already running a map(repeat should be off)
         return;
     }
-    if(trimpzSettings["shouldMaxOutToxicityHelium"].value && game.global.challengeActive === 'Toxicity' && game.global.lastClearedCell > 93 && game.challenges.Toxicity.stacks < 1500 && game.global.world >= trimpzSettings["zoneToStartMaxingAt"].value) {
+    if(trimpzSettings["shouldMaxOutToxicityHelium"].value && game.global.challengeActive === 'Toxicity' && game.global.lastClearedCell > trimpzSettings["lastCell"].value && game.challenges.Toxicity.stacks < 1500 && game.global.world >= trimpzSettings["zoneToStartMaxingAt"].value) {
         var mapLevel = getLevelOfOneShotMap(trimpzSettings["oneShotRatio"].value);
         var theMap;
         for (var map in game.global.mapsOwnedArray) {
@@ -2129,7 +2129,7 @@ function RunVoidMaps() {
     if (game.global.mapsActive === true && game.global.preMapsActive === false){ //no map ability(wait one) or already running a map(repeat should be off)
         return;
     }
-    if(trimpzSettings["voidLevel"].value && game.global.lastClearedCell > 93 && game.global.world >= trimpzSettings["voidLevel"].value) {
+    if(trimpzSettings["voidLevel"].value && game.global.lastClearedCell > trimpzSettings["lastCell"].value && game.global.world >= trimpzSettings["voidLevel"].value) {
         if (trimpzSettings["onlyVoidLevel"].value && game.global.world > trimpzSettings["voidLevel"].value)
             return;
         var theMap;
