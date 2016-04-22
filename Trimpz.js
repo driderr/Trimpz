@@ -1411,14 +1411,15 @@ function getEnemyAttackForLevel(worldLevel, calcForMap, enemyName) { //adapted f
         amt = (amt * 0.4) + ((amt * 0.9) * (level / 100));
         amt *= Math.pow(1.15, world - 59);
     }
-
+    if (world < 60) amt *= 0.85;
     if (world > 6 && calcForMap) amt *= 1.1;
     amt *= game.badGuys[name].attack;
     amt = Math.floor(amt);
 
     if (calcForMap) amt *= difficulty;
     if (game.global.challengeActive == "Toxicity") amt *= 5;
-    else if (game.global.challengeActive == "Balance" && calcForMap) amt *= 2;
+    else if (game.global.challengeActive == "Balance")
+        amt *= calcForMap ? 2.35 : 1.17;
     return amt;
 }
 
@@ -1443,6 +1444,7 @@ function getMaxEnemyHealthForLevel(worldLevel, calcForMap, enemyName) {  //adapt
         amt = (amt * 0.5) + ((amt * 0.8) * (level / 100));
         amt *= Math.pow(1.1, world - 59);
     }
+    if (world < 60) amt *= 0.75;
     if (world > 5 && calcForMap) amt *= 1.1;
     amt *= game.badGuys[name].health;
     amt = Math.floor(amt);
@@ -1451,7 +1453,7 @@ function getMaxEnemyHealthForLevel(worldLevel, calcForMap, enemyName) {  //adapt
     if (calcForMap) amt *= difficulty;
     if (game.global.challengeActive == "Meditate") amt *= 2;
     else if (game.global.challengeActive == "Toxicity") amt *= 2;
-    else if (game.global.challengeActive == "Balance") amt *= 1.5;
+    else if (game.global.challengeActive == "Balance") amt *= 2;
 
     return amt;
 }
