@@ -104,9 +104,21 @@ var constantsEndGame = new ConstantSet({
     maxLevel : 4,
     equipmentCostRatio : 0.9
 });
+var constantsCorruption = new ConstantSet({
+    zoneToStartAt : 180,
+    minerMultiplier : 15,
+    lumberjackMultiplier : 1,
+    explorerCostRatio: 0,
+    housingCostRatio : 0,
+    gymCostRatio : 0.5,
+    tributeCostRatio : 0.7,
+    nurseryCostRatio : 0.2,
+    maxLevel : 4,
+    equipmentCostRatio : 0.9
+});
 
 //game variables, not for user setting
-var constantsSets = [constantsEarlyGame, constantsLateGame, constantsLateLateGame, constantsEndGame];
+var constantsSets = [constantsEarlyGame, constantsLateGame, constantsLateLateGame, constantsEndGame, constantsCorruption];
 var constantsIndex;
 var constants;
 var trimpz = 0;             //"Trimpz" running indicator
