@@ -832,6 +832,12 @@ function BuyBuildings() {
             return;
         }
     }
+    if (game.upgrades.Gigastation.done >= trimpzSettings["gsForEqWs"].value) {
+        var eqCost = FindAndBuyEquipment([], "Attack", true);
+        if (eqCost !== 0 && eqCost < GetNonUpgradePrice(game.buildings.Warpstation, "metal") * trimpzSettings["eqWsRatio"].value){
+            return;
+        }
+    }
     while (BuyBuilding("Warpstation", 1,undefined,false)){}
 }
 
@@ -925,7 +931,8 @@ function FindBestEquipmentToLevel(debugHpToAtkRatio, filterOnStat) {
     }
     return {
         bestEquipGainPerMetal: bestEquipGainPerMetal,
-        bestEquipment: bestEquipment
+        bestEquipment: bestEquipment,
+        bestEquipmentCost: cost
     };
 }
 function GetRatioForEquipmentUpgrade(upgrade, currentEquip) {
@@ -1048,7 +1055,7 @@ function BuyCheapEquipmentUpgrades() {
     }
 }
 
-function FindAndBuyEquipment(debugHpToAtkRatio, stat) {
+function FindAndBuyEquipment(debugHpToAtkRatio, stat, justgetcost) {
     "use strict";
     var retFBETL = FindBestEquipmentToLevel(debugHpToAtkRatio, stat);
     var bestEquipGainPerMetal = retFBETL.bestEquipGainPerMetal;
@@ -1060,8 +1067,12 @@ function FindAndBuyEquipment(debugHpToAtkRatio, stat) {
     var bestUpgradeCost = retFBEU.bestUpgradeCost;
 
     if (bestEquipGainPerMetal === 0 && bestUpgradeGainPerMetal === 0) {   //nothing to buy
+        if (justgetcost)
+            return 0;
         return;
     }
+    if (justgetcost)
+        return bestEquipGainPerMetal > bestUpgradeGainPerMetal ? retFBETL.bestEquipmentCost : bestUpgradeCost;
     BuyEquipmentOrUpgrade(bestEquipGainPerMetal, bestUpgradeGainPerMetal, bestEquipment, bestUpgrade, bestUpgradeCost);
 }
 
