@@ -787,10 +787,22 @@ function BuyBuildings() {
 
     var targetBreedTime = trimpzSettings["targetBreedTime"].value;
     var targetBreedTimeHysteresis = trimpzSettings["targetBreedTimeHysteresis"].value;
-    if (ShouldLowerBreedWithoutGeneticists()){
+    if (trimpzSettings["ignoreBreedForNurseries"].value){
+        game.global.buyAmt = 'Max';
+        game.global.maxSplit = constants.getNurseryCostRatio();
+        buyBuilding("Nursery",true,true);
+        game.global.buyAmt = 1;
+        game.global.maxSplit = 1;
+    }
+    else if (ShouldLowerBreedWithoutGeneticists()){
             BuyBuilding("Nursery", constants.getNurseryCostRatio());
     }
-    BuyBuilding("Tribute", constants.getTributeCostRatio());
+
+    game.global.buyAmt = 'Max';
+    game.global.maxSplit = constants.getTributeCostRatio();
+    buyBuilding("Tribute",true,true);
+    game.global.buyAmt = 1;
+    game.global.maxSplit = 1;
 
     if (game.global.world > 10 &&
         (game.global.lastBreedTime / 1000 > targetBreedTime - getRemainingTimeForBreeding() + trimpzSettings["targetBreedTimeHysteresis"].value &&
