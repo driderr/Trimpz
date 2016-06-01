@@ -897,6 +897,7 @@ function FindBestEquipmentToLevel(debugHpToAtkRatio, filterOnStat) {
     var anEquipment;
     var bestEquipGainPerMetal = 0;
     var bestEquipment;
+    var bestEquipmentCost;
     var gainPerMetal;
     var cost;
     var currentEquip;
@@ -927,12 +928,13 @@ function FindBestEquipmentToLevel(debugHpToAtkRatio, filterOnStat) {
         if (gainPerMetal > bestEquipGainPerMetal) {
             bestEquipGainPerMetal = gainPerMetal;
             bestEquipment = anEquipment;
+            bestEquipmentCost = cost;
         }
     }
     return {
         bestEquipGainPerMetal: bestEquipGainPerMetal,
         bestEquipment: bestEquipment,
-        bestEquipmentCost: cost
+        bestEquipmentCost: bestEquipmentCost
     };
 }
 function GetRatioForEquipmentUpgrade(upgrade, currentEquip) {
