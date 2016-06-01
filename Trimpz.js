@@ -790,7 +790,7 @@ function BuyBuildings() {
     if (trimpzSettings["ignoreBreedForNurseries"].value){
         game.global.buyAmt = 'Max';
         game.global.maxSplit = constants.getNurseryCostRatio();
-        buyBuilding("Nursery",true,true);
+        BuyBuilding("Nursery", constants.getNurseryCostRatio());
         game.global.buyAmt = 1;
         game.global.maxSplit = 1;
     }
@@ -800,7 +800,7 @@ function BuyBuildings() {
 
     game.global.buyAmt = 'Max';
     game.global.maxSplit = constants.getTributeCostRatio();
-    buyBuilding("Tribute",true,true);
+    BuyBuilding("Tribute", constants.getTributeCostRatio());
     game.global.buyAmt = 1;
     game.global.maxSplit = 1;
 
