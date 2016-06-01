@@ -525,7 +525,7 @@ function ClickAllNonEquipmentUpgrades() {
         if (upgrade === "Gigastation"){
             continue;
         }
-        if (upgrade === "Potency"){
+        if (upgrade === "Potency" && !trimpzSettings["ignoreBreedForNurseries"].value){
             continue;
         }
         if (trimpzSettings["skipShieldBlock"].value === true && upgrade === "Shieldblock"){
@@ -639,7 +639,7 @@ function UpgradeNonEquipment() {
             if (trimpzSettings["skipShieldBlock"].value === true && upgrade === "Shieldblock"){
                 continue;
             }
-            if (upgrade === "Potency" && !ShouldLowerBreedWithoutGeneticists())
+            if (upgrade === "Potency" && !ShouldLowerBreedWithoutGeneticists() && !trimpzSettings["ignoreBreedForNurseries"].value)
                 continue;
             for (aResource in game.upgrades[upgrade].cost.resources) {
                 needed = game.upgrades[upgrade].cost.resources[aResource];
