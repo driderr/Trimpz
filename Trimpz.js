@@ -374,7 +374,7 @@ function AssignFreeWorkers() {
         }
     }
     if (game.global.world > 10 && (game.resources.trimps.soldiers === 0 || getRemainingTimeForBreeding() > trimpzSettings["targetBreedTime"].value)) {
-            return;
+        return;
     }
     var cost;
     var maxFreeForAssignOneAtATime = 1000;
@@ -630,8 +630,8 @@ function UpgradeNonEquipment() {
     var needed;
     for (upgrade in game.upgrades) {
         if (typeof game.upgrades[upgrade].prestiges == 'undefined' && game.upgrades[upgrade].locked === 0) {
-            if (upgrade === "Gigastation" && 
-				(game.buildings.Warpstation.owned < trimpzSettings["minimumWarpStations"].value + trimpzSettings["deltaIncreaseInMinimumWarpstationsPerGigastationPurchase"].value * game.upgrades.Gigastation.done
+            if (upgrade === "Gigastation" &&
+                (game.buildings.Warpstation.owned < trimpzSettings["minimumWarpStations"].value + trimpzSettings["deltaIncreaseInMinimumWarpstationsPerGigastationPurchase"].value * game.upgrades.Gigastation.done
                 || CanBuyNonUpgrade(game.buildings.Warpstation, 2) === true)){ //ratio 2 for "can buy soon"
                 continue;
             }
@@ -690,7 +690,7 @@ function UpgradeAndGather() {
         return true;
     if (game.global.buildingsQueue.length > 0 &&
         (game.global.buildingsQueue[0] !== "Trap.1") || game.global.buildingsQueue.length > 1) {
-            setGather("buildings");
+        setGather("buildings");
     }
     else if (game.resources.trimps.owned < game.resources.trimps.realMax() &&
         game.buildings.Trap.owned > 0 &&
@@ -795,7 +795,7 @@ function BuyBuildings() {
         game.global.maxSplit = 1;
     }
     else if (ShouldLowerBreedWithoutGeneticists()){
-            BuyBuilding("Nursery", constants.getNurseryCostRatio());
+        BuyBuilding("Nursery", constants.getNurseryCostRatio());
     }
 
     game.global.buyAmt = 'Max';
@@ -832,7 +832,7 @@ function BuyBuildings() {
             return;
         }
     }
-    if (game.upgrades.Gigastation.done >= trimpzSettings["gsForEqWs"].value) {
+    if (game.upgrades.Gigastation.done === game.upgrades.Gigastation.allowed && game.upgrades.Gigastation.done >= trimpzSettings["gsForEqWs"].value) {
         var eqCost = FindAndBuyEquipment([], "Attack", true);
         if (eqCost !== 0 && eqCost < GetNonUpgradePrice(game.buildings.Warpstation, "metal") * trimpzSettings["eqWsRatio"].value){
             return;
@@ -2051,7 +2051,7 @@ function CheckPortal() {
             ClickButton("pastUpgradesBtn");
 
             while (game.portal.Pheromones.level + game.portal.Pheromones.levelTemp < respecAmount &&
-                    getPortalUpgradePrice("Pheromones") + game.resources.helium.totalSpentTemp <= game.resources.helium.respecMax) {
+            getPortalUpgradePrice("Pheromones") + game.resources.helium.totalSpentTemp <= game.resources.helium.respecMax) {
                 ClickButton("Pheromones");
             }
             ClickButton("activatePortalBtn");
@@ -2121,10 +2121,10 @@ function FireGeneticists() {
     var trimps = game.resources.trimps;
     var remainingTimeForBreeding = getRemainingTimeForBreeding();
     while (game.jobs.Geneticist.owned !== 0 &&
-        (getTotalTimeForBreeding(0) >= targetBreedTime + targetBreedTimeHysteresis ||
-        remainingTimeForBreeding >= targetBreedTime + targetBreedTimeHysteresis ||
-        (trimps.owned !== trimps.realMax() && remainingTimeForBreeding > 1 && game.global.soldierHealth <= game.global.soldierHealthMax * 0.5 &&
-        global.lastBreedTime / 1000 > targetBreedTime - remainingTimeForBreeding + targetBreedTimeHysteresis * 1.3))) {
+    (getTotalTimeForBreeding(0) >= targetBreedTime + targetBreedTimeHysteresis ||
+    remainingTimeForBreeding >= targetBreedTime + targetBreedTimeHysteresis ||
+    (trimps.owned !== trimps.realMax() && remainingTimeForBreeding > 1 && game.global.soldierHealth <= game.global.soldierHealthMax * 0.5 &&
+    global.lastBreedTime / 1000 > targetBreedTime - remainingTimeForBreeding + targetBreedTimeHysteresis * 1.3))) {
 
         global.firing = true;
         global.buyAmt = 1;
