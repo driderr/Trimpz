@@ -1394,6 +1394,9 @@ function calculateDamageLocal(number, isTrimp, world, calcForMap) { //number = b
     if (!isTrimp && game.global.challengeActive == "Meditate"){
         number *= 1.5;
     }
+    if (!isTrimp && game.global.challengeActive == "Corrupted"){
+        number *= 3;
+    }
     if (isTrimp && game.global.roboTrimpLevel > 0){
         number *= ((0.2 * game.global.roboTrimpLevel) + 1);
     }
