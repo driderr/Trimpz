@@ -2085,6 +2085,9 @@ function CheckPortal() {
             case "Lead":
                 ClickButton("challengeLead");
                 break;
+            case "Corrupted":
+                ClickButton("challengeCorrupted");
+                break;
             default:
                 break;
         }
