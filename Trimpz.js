@@ -2228,6 +2228,10 @@ function FocusOnBreeding(){
     }
 }
 
+function BuyGoldenUpgrade() {
+    buyGoldenUpgrade('Helium')
+}
+
 //Start
 (function () {
     "use strict";
@@ -2265,6 +2269,7 @@ function MainLoop(){
         return;
     }
     TurnOnAutoBuildTraps();
+    BuyGoldenUpgrade();
     AssignFreeWorkers();
     Fight();
     UpgradeStorage();
