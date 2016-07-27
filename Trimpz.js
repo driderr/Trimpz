@@ -2232,6 +2232,13 @@ function BuyGoldenUpgrade() {
     buyGoldenUpgrade('Helium')
 }
 
+function Shriek() {
+    if (game.global.spireActive && !game.global.useShriek){
+        magnetoShriek();
+    }
+}
+
+
 //Start
 (function () {
     "use strict";
@@ -2270,6 +2277,7 @@ function MainLoop(){
     }
     TurnOnAutoBuildTraps();
     BuyGoldenUpgrade();
+    Shriek();
     AssignFreeWorkers();
     Fight();
     UpgradeStorage();
