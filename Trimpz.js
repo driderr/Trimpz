@@ -805,7 +805,8 @@ function BuyBuildings() {
     game.global.maxSplit = 1;
 
     if (game.global.world > 10 &&
-        (game.global.lastBreedTime / 1000 > targetBreedTime - getRemainingTimeForBreeding() + trimpzSettings["targetBreedTimeHysteresis"].value &&
+        (game.resources.trimps.owned !== game.resources.trimps.realMax() &&
+        game.global.lastBreedTime / 1000 > targetBreedTime - getRemainingTimeForBreeding() + trimpzSettings["targetBreedTimeHysteresis"].value &&
         game.jobs.Geneticist.owned < 10 ||
         game.resources.trimps.soldiers === 0)){
         return;
