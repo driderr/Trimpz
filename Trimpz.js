@@ -1687,6 +1687,11 @@ function RunPrimaryUniqueMaps(){
         }
     }
 
+    if (game.talents.blacksmith.purchased && game.buildings.Nursery.locked && game.buildings.Collector.locked && game.global.world > 50){
+        RunNewMap(game.global.world);
+        return true;
+    }
+
     if (game.upgrades.Shieldblock.done === 0 && game.upgrades.Shieldblock.locked === 1 && trimpzSettings["skipShieldBlock"].value === false) {
         for (map in game.global.mapsOwnedArray) {
             theMap = game.global.mapsOwnedArray[map];
