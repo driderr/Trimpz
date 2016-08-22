@@ -1281,6 +1281,16 @@ function canTakeOnBoss(returnNumAttacks){
     return true;
 }
 
+function ableToRunHigherVoidMap()
+{
+    "use strict";
+    var bossHealth = getBossHealth(true);
+    var soldierAttack = getSoldierAttack(game.global.world, true);
+
+    return soldierAttack > bossHealth * 2.15;
+}
+
+
 function GotoMapsScreen() {
     "use strict";
     if (game.global.preMapsActive === true) {
@@ -2199,18 +2209,20 @@ function MaxToxicStacks() {
 
 function RunVoidMaps() {
     "use strict";
-    if (game.global.mapsActive === true && game.global.preMapsActive === false){ //no map ability(wait one) or already running a map(repeat should be off)
+    if (game.global.mapsActive === true && game.global.preMapsActive === false) { //no map ability(wait one) or already running a map(repeat should be off)
         return;
     }
-    if(trimpzSettings["voidLevel"].value && game.global.lastClearedCell > trimpzSettings["lastCell"].value && game.global.world >= trimpzSettings["voidLevel"].value) {
-        if (trimpzSettings["onlyVoidLevel"].value && game.global.world > trimpzSettings["voidLevel"].value)
-            return;
-        var theMap;
-        for (var map in game.global.mapsOwnedArray) {
-            theMap = game.global.mapsOwnedArray[map];
-            if (theMap.location == 'Void'){
-                RunMap(theMap);
-                return;
+    if (trimpzSettings["onlyVoidLevel"].value && game.global.world > trimpzSettings["voidLevel"].value)
+        return;
+    if (trimpzSettings["voidLevel"].value && ((game.global.lastClearedCell > trimpzSettings["lastCell"].value && getRemainingTimeForBreeding() < 1) || game.global.lastClearedCell > 96) && game.global.world >= trimpzSettings["voidLevel"].value) {
+        if (!trimpzSettings["staggerVoid"].value || !ableToRunHigherVoidMap()) {
+            var theMap;
+            for (var map in game.global.mapsOwnedArray) {
+                theMap = game.global.mapsOwnedArray[map];
+                if (theMap.location == 'Void') {
+                    RunMap(theMap);
+                    return;
+                }
             }
         }
     }
