@@ -127,7 +127,7 @@ var workersFocused = false;
 var workersFocusedOn;
 var workersMoved = [];
 var mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50,80,125]; //removed from array when done, reset on portal or refresh
-var uniqueMaps = ["The Block", "The Wall",  "Dimension of Anger", "Trimple Of Doom", "The Prison", "Bionic Wonderland", "Bionic Wonderland II", "Bionic Wonderland III", "Bionic Wonderland IV", "Bionic Wonderland V", "Bionic Wonderland VI"];
+var uniqueMaps = ["The Block", "The Wall",  "Dimension of Anger", "Trimple Of Doom", "The Prison"];
 var helium = -1;
 var heliumHistory = [];
 var pauseTrimpz = false;
@@ -1759,7 +1759,7 @@ function RunPrestigeMaps(){
         setMapRunStatus("Prestige");
         for (map in game.global.mapsOwnedArray){ //look for an existing map first
             theMap = game.global.mapsOwnedArray[map];
-            if (uniqueMaps.indexOf(theMap.name) > -1){
+            if (uniqueMaps.indexOf(theMap.name) > -1 || theMap.name.indexOf("Bionic Wonderland") > -1){
                 continue;
             }
             if (theMap.level === mapLevelToRun) {
@@ -1894,7 +1894,7 @@ function RunAllUniqueAndEqOnHandMaps(){
         setMapRunStatus("OldEqOnHand");
         for (map in game.global.mapsOwnedArray){ //look for an existing map first
             theMap = game.global.mapsOwnedArray[map];
-            if (uniqueMaps.indexOf(theMap.name) > -1){
+            if (uniqueMaps.indexOf(theMap.name) > -1 || theMap.name.indexOf("Bionic Wonderland") > -1){
                 continue;
             }
             itemsAvailable = addSpecials(true,true,game.global.mapsOwnedArray[map]);
