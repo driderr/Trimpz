@@ -107,14 +107,14 @@ var constantsEndGame = new ConstantSet({
 var constantsCorruption = new ConstantSet({
     zoneToStartAt : 180,
     minerMultiplier : 15,
-    lumberjackMultiplier : 1,
+    lumberjackMultiplier : 2,
     explorerCostRatio: 0,
     housingCostRatio : 0,
-    gymCostRatio : 0.5,
+    gymCostRatio : 0.2,
     tributeCostRatio : 0.7,
     nurseryCostRatio : 0.2,
     maxLevel : 4,
-    equipmentCostRatio : 0.9
+    equipmentCostRatio : 0.999
 });
 
 //game variables, not for user setting
