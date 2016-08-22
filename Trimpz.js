@@ -1791,6 +1791,13 @@ function RunPrestigeMaps(){
     var mapLevelToRun;
     var prestige;
     prestige = trimpzSettings["prestige"].value;
+
+
+    if (game.global.world != trimpzSettings["voidLevel"].value && ~~((game.global.world-1)/10) === ~~((trimpzSettings["voidLevel"].value-1)/10))
+        return false;
+    if (trimpzSettings["staggerVoid"].value && game.global.world > trimpzSettings["voidLevel"].value && ableToRunHigherVoidMap() === true && !(!isPrestigeFull(null,prestige) && game.global.world%10==0))
+        return false;
+
     if (prestige !== "Off" && game.mapUnlocks[prestige].last <= game.global.world - 5 && !isPrestigeFull(null,prestige)){
         if (game.options.menu.mapLoot.enabled != 1)
             toggleSetting("mapLoot");
