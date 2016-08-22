@@ -1623,7 +1623,7 @@ function ManageRepeatMaps() {
             var mapDrop = game.global.mapGridArray[game.global.mapGridArray.length - 1].special;
             var lastDrop = game.mapUnlocks[prestige].last;
             if (!isPrestigeFull(null, prestige) && mapDrop && lastDrop <= game.global.world - 5) {
-                shouldRepeat = !(mapDrop === prestige && lastDrop >= game.global.world - 9);
+                shouldRepeat = !(mapDrop === prestige && ~~((lastDrop-1)/10) >= ~~((game.global.world-1)/10)-1);
             }
         }
         else if (mapRunStatus === "Bonus") {
