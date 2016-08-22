@@ -620,6 +620,37 @@ function RestoreWorkerFocus() {
         workersFocusedOn = "";
     }
 }
+
+/**
+ * @return {boolean}
+ */
+function CanBuyWarpstationSoon(){
+    "use strict";
+    //return CanBuyNonUpgrade(game.buildings.Warpstation, 2) === true;
+    var MaxMinutesToWait = 2;
+    var buildstring = canAffordBuilding("Warpstation",false,true);
+
+    if (buildstring.indexOf("Days") > -1 || buildstring.indexOf("Hours") > -1 || buildstring.indexOf("Long") > -1){
+        return false;
+    }
+    if (buildstring.indexOf("Mins") == -1){
+        return true;
+    }
+    var buildStringArray = buildstring.split(" ");
+    var minutesIndex = buildStringArray.indexOf("Mins");
+    var minutesString = buildStringArray[minutesIndex - 1].split("(")[1];
+    var minutes = parseInt(minutesString, 10);
+
+    if (minutesIndex == buildStringArray.lastIndexOf("Mins")){
+        return minutes <= MaxMinutesToWait;
+    }
+
+    var minutes2Index = buildStringArray.lastIndexOf("Mins");
+    var minutes2String = buildStringArray[minutes2Index - 1].split("(")[1];
+    var minutes2 = parseInt(minutes2String, 10);
+    return !(minutes > MaxMinutesToWait || minutes2 > MaxMinutesToWait);
+}
+
 /**
  * @return {boolean} return.collectingForNonEquipment Is it collecting for upgrade?
  */
@@ -632,9 +663,10 @@ function UpgradeNonEquipment() {
         if (typeof game.upgrades[upgrade].prestiges == 'undefined' && game.upgrades[upgrade].locked === 0) {
             if (upgrade === "Gigastation" &&
                 (game.buildings.Warpstation.owned < trimpzSettings["minimumWarpStations"].value + trimpzSettings["deltaIncreaseInMinimumWarpstationsPerGigastationPurchase"].value * game.upgrades.Gigastation.done
-                || CanBuyNonUpgrade(game.buildings.Warpstation, 2) === true)){ //ratio 2 for "can buy soon"
+                || CanBuyWarpstationSoon())){ //ratio 2 for "can buy soon"
                 continue;
             }
+
             if (upgrade == 'Coordination' && !canAffordCoordinationTrimps()) continue;
             if (trimpzSettings["skipShieldBlock"].value === true && upgrade === "Shieldblock"){
                 continue;
