@@ -1286,8 +1286,13 @@ function ableToRunHigherVoidMap()
     "use strict";
     var bossHealth = getBossHealth(true);
     var soldierAttack = getSoldierAttack(game.global.world, true);
+    var bossHealthMultiplier;
+    if (game.talents.voidPower)
+        bossHealthMultiplier = game.talents.voidPower2 ? 2.15 : 2.52;
+    else
+        bossHealthMultiplier = 2.8;
 
-    return soldierAttack > bossHealth * 2.15;
+    return soldierAttack > bossHealth * bossHealthMultiplier ;
 }
 
 
