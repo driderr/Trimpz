@@ -663,7 +663,7 @@ function UpgradeNonEquipment() {
         if (typeof game.upgrades[upgrade].prestiges == 'undefined' && game.upgrades[upgrade].locked === 0) {
             if (upgrade === "Gigastation" &&
                 (game.buildings.Warpstation.owned < trimpzSettings["minimumWarpStations"].value + trimpzSettings["deltaIncreaseInMinimumWarpstationsPerGigastationPurchase"].value * game.upgrades.Gigastation.done
-                || CanBuyWarpstationSoon())){ //ratio 2 for "can buy soon"
+                || (CanBuyWarpstationSoon() && CanBuyNonUpgrade(game.buildings.Warpstation, 2) === true) )){ //ratio 2 for "can buy soon"
                 continue;
             }
 
