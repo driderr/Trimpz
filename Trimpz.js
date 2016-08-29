@@ -2171,7 +2171,7 @@ function CheckPortal() {
 
 function CheckFormation() {
     "use strict";
-    if (game.global.world < 70)
+    if (game.global.world < 70 || trimpzSettings["manualFormation"].value)
     {
         return;
     }
