@@ -118,6 +118,8 @@ var constantsCorruption = new ConstantSet({
 });
 
 //game variables, not for user setting
+const DominanceIndex = 2;
+const ScryerIndex = 4;
 var constantsSets = [constantsEarlyGame, constantsLateGame, constantsLateLateGame, constantsEndGame, constantsCorruption];
 var constantsIndex;
 var constants;
@@ -132,7 +134,6 @@ var helium = -1;
 var heliumHistory = [];
 var pauseTrimpz = false;
 var bionicDone = false;
-var formationDone = false;
 var respecDone = false;
 var respecAmount = 0;
 var heliumLog = [];
@@ -1196,6 +1197,10 @@ function getBossHealth(isVoidBoss) {
 function getSoldierAttack(world, calcForMap){
     "use strict";
     var baseAttack = game.global.soldierCurrentAttack;
+    if (game.global.formation === ScryerIndex)
+    {
+        baseAttack *= 8;  //Dominance is the normal stance.  Fix calculation if scrying.
+    }
     return calculateDamageLocal(baseAttack, true, world, calcForMap);
 }
 
@@ -1549,6 +1554,10 @@ function getMaxEnemyHealthForLevel(worldLevel, calcForMap, enemyName) {  //adapt
 function getLevelOfOneShotMap(ratio){
     "use strict";
     var soldierAttack = getSoldierAttack(game.global.world, true);
+    if (trimpzSettings["scryerMaps"].value && game.global.world > 180)
+    {
+        soldierAttack /= 8; //Maps will be run with less attack in Scryer formation.
+    }
 
     for (var mapLevel = game.global.world; mapLevel > 6; mapLevel--) {
         var maxEnemyHealth = getMaxEnemyHealthForLevel(mapLevel, true, "Mountimp");
@@ -2026,7 +2035,6 @@ function CheckLateGame() {
         constantsIndex = 0;
         mapsWithDesiredUniqueDrops = [8,10,14,15,18,23,25,29,30,34,40,47,50,80,125];
         heliumHistory = [];
-        formationDone = false;
         autoFighting = false;
         helium = -1;
         bionicDone = false;
@@ -2163,14 +2171,24 @@ function CheckPortal() {
 
 function CheckFormation() {
     "use strict";
-    if (game.global.world < 70 || formationDone === true)
+    if (game.global.world < 70)
     {
         return;
     }
-    if (document.getElementById("formation2").style.display === "block")
+
+    var currentFormation = game.global.formation;
+    var nextFormation;
+
+    if (game.global.world > 180 && game.global.mapsActive === true && game.global.preMapsActive === false && trimpzSettings["scryerMaps"].value && getCurrentMapObject().location !== "Void")
     {
-        setFormation("2");
-        formationDone = true;
+        nextFormation = ScryerIndex;
+    } else
+    {
+        nextFormation = DominanceIndex;
+    }
+
+    if (nextFormation !== currentFormation){
+        setFormation(nextFormation);
     }
 }
 
