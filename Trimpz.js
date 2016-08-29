@@ -1318,6 +1318,7 @@ function RunNewMap(zoneToCreate) {
     var size = 9;   //0-9
     var difficulty = 9; //0-9
     var loot = 0; //0-9
+    var highFragmentLoot = 9;
     var biome = "Random";
 
     document.getElementById("difficultyAdvMapsRange").value = difficulty;
@@ -1335,6 +1336,11 @@ function RunNewMap(zoneToCreate) {
         document.getElementById("biomeAdvMapsSelect").value = "Mountain";
     }
     cost = updateMapCost(true);
+    if (cost * 4 < game.resources.fragments.owned){
+        document.getElementById("lootAdvMapsRange").value = highFragmentLoot;
+        adjustMap('loot', loot);
+    }
+    cost = updateMapCost(true);
     while (cost > game.resources.fragments.owned){
         if (size === 1){
             difficulty--;
@@ -1344,6 +1350,8 @@ function RunNewMap(zoneToCreate) {
                 }
                 return;         //need more fragments!
             }
+        } else if (loot > 1) {
+            loot--;
         } else {
             size--;
         }
