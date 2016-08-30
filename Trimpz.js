@@ -2038,6 +2038,11 @@ function CheckLateGame() {
     "use strict";
     if (game.global.world === 60 && document.getElementById("tipTitle").innerHTML === "The Improbability")
         cancelTooltip();
+    else if(game.global.world == getCorruptionStart(true) && document.getElementById("tipTitle").innerHTML == "Corruption")
+        cancelTooltip();
+    else if(game.global.spireActive && document.getElementById("tipTitle").innerHTML == "Spire")
+        cancelTooltip();
+
     if (game.global.world === 1 && helium !== -1) {
         constants = constantsSets[0];
         constantsIndex = 0;
