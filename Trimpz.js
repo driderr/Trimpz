@@ -1752,7 +1752,7 @@ function RunPrimaryUniqueMaps(){
         }
     }
 
-    if (game.talents.blacksmith.purchased && game.buildings.Nursery.locked && game.buildings.Collector.locked && game.global.world > 50){
+    if (game.talents.blacksmith.purchased && (game.buildings.Nursery.locked || game.buildings.Collector.locked) && game.global.world > 50){
         RunNewMap(game.global.world);
         return true;
     }
