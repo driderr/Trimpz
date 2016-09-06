@@ -812,7 +812,7 @@ function BuyBuildings() {
 
     var targetBreedTime = trimpzSettings["targetBreedTime"].value;
     var targetBreedTimeHysteresis = trimpzSettings["targetBreedTimeHysteresis"].value;
-    if (trimpzSettings["ignoreBreedForNurseries"].value){
+    if (trimpzSettings["ignoreBreedForNurseries"].value && !(game.global.mapsActive === true && game.global.preMapsActive === false)){
         game.global.buyAmt = 'Max';
         game.global.maxSplit = constants.getNurseryCostRatio();
         BuyBuilding("Nursery", constants.getNurseryCostRatio());
@@ -823,11 +823,14 @@ function BuyBuildings() {
         BuyBuilding("Nursery", constants.getNurseryCostRatio());
     }
 
-    game.global.buyAmt = 'Max';
-    game.global.maxSplit = constants.getTributeCostRatio();
-    BuyBuilding("Tribute", constants.getTributeCostRatio());
-    game.global.buyAmt = 1;
-    game.global.maxSplit = 1;
+    if (!(game.global.mapsActive === true && game.global.preMapsActive === false))
+    {
+        game.global.buyAmt = 'Max';
+        game.global.maxSplit = constants.getTributeCostRatio();
+        BuyBuilding("Tribute", constants.getTributeCostRatio());
+        game.global.buyAmt = 1;
+        game.global.maxSplit = 1;
+    }
 
 /*    if (game.global.world > 10 &&
         (game.resources.trimps.owned !== game.resources.trimps.realMax() &&
@@ -2740,9 +2743,9 @@ function ableToOverkillAllMobs()
     var bossHealth = getBossHealth(false);
     var soldierAttack = getSoldierAttack(game.global.world, false);
     
-    if (game.global.formation == 4) soldierAttack/=8;
+    if (game.global.formation == 4 && !(game.global.mapsActive === true && game.global.preMapsActive === false)) soldierAttack/=8;
 
-    return soldierAttack > bossHealth * 100;
+    return soldierAttack > bossHealth * 70;
 }
 
 function ableToGetChronoUpgrade()
@@ -2760,7 +2763,7 @@ function ableToGetChronoUpgrade()
 		if (game.global.formation == 4) chronoImpLoot *= 2;
         eqCost = FindAndBuyEquipment([], "Attack", true);
         
-        if (game.resources['metal'].owned+chronoImpLoot>eqCost*2) return true;
+        if (game.resources['metal'].owned+chronoImpLoot>eqCost*4) return true;
     }
     return false;
 }
