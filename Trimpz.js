@@ -347,6 +347,7 @@ function AssignFreeWorkers() {
         "Lumberjack" : 0,
         "Farmer" : 0
     };
+    if (game.global.world < 4) return;
     if (trimps.owned === 0 || game.global.firing) {
         return;
     }
@@ -831,6 +832,7 @@ function BuyBuildings() {
         game.global.buyAmt = 1;
         game.global.maxSplit = 1;
     }
+    else BuyBuilding("Tribute", constants.getTributeCostRatio());
 
 /*    if (game.global.world > 10 &&
         (game.resources.trimps.owned !== game.resources.trimps.realMax() &&
@@ -1660,6 +1662,7 @@ function ManageRepeatMaps() {
     var reallyNeedHealth;
     var mapLevelWithDrop;
     var shouldRepeat = false;
+    var mapBonus = game.global.mapBonus;
 
     if (mapRunStatus) {
         if (mapRunStatus === "Prestige") {
@@ -1671,7 +1674,6 @@ function ManageRepeatMaps() {
             }
         }
         else if (mapRunStatus === "Bonus") {
-            var mapBonus = game.global.mapBonus;
             if (mapBonus < 9) {
                 bossBattle = canTakeOnBoss(true);
                 bossBattle.attacksToKillBoss *= (mapBonus + 5)/(mapBonus + 6);
@@ -1710,7 +1712,7 @@ function ManageRepeatMaps() {
             }
         }
         
-        if (!ableToOverkillAllMobs() && ableToGetChronoUpgrade()) shouldRepeat = true;
+        if (!ableToOverkillAllMobs() && ableToGetChronoUpgrade() && mapBonus < 9) shouldRepeat = true;
     }
     if (game.global.repeatMap !== shouldRepeat) {
         repeatClicked();
@@ -1817,12 +1819,6 @@ function RunPrestigeMaps(){
                 return true;
             }
         }
-        BuyBuilding("Barn", 1,undefined,false);
-        BuyBuilding("Shed", 1,undefined,false);
-        BuyBuilding("Forge", 1,undefined,false);
-        BuyBuilding("Barn", 1,undefined,false);
-        BuyBuilding("Shed", 1,undefined,false);
-        BuyBuilding("Forge", 1,undefined,false);
         RunNewMap(mapLevelToRun);
         return true;
     }
@@ -1834,15 +1830,9 @@ function RunPrestigeMaps(){
  */
 function RunUpgradeMaps(){
     
-    if (!ableToOverkillAllMobs() && ableToGetChronoUpgrade())
+    if (!ableToOverkillAllMobs() && ableToGetChronoUpgrade() && game.global.lastClearedCell<30)
     {
         setMapRunStatus("Upgrade");
-        BuyBuilding("Barn", 1,undefined,false);
-        BuyBuilding("Shed", 1,undefined,false);
-        BuyBuilding("Forge", 1,undefined,false);
-        BuyBuilding("Barn", 1,undefined,false);
-        BuyBuilding("Shed", 1,undefined,false);
-        BuyBuilding("Forge", 1,undefined,false);
         FindAndRunSmallMap(game.global.world);
         return true;
     }
@@ -2266,7 +2256,7 @@ function RunVoidMaps() {
     }
     if (trimpzSettings["onlyVoidLevel"].value && game.global.world > trimpzSettings["voidLevel"].value)
         return;
-    if(trimpzSettings["voidLevel"].value && ((game.global.lastClearedCell > trimpzSettings["lastCell"].value && getRemainingTimeForBreeding()<1) || game.global.lastClearedCell > 96) && game.global.world >= trimpzSettings["voidLevel"].value) {
+    if(trimpzSettings["voidLevel"].value && ((game.global.lastClearedCell > trimpzSettings["lastCell"].value && getRemainingTimeForBreeding()<1) || (game.global.lastClearedCell > 98 && getRemainingTimeForBreeding()<5)) && game.global.world >= trimpzSettings["voidLevel"].value) {
         if (ableToRunHigherVoidMap() === false)
         {
             var theMap;
@@ -2286,7 +2276,7 @@ function ableToRunHigherVoidMap()
     var bossHealth = getBossHealth(true);
     var soldierAttack = getSoldierAttack(game.global.world, true);
 
-    return soldierAttack > bossHealth * 3.5;
+    return soldierAttack > bossHealth * 3.6;
 }
 
 function RespecPheremones() {
@@ -2745,7 +2735,7 @@ function ableToOverkillAllMobs()
     
     if (game.global.formation == 4 && !(game.global.mapsActive === true && game.global.preMapsActive === false)) soldierAttack/=8;
 
-    return soldierAttack > bossHealth * 70;
+    return soldierAttack > bossHealth * 60;
 }
 
 function ableToGetChronoUpgrade()
@@ -2760,10 +2750,10 @@ function ableToGetChronoUpgrade()
 		if (game.unlocks.impCount.Magnimp) chronoImpLoot *= Math.pow(1.003, game.unlocks.impCount.Magnimp);
 		if (game.portal.Looting.level) chronoImpLoot += (chronoImpLoot * game.portal.Looting.level * game.portal.Looting.modifier);
 		if (game.portal.Looting_II.level) chronoImpLoot *= (1 + (game.portal.Looting_II.level * game.portal.Looting_II.modifier));
-		if (game.global.formation == 4) chronoImpLoot *= 2;
+		/*if (game.global.formation == 4)*/ chronoImpLoot *= 2;
         eqCost = FindAndBuyEquipment([], "Attack", true);
         
-        if (game.resources['metal'].owned+chronoImpLoot>eqCost*4) return true;
+        if (game.resources['metal'].owned+chronoImpLoot>eqCost*1.5) return true;
     }
     return false;
 }
